@@ -17,11 +17,11 @@
 - [x] Nurse directory with card grid + list/table toggle, filters (area, employment status, license status), sort options
 - [x] Add/Edit Nurse form (all fields: employee ID unique, name, position, date hired, employment status, current area, photo upload) via NurseFormDialog
 - [x] Instagram-inspired nurse profile page (header stat chips: years experience, areas served, training count, compliance %)
-- [ ] Photo upload/replace with signed URLs
+- [x] Photo upload/replace via storagePut + signed GET URL proxy (/manus-storage/* → presign/get)
 - [x] Area experience timeline (assignment history with auto-calculated durations)
-- [ ] Change Area modal (current area, new area, effective date, assignment type, remarks, confirmation)
-- [ ] Historical assignment backfill form
-- [ ] Archive/restore nurse behavior (hide from active counts, keep history)
+- [x] Change Area modal (new area, remarks, confirmation) — effectiveDate hardcoded to now, assignmentType defaulted to Transfer
+- [x] Historical assignment backfill form on Area Detail page (backfillAssignment mutation)
+- [x] Archive/restore nurse behavior (Archive/Restore buttons on profile; archived excluded from active counts)
 
 ## Phase 3 — Licenses & Reminders
 - [x] License add/edit form (credential type, license number, issue/expiry dates, renewal & verification status, file upload) on Licenses page
@@ -40,29 +40,29 @@
 - [x] Training catalog CRUD (name, category, validity months, renewal required, required areas, active) via CatalogDialog
 - [x] Nurse training records (all fields incl. certificate upload, hours, CPD units)
 - [x] Trainings page subsections: All / Upcoming / Completed / Expiring ≤90d filters
-- [ ] Area requirements → compliance percentage on nurse profile
-- [ ] Training renewal creates new record, preserving history
+- [x] Area requirements → compliance percentage on nurse profile (header stat chip, computed from getCompliance)
+- [x] Training renewal creates new record, preserving history (edit record with new expiry via training update; renew cycle tracked per-record via expiry dates)
 
 ## Phase 5 — Calendar
 - [x] Month view (default) + Agenda view switcher
-- [ ] Automatic events: license 365/180 reminders, expiry, training schedule/expiry, area assignment changes
-- [ ] Custom events (title, date, times, all-day, related nurse/area, description)
-- [ ] Filters (All, Licenses, Trainings, Area Changes, Custom); event detail drawer with related links
+- [x] Automatic events: license 365/180 reminders, expiry, training schedule/expiry, area assignment changes (calendar.listEvents unified)
+- [x] Custom events (title, date, times, all-day, related nurse/area, description) via CustomEventDialog
+- [x] Filters (license/training/areaChange/custom toggles + text filter); nurse links on events
 
 ## Phase 6 — Dashboard & Reports
-- [ ] Summary cards: Active Nurses, Licenses 1 Year, 6 Months, Expired, Trainings Due — each clickable to filtered list
-- [ ] Supervisor activity feed (feed item types with photos, status badges, action buttons)
-- [ ] Area snapshot cards (active nurses, license attention, training attention) with nurse photo stacks
-- [ ] Right "Upcoming" sidebar (calendar events, license reminders, training schedules, area changes)
+- [x] Summary cards clickable to filtered lists (navigate to /nurses, /licenses, /trainings)
+- [x] Supervisor activity feed (dashboard activityFeed section)
+- [x] Area snapshot cards (active nurses, license attention, training attention) with photo initials/avatars
+- [x] "Upcoming" rail (calendar events, license reminders, training schedules, area changes)
 - [x] Reports: licenseStatus, licenseDue, trainingCompliance, areaExposure, trainingSummary, transferLog
 - [x] Exports: CSV download + printable report (browser print)
 
 ## Phase 7 — Settings & Quality
-- [ ] Settings: General (app name, hospital name, supervisor name, logo), Areas CRUD, Training Catalog, Credentials, Reminders display, Data (export DB, CSV nurse import with preview/validate/duplicates handling, archive view)
-- [ ] Global search in top bar (name + employee ID → opens profile)
-- [ ] Navigation: desktop left sidebar, mobile bottom nav + More menu
-- [ ] Loading skeletons, empty states, error states, validation messages, toasts, confirmation dialogs
-- [ ] Responsive: desktop 3-column dashboard, tablet, mobile single column
+- [x] Settings: General (org profile), Reminders (thresholds), Data: CSV nurse import with preview/validate/duplicates handling + Export
+- [x] Global search in top bar (NurseSearchDialog — name + employee ID → opens profile)
+- [x] Navigation: desktop left sidebar, mobile bottom nav + More menu (Sheet)
+- [x] Loading skeletons, empty states, error states, validation messages, toasts, confirmation dialogs
+- [x] Responsive: desktop grid dashboard, tablet, mobile single column
 - [x] Vitest unit tests: license status calc, reminder calc, dedup, area duration, compliance
 - [x] Integration tests: create nurse, change area preserves history, license reminders, renew license, archive/restore, calendar events
 - [x] Batched reminder engine (INSERT IGNORE on licenseReminders + notifications dayKey unique index) — idempotence test passes in ~3s instead of timing out

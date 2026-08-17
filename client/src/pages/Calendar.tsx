@@ -241,6 +241,7 @@ function MonthView({
   navigate: (path: string) => void;
 }) {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [selectedEventId, setSelectedEventId] = useState<string | number | null>(null);
   const start = startOfWeek(startOfMonth(month), { weekStartsOn: 0 });
   const end = endOfWeek(endOfMonth(month), { weekStartsOn: 0 });
   const days = eachDayOfInterval({ start, end });
@@ -308,14 +309,22 @@ function MonthView({
               <div className="mt-0.5 space-y-0.5">
                 {evs.slice(0, 3).map((e) => {
                   const meta = SEVERITY_META[e.severity] ?? SEVERITY_META.info;
+                  const isSelectedEvent = selectedEventId === e.id;
                   return (
-                    <div
+                    <button
                       key={e.id}
-                      className={`truncate rounded px-1 py-0.5 text-[10px] leading-tight ${meta.cls}`}
+                      type="button"
+                      className={`w-full text-left truncate rounded px-1 py-0.5 text-[10px] leading-tight ${meta.cls} ${isSelectedEvent ? "ring-2 ring-primary ring-offset-1" : "hover:opacity-80"}`}
                       title={e.title}
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        setSelectedDay(d);
+                        setSelectedEventId(isSelectedEvent ? null : e.id);
+                      }}
+                      aria-label={`${e.title}, ${format(d, "MMMM d yyyy")}`}
                     >
                       {e.title}
-                    </div>
+                    </button>
                   );
                 })}
                 {evs.length > 3 ? <p className="text-[10px] text-muted-foreground px-1">+{evs.length - 3} more</p> : null}
@@ -333,21 +342,49 @@ function MonthView({
             <ul className="space-y-2">
               {selectedEvents.map((e) => {
                 const meta = SEVERITY_META[e.severity] ?? SEVERITY_META.info;
+                const isSelectedEvent = selectedEventId === e.id;
                 return (
                   <li key={e.id}>
-                    <a
-                      className={`flex items-start justify-between gap-2 border rounded-lg p-3 cursor-pointer hover:shadow-sm transition-shadow ${meta.cls}`}
-                      onClick={(ev) => {
-                        ev.preventDefault();
-                        if (e.nurseId) navigate(`/nurses/${e.nurseId}`);
-                      }}
+                    <button
+                      type="button"
+                      className={`w-full text-left border rounded-lg p-3 cursor-pointer hover:shadow-sm transition-shadow ${meta.cls} ${isSelectedEvent ? "ring-2 ring-primary ring-offset-1" : ""}`}
+                      onClick={() => setSelectedEventId(isSelectedEvent ? null : e.id)}
+                      aria-expanded={isSelectedEvent}
                     >
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm">{e.title}</p>
-                        <p className="text-xs mt-0.5 opacity-80">{e.nurseName ?? ""}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm">{e.title}</p>
+                          <p className="text-xs mt-0.5 opacity-80">{e.nurseName ?? ""}</p>
+                        </div>
+                        <span className={`inline-block h-2 w-2 rounded-full self-center shrink-0 mt-1.5 ${meta.dot}`} />
                       </div>
-                      <span className={`inline-block h-2 w-2 rounded-full self-center shrink-0 mt-1.5 ${meta.dot}`} />
-                    </a>
+                      {isSelectedEvent ? (
+                        <div className="mt-3 pt-3 border-t border-black/10 space-y-2">
+                          <p className="text-xs flex items-center gap-2">
+                            <span className={`inline-block h-2 w-2 rounded-full ${meta.dot}`} />
+                            <span className="font-medium">{meta.label}</span>
+                            <span className="border rounded px-1">{TYPE_LABELS[e.type]}</span>
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(selectedDay, "EEEE, MMMM d, yyyy")}
+                            {e.nurseName ? ` · ${e.nurseName}` : ""}
+                          </p>
+                          {e.nurseId ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-xs"
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                navigate(`/nurses/${e.nurseId}`);
+                              }}
+                            >
+                              View Nurse
+                            </Button>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </button>
                   </li>
                 );
               })}

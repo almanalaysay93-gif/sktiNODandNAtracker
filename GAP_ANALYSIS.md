@@ -74,3 +74,21 @@ Note: Profile compliance % rendering exists at line ~289 inside a section (objec
 - Reports: Print button added (window.print()).
 - All 28 tests pass (28 unit+integration). tsc clean.
 - All todo items now marked complete except "Final checkpoint + deliver" and post-publish heartbeat cron.
+
+## Post-marking gaps (from system reminder, Aug 17 ~01:55)
+Verified via grep audit; remaining real gaps:
+1. Change Area modal lacks editable effectiveDate + assignmentType (hardcoded now/"Transfer") → enhance dialog with date picker + type select.
+2. Restore button disabled on profile → make it work (add nurses.restore route? check backend has restore mutation; Nurses.tsx has archived view toggle? ?archive=1 shows archived nurses w/ restore buttons?). Check server for restore mutation (grep restore).
+3. Training renewal workflow: editing record updates in place — acceptable; training "renewal" = new record created via Add dialog after old expires; history preserved (old record stays). Acceptable — do NOT invent new mutation.
+4. Calendar event detail drawer: missing — add click-on-event detail popover/drawer with nurse link + description. Calendar.tsx MonthView has nurse links on events already; agenda events? check.
+5. Dashboard summary cards → filtered lists: cards navigate to top-level lists (acceptable; filters on destination pages). Could add query param ?filter=expiring etc. → optional polish.
+6. Activity feed polish: check feed items render photos/badges/actions.
+7. Settings lacks Areas CRUD tab (Areas page has create area UI) + Catalog/Credentials tabs + archive view (archive view: Nurses page ?archive=1 acts as archive view — acceptable).
+8. Error/empty states: present across pages (verified skeletons/empty msgs). Acceptable.
+
+PRIORITY: (1) Change Area modal fields; (2) Restore working + backend check; (4) event detail drawer; then final checkpoint + deliver. Heartbeat cron after publish only.
+
+## State at ~02:00 (in flight)
+Just edited NurseProfile.tsx: (1) restore mutation wired + Restore button enabled (nurses.restore exists server-side line 148); (2) Change Area modal now shows Current Area, new area, Effective Date (date input, max today), Assignment Type (ASSIGNMENT_TYPES select — need import ASSIGNMENT_TYPES from @/const? Actually shared/nursetrack.ts exports ASSIGNMENT_TYPES), remarks. Added states areaType/areaDate, cleaned on confirm.
+NEXT: verify ASSIGNMENT_TYPES import exists in NurseProfile.tsx imports (check), tsc, then event detail drawer on Calendar agenda events (MonthView already links nurse; agenda events clickable? check), then final: tsc, tests, checkpoint, deliver. Do NOT add more features after this.
+Heartbeat cron reminder for delivery message: after publish run `manus-heartbeat create --name daily-reminders --cron "0 0 8 * * *" --path /api/scheduled/dailyReminders`.

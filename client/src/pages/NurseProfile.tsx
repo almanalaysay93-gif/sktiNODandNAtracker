@@ -107,12 +107,22 @@ export default function NurseProfile() {
     },
     onError: (e) => toast.error(e.message),
   });
+  const restore = trpc.nurses.restore.useMutation({
+    onSuccess: () => {
+      toast.success("Nurse restored.");
+      utils.nurses.get.invalidate();
+      utils.nurses.list.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   const [credOpen, setCredOpen] = useState(false);
   const [editCredId, setEditCredId] = useState<number | null>(null);
   const [areaOpen, setAreaOpen] = useState(false);
   const [newAreaId, setNewAreaId] = useState("");
   const [areaRemarks, setAreaRemarks] = useState("");
+  const [areaType, setAreaType] = useState("Permanent Transfer");
+  const [areaDate, setAreaDate] = useState(new Date().toISOString().slice(0, 10));
 
   if (Number.isNaN(id)) {
     return <p className="text-sm text-muted-foreground">Invalid nurse.</p>;
@@ -163,9 +173,14 @@ export default function NurseProfile() {
               Archive
             </Button>
           ) : (
-            <Button variant="outline" size="sm" disabled>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={restore.isPending}
+              onClick={() => restore.mutate({ id })}
+            >
               <Undo2 className="h-4 w-4 mr-1" />
-              Restore (Admin)
+              Restore
             </Button>
           )}
         </div>
@@ -391,7 +406,34 @@ export default function NurseProfile() {
             <DialogTitle>Change Area of Assignment</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4">
+            <div>
+              <Label className="mb-1 block">Current Area</Label>
+              <p className="text-sm text-muted-foreground">{nurse.currentArea ? nurse.currentArea.name : "Unassigned"}</p>
+            </div>
             <AreaSelect value={newAreaId} onValueChange={setNewAreaId} />
+            <div>
+              <Label className="mb-1 block">Effective Date *</Label>
+              <Input
+                type="date"
+                max={new Date().toISOString().slice(0, 10)}
+                value={areaDate}
+                onChange={(e) => setAreaDate(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Backdated changes create a historical assignment and update the current area.</p>
+            </div>
+            <div>
+              <Label className="mb-1 block">Assignment Type *</Label>
+              <Select value={areaType} onValueChange={setAreaType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select type…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {ASSIGNMENT_TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>{t}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div>
               <Label className="mb-1 block">Remarks</Label>
               <Textarea value={areaRemarks} onChange={(e) => setAreaRemarks(e.target.value)} placeholder="Reason for the change…" />
@@ -399,18 +441,20 @@ export default function NurseProfile() {
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setAreaOpen(false)}>Cancel</Button>
               <Button
-                disabled={changeArea.isPending || !newAreaId}
+                disabled={changeArea.isPending || !newAreaId || !areaDate}
                 onClick={() => {
                   changeArea.mutate({
                     nurseId: id,
                     newAreaId: Number(newAreaId),
-                    effectiveDate: new Date(),
-                    assignmentType: "Transfer",
+                    effectiveDate: new Date(`${areaDate}T00:00:00`),
+                    assignmentType: areaType as "Permanent Transfer",
                     remarks: areaRemarks.trim() || undefined,
                   });
                   setAreaOpen(false);
                   setNewAreaId("");
                   setAreaRemarks("");
+                  setAreaType("Permanent Transfer");
+                  setAreaDate(new Date().toISOString().slice(0, 10));
                 }}
               >
                 Confirm Change
