@@ -334,7 +334,7 @@ function CatalogTab({
                   <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
                 </div>
                 {c.renewalRequired && (
-                  <p className="mt-2 text-xs font-medium text-orange-600">Renewal required</p>
+                  <p className="mt-2 text-xs font-medium text-[#B4700A] dark:text-[#FBBF24]">Renewal required</p>
                 )}
                 <div className="flex items-center gap-2 mt-3 pt-2 border-t">
                   <button

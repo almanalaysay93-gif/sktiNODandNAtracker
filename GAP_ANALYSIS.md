@@ -113,3 +113,16 @@ DONE:
 - tsc clean; 28/28 tests pass (39s)
 Screenshots: logo + navy palette render; pages mostly captured during loading skeleton phase (calendar/settings filters visible). Glass blur will show over gradient in live browser; screenshots show layout OK.
 TODO: checkpoint + deliver. App auto-publishes on checkpoint.
+
+## Phase 9 — Logo color fidelity (current work)
+Goal: refine index.css tokens to exact logo hues. Logo hexes: navy #122A5E, teal #0FA4C7 (cyan-teal), gold #E8A617, green #3CB43B, coral/kidney red #F95A6B, orange hand #F49A1D, dark blue arc #1B2F6B.
+Current :root tokens (line 46-80 of client/src/index.css):
+- primary oklch(0.33 0.09 263) = #122A5E ✓ close to navy
+- accent oklch(0.935 0.03 225) light teal ✓
+- chart-1 teal oklch(0.62 0.14 230); chart-3 gold oklch(0.78 0.14 83); chart-4 green oklch(0.66 0.17 140); chart-5 coral
+Remaining tasks:
+1. Fine-tune tokens: chart-1 → exact teal #0FA4C7; chart-3 → gold #E8A617; chart-4 → green #3CB43B; ring use teal.
+2. Dashboard.tsx statCard tone classes use bg-blue-50/yellow-50/orange-50/red-50/purple-50 + text-*-600 — replace with logo-palette classes: navy (Active Nurses), teal (Within 1Y), gold (Within 6M), coral/red (Expired), green (Trainings attention). Similar teal/blue accents in Upcoming rail (bg-blue-50 text-blue-600 → teal) and ActionSection urgent (keep red/coral).
+3. Check Calendar page badges/severity colors map to logo palette where possible (severity meta is in shared/nursetrack.ts).
+4. Keep .glass-bg gradient uses of these hues.
+5. tsc + 28 tests, checkpoint, deliver.

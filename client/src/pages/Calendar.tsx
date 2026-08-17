@@ -40,23 +40,23 @@ const TYPE_LABELS: Record<EventType, string> = {
 
 const SEVERITY_META: Record<string, { cls: string; dot: string; label: string }> = {
   urgent_or_expired: {
-    cls: "bg-red-50 border-red-200 text-red-800",
-    dot: "bg-red-500",
+    cls: "bg-[#FDE8EA] border-[#F6B5BD] text-[#C2364A]",
+    dot: "bg-[#F95A6B]",
     label: "Overdue / Expired",
   },
   attention: {
-    cls: "bg-orange-50 border-orange-200 text-orange-800",
-    dot: "bg-orange-500",
+    cls: "bg-[#FFF3E3] border-[#F4C58A] text-[#B4700A]",
+    dot: "bg-[#E8A617]",
     label: "Renewal Soon",
   },
   upcoming_renewal: {
-    cls: "bg-amber-50 border-amber-200 text-amber-800",
-    dot: "bg-amber-500",
+    cls: "bg-[#FBF6E6] border-[#EFD9A5] text-[#8A6508]",
+    dot: "bg-[#D4A017]",
     label: "Upcoming Renewal",
   },
   scheduled: {
-    cls: "bg-blue-50 border-blue-200 text-blue-800",
-    dot: "bg-blue-500",
+    cls: "bg-[#E4F4F8] border-[#A8DEEB] text-[#0E6E85]",
+    dot: "bg-[#0FA4C7]",
     label: "Scheduled",
   },
   completed: {

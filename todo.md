@@ -8,6 +8,11 @@
 - [x] Glass morphism: animated gradient background + frosted-glass classes (.glass-bg root layer, .glass-panel, .glass-card hover lift, .glass-sidebar)
 - [x] Glass treatment on DashboardLayout (sidebar glass-sidebar, top bar glass-panel), all dashboard/main card surfaces -> glass-card
 
+## Phase 9 — Logo color scheme fidelity
+- [x] Refine theme tokens to exact logo hues (navy #122A5E, teal #0FA4C7, gold #E8A617, green #3CB43B, coral #F95A6B accents)
+- [x] Update stat-card/label accent colors to logo palette (dashboard stat cards, upcoming rail, calendar severity badges, area/training labels)
+- [x] Verify pages render well, tests pass (28/28), checkpoint
+
 ## Phase 1 — Foundation
 - [x] Database schema: supervisor identity via Manus OAuth (account owner, no dedicated supervisor table); org/app settings stored in settings rows — schema verified live
 - [x] Frontend protected routes + auth gating (single supervisor via OAuth; protectedProcedure on all feature routes)

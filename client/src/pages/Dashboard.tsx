@@ -47,35 +47,35 @@ export default function Dashboard() {
       label: "Active Nurses",
       value: summary?.activeNurses,
       icon: <Users className="h-5 w-5" />,
-      tone: "bg-blue-50 text-blue-600",
+      tone: "bg-[oklch(0.94_0.03_263)] text-[#122A5E] dark:bg-[oklch(0.25_0.05_250)] dark:text-[#7D96CC]",
       path: "/nurses",
     },
     {
       label: "Licenses — Within 1 Year",
       value: summary?.licensesWithin1Year,
       icon: <Clock className="h-5 w-5" />,
-      tone: "bg-yellow-50 text-yellow-600",
+      tone: "bg-[oklch(0.95_0.03_215)] text-[#0891B2] dark:bg-[oklch(0.25_0.06_210)] dark:text-[#38BDF8]",
       path: "/licenses",
     },
     {
       label: "Licenses — Within 6 Months",
       value: summary?.licensesWithin6Months,
       icon: <AlertTriangle className="h-5 w-5" />,
-      tone: "bg-orange-50 text-orange-600",
+      tone: "bg-[oklch(0.95_0.04_80)] text-[#CA8A04] dark:bg-[oklch(0.26_0.06_75)] dark:text-[#FBBF24]",
       path: "/licenses",
     },
     {
       label: "Licenses — Expired",
       value: summary?.licensesExpired,
       icon: <AlertCircle className="h-5 w-5" />,
-      tone: "bg-red-50 text-red-600",
+      tone: "bg-[oklch(0.95_0.035_18)] text-[#F95A6B] dark:bg-[oklch(0.26_0.08_20)] dark:text-[#FB7185]",
       path: "/licenses",
     },
     {
       label: "Trainings — Need Attention",
       value: summary?.trainingsAttention,
       icon: <ListChecks className="h-5 w-5" />,
-      tone: "bg-purple-50 text-purple-600",
+      tone: "bg-[oklch(0.94_0.04_145)] text-[#16A34A] dark:bg-[oklch(0.25_0.06_140)] dark:text-[#4ADE80]",
       path: "/trainings",
     },
   ];
@@ -156,7 +156,7 @@ export default function Dashboard() {
               <>
                 {upcoming?.upcomingCustoms.map((e) => (
                   <div key={e.id} className="flex items-start gap-3 rounded-lg border p-2.5">
-                    <div className="rounded-md bg-blue-50 text-blue-600 p-1.5 shrink-0">
+                    <div className="rounded-md bg-[oklch(0.95_0.03_215)] text-[#0891B2] p-1.5 shrink-0 dark:bg-[oklch(0.25_0.06_210)] dark:text-[#38BDF8]">
                       <CalendarDays className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
@@ -171,7 +171,7 @@ export default function Dashboard() {
                     onClick={() => navigate(`/nurses/${l.nurseId}`)}
                     className="w-full flex items-start gap-3 rounded-lg border p-2.5 text-left hover:bg-accent transition-colors"
                   >
-                    <div className="rounded-md bg-orange-50 text-orange-600 p-1.5 shrink-0">
+                    <div className="rounded-md bg-[#FFF3E3] text-[#B4700A] dark:bg-[oklch(0.26_0.06_75)] dark:text-[#FBBF24] p-1.5 shrink-0">
                       <BadgeCheck className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
@@ -216,12 +216,12 @@ export default function Dashboard() {
                           {a.nurseCount} nurses
                         </span>
                         {a.licenseAttention > 0 && (
-                          <span className="text-xs text-orange-600 font-medium flex items-center gap-1">
+                          <span className="text-xs text-[#B4700A] dark:text-[#FBBF24] font-medium flex items-center gap-1">
                             <AlertTriangle className="h-3 w-3" /> {a.licenseAttention} license attention
                           </span>
                         )}
                         {a.trainingAttention > 0 && (
-                          <span className="text-xs text-purple-600 font-medium flex items-center gap-1">
+                          <span className="text-xs text-[#16A34A] font-medium flex items-center gap-1 dark:text-[#4ADE80]">
                             <ListChecks className="h-3 w-3" /> {a.trainingAttention} training
                           </span>
                         )}

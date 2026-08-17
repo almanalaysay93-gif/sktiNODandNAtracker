@@ -83,7 +83,7 @@ export default function Areas() {
                       <Users className="h-4 w-4" /> {a.nurseCount ?? 0} nurses
                     </span>
                     {a.licenseAttention ? (
-                      <span className="inline-flex items-center gap-1 text-orange-600">
+                      <span className="inline-flex items-center gap-1 text-[#B4700A] dark:text-[#FBBF24]">
                         <AlertTriangle className="h-4 w-4" /> {a.licenseAttention} license attention
                       </span>
                     ) : null}
