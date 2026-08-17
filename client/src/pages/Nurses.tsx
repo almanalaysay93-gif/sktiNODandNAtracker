@@ -31,7 +31,7 @@ type SortKey = "name" | "employeeId" | "area" | "dateHired";
 export default function Nurses() {
   const [view, setView] = useState<View>("cards");
   const [search, setSearch] = useState("");
-  const [areaFilter, setAreaFilter] = useState("all");
+  const [areaFilter, setAreaFilter] = useState("");
   const [empFilter, setEmpFilter] = useState("all");
   const [licFilter, setLicFilter] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
@@ -52,7 +52,7 @@ export default function Nurses() {
           n.employeeId.toLowerCase().includes(q),
       );
     }
-    if (areaFilter !== "all") rows = rows.filter((n) => String(n.currentAreaId) === areaFilter);
+    if (areaFilter !== "") rows = rows.filter((n) => String(n.currentAreaId) === areaFilter);
     if (empFilter !== "all") rows = rows.filter((n) => n.employmentStatus === empFilter);
     if (licFilter !== "all") rows = rows.filter((n) => n.licenseStatus === licFilter);
     const areaName = new Map((areas ?? []).map((a) => [a.id, a.name]));
@@ -139,7 +139,7 @@ export default function Nurses() {
         <Card className="glass-card">
           <CardContent className="py-12 text-center">
             <p className="text-sm text-muted-foreground mb-3">No nurses match your filters.</p>
-            <Button variant="outline" onClick={() => { setSearch(""); setAreaFilter("all"); setEmpFilter("all"); setLicFilter("all"); }}>
+            <Button variant="outline" onClick={() => { setSearch(""); setAreaFilter(""); setEmpFilter("all"); setLicFilter("all"); }}>
               Clear filters
             </Button>
           </CardContent>

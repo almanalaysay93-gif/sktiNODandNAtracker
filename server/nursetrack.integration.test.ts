@@ -1,6 +1,35 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { appRouter } from "./routers";
-import type { TrpcContext } from "./_core/context";
+import * as db from "./db";
+import { inArray, like } from "drizzle-orm";
+import {
+  nurseCredentials,
+  nurseTrainings,
+  customCalendarEvents,
+  notifications,
+  nurses,
+} from "../drizzle/schema";
+
+const TEST_PREFIXES = ["TEST-%", "CAL-%", "LIC-%", "NOREAD-%", "BT%"];
+
+/** Purge rows created by prior integration-test runs so the suite stays fast. */
+async function purgeTestRows() {
+  const sql = await db.getDb();
+  for (const prefix of TEST_PREFIXES) {
+    const rows = await sql.select({ id: nurses.id }).from(nurses).where(like(nurses.employeeId, prefix));
+    const ids = rows.map((r) => r.id);
+    if (!ids.length) continue;
+    await sql.delete(notifications).where(inArray(notifications.nurseId, ids));
+    await sql.delete(nurseTrainings).where(inArray(nurseTrainings.nurseId, ids));
+    await sql.delete(customCalendarEvents).where(inArray(customCalendarEvents.nurseId, ids));
+    await sql.delete(nurseCredentials).where(inArray(nurseCredentials.nurseId, ids));
+    await sql.delete(nurses).where(inArray(nurses.id, ids));
+  }
+}
+
+beforeAll(async () => {
+  await purgeTestRows();
+}, 60000);
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 

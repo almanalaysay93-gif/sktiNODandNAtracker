@@ -111,3 +111,11 @@
 - [x] nurses.initial: merges nurses+areas; Nurses.tsx switched
 - [x] trainings.initial: merges catalog+records; Trainings.tsx switched
 - [x] Verify: 29/29 tests pass, tsc clean, checkpoint + deliver (incl. Reserved hosting recommendation)
+
+## Phase 13 — Nurses page: empty Area filter + missing nurse cards (user report)
+- [x] Reproduce: screenshot shows Area filter dropdown empty and no nurse cards visible despite "119 of 119 active nurses"
+- [x] Diagnose root cause: @radix-ui/react-select 2.2.6 shows SelectValue placeholder ONLY when value is empty — value="all" with no matching option rendered an empty span; AreaSelect had no "All areas" option; nurse cards were actually loading behind a skeleton layer during slow prod load
+- [x] Fix: Nurses.tsx areaFilter sentinel changed to "" so "All areas" placeholder renders; AreaSelect kept simple (area options only, empty value → placeholder)
+- [x] Added global beforeAll test purge of prior-run test rows (employeeId TEST-/CAL-/LIC-/NOREAD-/BT-) — calendar test no longer times out; 29/29 pass
+- [x] Verified in browser: filter shows "All areas", dropdown lists all 5 areas
+- [x] tsc clean, checkpoint + deliver
