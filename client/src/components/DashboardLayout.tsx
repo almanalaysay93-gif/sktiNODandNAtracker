@@ -80,12 +80,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="auth-welcome-panel flex flex-col items-center gap-8 p-8 max-w-md w-full">
           <div className="flex flex-col items-center gap-6">
             <div className="h-20 w-20 rounded-2xl bg-white flex items-center justify-center shadow-sm">
               <img
-                src="/manus-storage/spmc-nephro-logo_11359316.jpg"
+                src="/branding/spmc-nephro-cluster.jpg"
                 alt="SPMC Department of Nephrology Nursing"
                 className="h-16 w-16 object-contain rounded-full"
               />
@@ -157,7 +157,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
                   <img
-                    src="/manus-storage/spmc-nephro-logo_11359316.jpg"
+                    src="/branding/spmc-nephro-cluster.jpg"
                     alt="SPMC Department of Nephrology Nursing"
                     className="h-10 w-10 object-contain rounded-full bg-white shrink-0"
                   />
@@ -165,7 +165,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
                 </div>
               ) : (
                 <img
-                  src="/manus-storage/spmc-nephro-logo_11359316.jpg"
+                  src="/branding/spmc-nephro-cluster.jpg"
                   alt="SPMC Department of Nephrology Nursing"
                   className="h-10 w-10 object-contain rounded-full bg-white shrink-0"
                 />
@@ -233,7 +233,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
         />
       </div>
 
-      <SidebarInset>
+      <SidebarInset className="nurse-track-inset">
         <div className="flex border-b h-16 items-center justify-between glass-panel px-2 md:px-4 sticky top-0 z-40">
           <div className="flex items-center gap-2 min-w-0">
             <SidebarTrigger className="h-9 w-9 rounded-lg bg-background shrink-0" />
