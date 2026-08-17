@@ -2,12 +2,20 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { nursesRouter } from "./routers/nurses";
+import { credentialsRouter } from "./routers/credentials";
+import { trainingsRouter } from "./routers/trainings";
+import { calendarRouter } from "./routers/calendar";
+import { notificationsRouter } from "./routers/notifications";
+import { dashboardRouter } from "./routers/dashboard";
+import { areasRouter } from "./routers/areas";
+import { reportsRouter } from "./routers/reports";
+import { settingsRouter } from "./routers/settings";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
+    me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -16,13 +24,15 @@ export const appRouter = router({
       } as const;
     }),
   }),
-
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  nurses: nursesRouter,
+  credentials: credentialsRouter,
+  trainings: trainingsRouter,
+  calendar: calendarRouter,
+  notifications: notificationsRouter,
+  dashboard: dashboardRouter,
+  areas: areasRouter,
+  reports: reportsRouter,
+  settings: settingsRouter,
 });
 
 export type AppRouter = typeof appRouter;
