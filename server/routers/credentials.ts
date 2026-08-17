@@ -2,15 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
-import {
-  deriveLicenseStatus,
-  LICENSE_STATUS_META,
-  nurseFullName,
-  renewalCycleKey,
-  sanitizeFilename,
-  storageKey,
-  validateMime,
-} from "../../shared/nursetrack";
+import { deriveLicenseStatus, LICENSE_STATUS_META, nurseFullName, renewalCycleKey, sanitizeFilename, storageKey, validateMime, dateKey } from "../../shared/nursetrack";
 import { storagePut } from "../storage";
 
 const nullableDateInput = z.union([z.date(), z.string().datetime(), z.null()]).transform((d) => (d === null ? null : d instanceof Date ? d : new Date(d))).optional();
@@ -45,7 +37,7 @@ export const credentialsRouter = router({
         ...c,
         nurse,
         typeName,
-        derivedStatus: deriveLicenseStatus(String(c.expiryDate)),
+        derivedStatus: deriveLicenseStatus(dateKey(c.expiryDate)),
         daysRemaining: Math.floor((parseForDays(c.expiryDate) - Date.now()) / 86400000),
       };
     });
@@ -60,7 +52,7 @@ export const credentialsRouter = router({
       return rows.map((c) => ({
         ...c,
         typeName: typeById.get(c.credentialTypeId)?.name ?? "Unknown",
-        derivedStatus: deriveLicenseStatus(String(c.expiryDate)),
+        derivedStatus: deriveLicenseStatus(dateKey(c.expiryDate)),
         daysRemaining: Math.floor((parseForDays(c.expiryDate) - Date.now()) / 86400000),
       }));
     }),
@@ -95,7 +87,7 @@ export const credentialsRouter = router({
         actionType: "license.created",
         entityType: "credential",
         entityId: id,
-        summary: `License added for ${nurseFullName(nurse)} (expires ${String(input.expiryDate).slice(0, 10)})`,
+        summary: `License added for ${nurseFullName(nurse)} (expires ${dateKey(input.expiryDate)})`,
       });
       return { id };
     }),
@@ -212,7 +204,7 @@ export const credentialsRouter = router({
         entityType: "credential",
         entityId: input.credentialId,
         summary: nurse
-          ? `License renewed for ${nurseFullName(nurse)} — new cycle expiring ${String(input.newExpiryDate).slice(0, 10)} (old record #${input.credentialId} preserved)`
+          ? `License renewed for ${nurseFullName(nurse)} — new cycle expiring ${dateKey(input.newExpiryDate)} (old record #${input.credentialId} preserved)`
           : `License renewed — new cycle #${newId}`,
       });
       return { id: newId } as const;

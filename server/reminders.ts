@@ -23,9 +23,8 @@ import {
   listNotifications,
   markAllNotificationsRead,
   markNotificationRead,
-  markReminderExpiredByCredential,
 } from "./db";
-import { daysUntilExpiry, deriveLicenseStatus } from "../shared/nursetrack";
+import { daysUntilExpiry, deriveLicenseStatus, dateKey } from "../shared/nursetrack";
 
 export const DEFAULT_THRESHOLDS = [365, 180] as const;
 
@@ -107,8 +106,8 @@ export async function runDailyReminders(today: string, thresholds: readonly numb
       results.archivedSkipped++;
       continue;
     }
-    const days = daysUntilExpiry(String(cred.expiryDate), today);
-    const status = deriveLicenseStatus(String(cred.expiryDate), today);
+    const days = daysUntilExpiry(dateKey(cred.expiryDate), today);
+    const status = deriveLicenseStatus(dateKey(cred.expiryDate), today);
 
     // Expired license — mark any active reminders for it expired and notify once per day handled by reminder status.
     if (status === "Expired") {
@@ -123,7 +122,6 @@ export async function runDailyReminders(today: string, thresholds: readonly numb
       duePairs.push({ cred, threshold, days, areaName });
     }
   }
-
   // Phase 2 — bulk-insert due reminders. INSERT IGNORE on uniq_reminder_cycle
   // makes this idempotent: already-seen (credential, threshold, cycle) pairs are skipped.
   if (duePairs.length > 0) {
@@ -144,22 +142,26 @@ export async function runDailyReminders(today: string, thresholds: readonly numb
     results.created += duePairs.length;
   }
 
-  // Phase 3 — expired credentials: mark their active reminders expired and send
-  // one expired notification each (createNotification is idempotent via INSERT IGNORE
-  // on uniq_notif_day).
-  for (const id of expiredIds) {
-    await markReminderExpiredByCredential(id);
+  // Phase 3 — expired credentials: bulk-mark active reminders expired in one
+  // query and send one expired notification each via a single batch insert
+  // (INSERT IGNORE keeps the per-day idempotence).
+  if (expiredIds.length > 0) {
+    const db2 = await getDb();
+    if (db2) {
+      await db2.update(licenseReminders).set({ status: "expired" }).where(sql`${licenseReminders.credentialId} IN (${sql.join(expiredIds.map((i) => sql`${i}`), sql`, `)})`);
+    }
   }
-  for (const { cred } of expiredNotes) {
-    await createNotification({
-      type: "license.expired",
-      severity: "urgent_or_expired",
-      title: `License expired — ${cred.nurse.firstName} ${cred.nurse.lastName}`,
-      message: `The license (${cred.renewalCycleKey}) for ${cred.nurse.firstName} ${cred.nurse.lastName} expired. Mark renewal as complete to start a new cycle.`,
-      nurseId: cred.nurseId,
-      relatedEntityType: "credential",
-      relatedEntityId: cred.id,
-    });
+  const expiredNotifs = expiredNotes.map(({ cred }) => ({
+    type: "license.expired",
+    severity: "urgent_or_expired",
+    title: `License expired — ${cred.nurse.firstName} ${cred.nurse.lastName}`,
+    message: `The license (${cred.renewalCycleKey}) for ${cred.nurse.firstName} ${cred.nurse.lastName} expired. Mark renewal as complete to start a new cycle.`,
+    nurseId: cred.nurseId,
+    relatedEntityType: "credential",
+    relatedEntityId: cred.id,
+  }));
+  if (expiredNotifs.length > 0) {
+    await createNotificationsBatch(expiredNotifs);
   }
   results.expiredCredentials = expiredIds.length;
 
@@ -170,7 +172,7 @@ export async function runDailyReminders(today: string, thresholds: readonly numb
     type: "license.renewalReminder",
     severity: threshold >= 365 ? "attention" : "upcoming_renewal",
     title: `${threshold === 365 ? "1-year" : "6-month"} renewal reminder — ${cred.nurse.firstName} ${cred.nurse.lastName}`,
-    message: `${cred.nurse.firstName} ${cred.nurse.lastName} has a license expiring in ${days <= 0 ? "about " + (Math.abs(days) + 1) + " day(s) (due " + String(cred.expiryDate).slice(0, 10) + ")" : days + " days"}. Review the license and begin renewal.`,
+    message: `${cred.nurse.firstName} ${cred.nurse.lastName} has a license expiring in ${days <= 0 ? "about " + (Math.abs(days) + 1) + " day(s) (due " + dateKey(cred.expiryDate) + ")" : days + " days"}. Review the license and begin renewal.`,
     nurseId: cred.nurseId,
     relatedEntityType: "credential",
     relatedEntityId: cred.id,
@@ -178,7 +180,6 @@ export async function runDailyReminders(today: string, thresholds: readonly numb
   if (notifPayloads.length > 0) {
     await createNotificationsBatch(notifPayloads);
   }
-
   return results;
 }
 

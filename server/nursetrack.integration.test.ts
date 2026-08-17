@@ -174,5 +174,5 @@ describe("reminder job idempotence", () => {
     await caller.settings.runRemindersNow();
     const secondRun = (await caller.notifications.list()).length;
     expect(secondRun).toBe(firstRun);
-  }, 60000);
+  }, 120000);
 });

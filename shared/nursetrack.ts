@@ -1,3 +1,14 @@
+/** Safely extract a YYYY-MM-DD key from a Date object or date string. */
+export function dateKey(value: string | Date | null | undefined): string {
+  if (value === null || value === undefined) return "";
+  if (value instanceof Date) {
+    if (isNaN(value.getTime())) return "";
+    return value.toISOString().slice(0, 10);
+  }
+  // Already a YYYY-MM-DD-ish string: take the first 10 chars only if it starts with a digit year
+  return /^d{4}-d{2}-d{2}/.test(value) ? value.slice(0, 10) : "";
+}
+
 /**
  * Shared business logic for SKTI NurseTrack.
  * Pure functions usable by server and (where sensible) client code.

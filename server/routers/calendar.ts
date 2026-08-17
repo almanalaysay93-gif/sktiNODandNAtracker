@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
-import { deriveLicenseStatus, daysUntilExpiry, todayDate, parseLocalDate } from "../../shared/nursetrack";
+import { deriveLicenseStatus, daysUntilExpiry, todayDate, parseLocalDate, dateKey } from "../../shared/nursetrack";
 
 function dateIso(d: Date | string | null | undefined): string {
   if (!d) return "";
@@ -134,7 +134,7 @@ export const calendarRouter = router({
           const assignments = await db.listAssignmentsForNurse(n.id);
           for (const a of assignments) {
             if (a.endDate) continue; // closed assignments don't appear as events
-            const startStr = String(a.startDate).slice(0, 10);
+            const startStr = dateKey(a.startDate);
             if (inRange(startStr)) {
               const newArea = areaById.get(a.areaId);
               const isFuture = startStr > today;
@@ -161,7 +161,7 @@ export const calendarRouter = router({
           events.push({
             id: `cce-${c.id}`, type: "custom", subtype: "custom",
             title: c.title,
-            date: String(c.eventDate),
+            date: dateKey(c.eventDate),
             startTime: c.startTime,
             endTime: c.endTime,
             allDay: c.allDay,

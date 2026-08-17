@@ -25,6 +25,7 @@ import {
   subMonths,
 } from "date-fns";
 import { CalendarPlus, ChevronLeft, ChevronRight, MapPin, Pencil, Trash2 } from "lucide-react";
+import { safeDateKey } from "@/lib/utils";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -249,7 +250,7 @@ function MonthView({
   const dayEvents = useMemo(() => {
     const map = new Map<string, typeof events>();
     for (const e of events) {
-      const key = e.date.slice(0, 10);
+      const key = safeDateKey(e.date);
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(e);
     }

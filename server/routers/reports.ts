@@ -1,3 +1,4 @@
+import { dateKey } from "../../shared/nursetrack";
 import { and, asc, desc, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -82,9 +83,9 @@ export const reportsRouter = router({
             licenseNumber: r.licenseNumber ?? "—",
             issuingOrganization: r.issuingOrganization ?? "—",
             issueDate: r.issueDate ? String(r.issueDate) : "—",
-            expiryDate: String(r.expiryDate),
-            daysRemaining: daysUntilExpiry(String(r.expiryDate), today),
-            status: deriveLicenseStatus(String(r.expiryDate), today),
+            expiryDate: dateKey(r.expiryDate),
+            daysRemaining: daysUntilExpiry(dateKey(r.expiryDate), today),
+            status: deriveLicenseStatus(dateKey(r.expiryDate), today),
             renewalStatus: r.renewalStatus,
             verificationStatus: r.verificationStatus,
           }));
@@ -119,9 +120,9 @@ export const reportsRouter = router({
             credentialType: r.typeName,
             licenseNumber: r.licenseNumber ?? "—",
             issuingOrganization: r.issuingOrganization ?? "—",
-            expiryDate: String(r.expiryDate),
-            daysRemaining: daysUntilExpiry(String(r.expiryDate), today),
-            status: deriveLicenseStatus(String(r.expiryDate), today),
+            expiryDate: dateKey(r.expiryDate),
+            daysRemaining: daysUntilExpiry(dateKey(r.expiryDate), today),
+            status: deriveLicenseStatus(dateKey(r.expiryDate), today),
             renewalStatus: r.renewalStatus,
           }));
       }
@@ -187,10 +188,10 @@ export const reportsRouter = router({
           nurse: nurseFullName(r),
           employeeId: r.employeeId,
           areaName: r.areaName,
-          startDate: String(r.startDate),
-          endDate: r.endDate ? String(r.endDate) : "Present",
+          startDate: dateKey(r.startDate),
+          endDate: r.endDate ? dateKey(r.endDate) : "Present",
           assignmentType: r.assignmentType ?? "—",
-          durationDays: daysBetween(String(r.startDate), r.endDate ? String(r.endDate) : today),
+          durationDays: daysBetween(dateKey(r.startDate), r.endDate ? dateKey(r.endDate) : today),
         }));
       }
 
@@ -227,9 +228,9 @@ export const reportsRouter = router({
             renewalRequired: r.renewalRequired,
             defaultValidityMonths: r.defaultValidityMonths ?? null,
             status: r.status,
-            scheduledDate: r.scheduledDate ? String(r.scheduledDate) : "—",
-            completionDate: r.completionDate ? String(r.completionDate) : "—",
-            expiryDate: r.expiryDate ? String(r.expiryDate) : "—",
+            scheduledDate: r.scheduledDate ? dateKey(r.scheduledDate) : "—",
+            completionDate: r.completionDate ? dateKey(r.completionDate) : "—",
+            expiryDate: r.expiryDate ? dateKey(r.expiryDate) : "—",
             trainingHours: r.trainingHours ?? null,
             cpdUnits: r.cpdUnits ?? null,
             provider: r.provider ?? "—",
@@ -259,8 +260,8 @@ export const reportsRouter = router({
         nurse: nurseFullName(r),
         employeeId: r.employeeId,
         areaName: r.areaName,
-        startDate: String(r.startDate),
-        endDate: r.endDate ? String(r.endDate) : "Present",
+        startDate: dateKey(r.startDate),
+        endDate: r.endDate ? dateKey(r.endDate) : "Present",
         assignmentType: r.assignmentType ?? "—",
         remarks: r.remarks ?? "—",
       }));

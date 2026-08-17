@@ -5,7 +5,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { getDb, getAssignmentsForArea } from "../db";
 import { areas } from "../../drizzle/schema";
 import { areaAssignments, nurses, nurseCredentials, nurseTrainings } from "../../drizzle/schema";
-import { daysBetween, todayDate, deriveLicenseStatus, daysUntilExpiry } from "../../shared/nursetrack";
+import { daysBetween, todayDate, deriveLicenseStatus, daysUntilExpiry, dateKey } from "../../shared/nursetrack";
 
 export const areasRouter = router({
   list: protectedProcedure.query(() => listAreasWithCounts()),
@@ -102,7 +102,7 @@ export const areasRouter = router({
           .from(nurseCredentials)
           .where(sql`${nurseCredentials.nurseId} IN (${sql.join(nurseIds, sql`, `)})`);
         for (const c of creds) {
-          const status = deriveLicenseStatus(String(c.expiryDate), today);
+          const status = deriveLicenseStatus(dateKey(c.expiryDate), today);
           if (status === "Expired") expired++;
           if (status !== "Valid") licenseAttention++;
         }
@@ -116,8 +116,8 @@ export const areasRouter = router({
           .from(nurseTrainings)
           .where(sql`${nurseTrainings.nurseId} IN (${sql.join(nurseIds, sql`, `)})`);
         for (const t of trainings) {
-          if (t.status === "Scheduled" && t.scheduledDate && String(t.scheduledDate).slice(0, 10) <= today) trainingAttention++;
-          if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(String(t.expiryDate), today) <= 0) trainingAttention++;
+          if (t.status === "Scheduled" && t.scheduledDate && dateKey(t.scheduledDate) <= today) trainingAttention++;
+          if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(dateKey(t.expiryDate), today) <= 0) trainingAttention++;
         }
       }
 
@@ -137,7 +137,7 @@ export const areasRouter = router({
       // Assignment duration stats
       const durations = staff
         .filter((s) => s.assignment.startDate)
-        .map((s: { assignment: { startDate: Date | string } }) => daysBetween(String(s.assignment.startDate), today));
+        .map((s: { assignment: { startDate: Date | string } }) => daysBetween(dateKey(s.assignment.startDate), today));
 
       return {
         area,
@@ -148,7 +148,7 @@ export const areasRouter = router({
         trainingAttention,
         upcomingOutboundTransfers: outbound.map((o) => ({
           nurse: { ...o.nurse, name: `${o.nurse.firstName} ${o.nurse.lastName}` },
-          date: String(o.startDate).slice(0, 10),
+          date: dateKey(o.startDate),
           type: o.assignmentType,
         })),
         avgDurationDays: durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0,
@@ -174,7 +174,7 @@ async function listAreasWithCounts() {
     .where(isNull(nurses.archivedAt));
   const attentionByArea = new Map<number, number>();
   for (const c of creds) {
-    if (deriveLicenseStatus(String(c.expiryDate), today) !== "Valid" && c.areaId) {
+    if (deriveLicenseStatus(dateKey(c.expiryDate), today) !== "Valid" && c.areaId) {
       attentionByArea.set(c.areaId, (attentionByArea.get(c.areaId) ?? 0) + 1);
     }
   }

@@ -11,7 +11,7 @@ import {
   nurseCredentials,
   nurseTrainings,
 } from "../../drizzle/schema";
-import { daysUntilExpiry, deriveLicenseStatus, todayDate } from "../../shared/nursetrack";
+import { daysUntilExpiry, deriveLicenseStatus, todayDate, dateKey } from "../../shared/nursetrack";
 
 export const dashboardRouter = router({
   summary: protectedProcedure.query(async () => {
@@ -37,7 +37,7 @@ export const dashboardRouter = router({
     let expired = 0;
     for (const c of creds) {
       if (c.archivedAt) continue;
-      const status = deriveLicenseStatus(String(c.expiryDate), today);
+      const status = deriveLicenseStatus(dateKey(c.expiryDate), today);
       if (status === "Within 1 Year") within1Year++;
       if (status === "Within 6 Months") within6Months++;
       if (status === "Expired") expired++;
@@ -55,8 +55,8 @@ export const dashboardRouter = router({
     let trainingsAttention = 0;
     for (const t of trainings) {
       if (t.archivedAt) continue;
-      if (t.status === "Scheduled" && t.scheduledDate && String(t.scheduledDate).slice(0, 10) <= today) trainingsAttention++;
-      if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(String(t.expiryDate), today) <= 0) trainingsAttention++;
+      if (t.status === "Scheduled" && t.scheduledDate && dateKey(t.scheduledDate) <= today) trainingsAttention++;
+      if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(dateKey(t.expiryDate), today) <= 0) trainingsAttention++;
     }
 
     return {
@@ -95,7 +95,7 @@ export const dashboardRouter = router({
       .where(isNull(nurses.archivedAt));
     const attentionByArea = new Map<number, number>();
     for (const c of creds) {
-      const status = deriveLicenseStatus(String(c.expiryDate), today);
+      const status = deriveLicenseStatus(dateKey(c.expiryDate), today);
       if (status !== "Valid" && c.areaId) {
         attentionByArea.set(c.areaId, (attentionByArea.get(c.areaId) ?? 0) + 1);
       }
@@ -114,8 +114,8 @@ export const dashboardRouter = router({
     const trainingAttentionByArea = new Map<number, number>();
     for (const t of trainings) {
       let needsAttention = false;
-      if (t.status === "Scheduled" && t.scheduledDate && String(t.scheduledDate).slice(0, 10) <= today) needsAttention = true;
-      if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(String(t.expiryDate), today) <= 0) needsAttention = true;
+      if (t.status === "Scheduled" && t.scheduledDate && dateKey(t.scheduledDate) <= today) needsAttention = true;
+      if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(dateKey(t.expiryDate), today) <= 0) needsAttention = true;
       if (needsAttention && t.areaId) {
         trainingAttentionByArea.set(t.areaId, (trainingAttentionByArea.get(t.areaId) ?? 0) + 1);
       }
@@ -175,13 +175,13 @@ export const dashboardRouter = router({
       .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId));
     for (const c of creds) {
       if (c.archivedAt) continue;
-      const status = deriveLicenseStatus(String(c.expiryDate), today);
-      const days = daysUntilExpiry(String(c.expiryDate), today);
+      const status = deriveLicenseStatus(dateKey(c.expiryDate), today);
+      const days = daysUntilExpiry(dateKey(c.expiryDate), today);
       items.push({
         kind: "license",
         severity: status === "Expired" ? "urgent_or_expired" : status === "Within 6 Months" ? "upcoming_renewal" : "attention",
         title: `${c.firstName} ${c.lastName} — license ${status === "Expired" ? "expired" : `expires in ${days} days`} (${c.renewalStatus})`,
-        date: String(c.expiryDate).slice(0, 10),
+        date: dateKey(c.expiryDate),
         nurseId: c.nurseId,
         nurseName: `${c.firstName} ${c.lastName}`,
         relatedEntityType: "credential",
@@ -204,24 +204,24 @@ export const dashboardRouter = router({
       .innerJoin(nurses, eq(nurses.id, nurseTrainings.nurseId));
     for (const t of trainings) {
       if (t.archivedAt) continue;
-      if (t.status === "Scheduled" && t.scheduledDate && String(t.scheduledDate).slice(0, 10) <= today) {
+      if (t.status === "Scheduled" && t.scheduledDate && dateKey(t.scheduledDate) <= today) {
         items.push({
           kind: "training",
           severity: "attention",
-          title: `${t.firstName} ${t.lastName} — training overdue (was scheduled ${String(t.scheduledDate).slice(0, 10)})`,
-          date: String(t.scheduledDate).slice(0, 10),
+          title: `${t.firstName} ${t.lastName} — training overdue (was scheduled ${dateKey(t.scheduledDate)})`,
+          date: dateKey(t.scheduledDate),
           nurseId: t.nurseId,
           nurseName: `${t.firstName} ${t.lastName}`,
           relatedEntityType: "nurseTraining",
           relatedEntityId: t.id,
         });
       }
-      if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(String(t.expiryDate), today) <= 0) {
+      if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(dateKey(t.expiryDate), today) <= 0) {
         items.push({
           kind: "training",
-          severity: daysUntilExpiry(String(t.expiryDate), today) < -30 ? "upcoming_renewal" : "attention",
+          severity: daysUntilExpiry(dateKey(t.expiryDate), today) < -30 ? "upcoming_renewal" : "attention",
           title: `${t.firstName} ${t.lastName} — training certification expired`,
-          date: String(t.expiryDate).slice(0, 10),
+          date: dateKey(t.expiryDate),
           nurseId: t.nurseId,
           nurseName: `${t.firstName} ${t.lastName}`,
           relatedEntityType: "nurseTraining",
@@ -247,12 +247,12 @@ export const dashboardRouter = router({
     const areaRows = await db.select().from(areas);
     const areaById = new Map(areaRows.map((a) => [a.id, a]));
     for (const a of assignments) {
-      if (String(a.startDate).slice(0, 10) > today) {
+      if (dateKey(a.startDate) > today) {
         items.push({
           kind: "transfer",
           severity: "informational",
           title: `${a.firstName} ${a.lastName} — transferring to ${areaById.get(a.areaId)?.name ?? "an area"} (${a.assignmentType ?? "transfer"})`,
-          date: String(a.startDate).slice(0, 10),
+          date: dateKey(a.startDate),
           nurseId: a.nurseId,
           nurseName: `${a.firstName} ${a.lastName}`,
           relatedEntityType: "areaAssignment",
@@ -338,13 +338,13 @@ export const dashboardRouter = router({
     return {
       upcomingCustoms: upcomingCustoms.map((r) => ({
         ...r,
-        date: String(r.eventDate).slice(0, 10),
+        date: dateKey(r.eventDate),
         nurseName: r.nurseName ?? null,
         areaName: r.areaName ?? null,
       })),
       upcomingLicenses: upcomingLicenses.map((r) => ({
         ...r,
-        date: String(r.expiryDate).slice(0, 10),
+        date: dateKey(r.expiryDate),
         daysRemaining: Number(r.daysRemaining),
       })),
     };

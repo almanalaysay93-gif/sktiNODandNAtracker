@@ -83,3 +83,14 @@
 - [x] Catalog edit + activate/deactivate in UI
 - [x] Training records dialog covers all fields (nurse, training type, provider, dates, hours, CPD, cert number, remarks)
 - [x] Final checkpoint + deliver
+
+## Phase 10 — Fix missing background + lag (user report)
+- [x] Remove logo from body background-image (attachment:fixed + cover repaints causing lag; image not visible)
+- [x] Place logo as faint fixed image inside .glass-bg layer (opacity 0.16 light / 0.13 dark, no animation, pointer-events-none)
+- [x] Optimize logo asset (resize 1024px, 84KB JPEG)
+- [x] Soften/remove glass-drift animation
+- [x] Fix watermark z-index: was z-[-1] (painted behind body bg) → z-index 0 with content wrapper at z-[1]
+- [x] Make SidebarInset (nurse-track-inset) + main transparent so watermark shows through instead of solid bg-background
+- [x] Verify logo watermark visible behind glass panels in live preview
+- [x] Fix date parsing bug: mysql2 returns Date objects — String(Date).slice(0,10) produced 'Mon Aug 17' → 'Invalid Date'/NaN in Action Center; added dateKey() helper, replaced all unsafe usages
+- [x] Verify screenshots, tests pass (28/28), checkpoint + deliver

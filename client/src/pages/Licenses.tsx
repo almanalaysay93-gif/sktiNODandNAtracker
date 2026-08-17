@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
 import { formatDate, nurseFullName } from "../../../shared/nursetrack";
 import { CalendarCheck, Pencil, Plus, RefreshCw, Search } from "lucide-react";
+import { safeDateKey } from "@/lib/utils";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -257,8 +258,8 @@ function CredentialDialog({
       setSelectedNurse(current.nurseId);
       setSelectedType(String(current.credentialTypeId));
       setLicenseNumber(current.licenseNumber ?? "");
-      setIssueDate(current.issueDate ? String(current.issueDate).slice(0, 10) : "");
-      setExpiryDate(String(current.expiryDate).slice(0, 10));
+      setIssueDate(current.issueDate ? safeDateKey(current.issueDate) : "");
+      setExpiryDate(safeDateKey(current.expiryDate));
       setRenewalStatus(current.renewalStatus ?? "Not Started");
       setVerificationStatus(current.verificationStatus ?? "Unverified");
       setRemarks(current.remarks ?? "");

@@ -134,3 +134,18 @@ Remaining tasks:
 - origin remote points to Manus artifacts git (do not touch)
 - A remote named "github" was already added pointing to https://github.com/aljohnmanalaysay/skti-nursetrack.git — WRONG owner, must remove or re-add with correct owner
 - Steps: gh repo create almanalaysay93-gif/skti-nursetrack --private, git remote set-url github <correct url> (or remove+add), git push github main
+
+## Bug: logo background missing + lag (user report 2026-08-17)
+Facts gathered:
+- Asset client/public/branding/spmc-nephro-cluster.jpg exists (194KB JPEG, 2048px). Served 200 locally and on prod https://nursetrack-kkebhhek.manus.space/branding/spmc-nephro-cluster.jpg.
+- CSS (index.css): .dark body (line 117) and body in @layer base (line ~131) both have background-image stack including url("/branding/spmc-nephro-cluster.jpg") with background-size cover / 28px / 36px / min(42rem,68vw) and attachment fixed.
+- App.tsx: glass-bg div (fixed inset-0, z-[-1], has animated glass-drift ::before transform; user's commit made it pointer-events-none + softer radial opacities).
+- DashboardLayout: SidebarProvider wraps everything; user added .nurse-track-inset {background:transparent} on SidebarInset and .auth-welcome-panel glass on login.
+- Likely root cause of MISSING bg: Tailwind @layer base "body { @apply bg-background text-foreground }" — bg-background sets background-color, fine. But the @layer base body rule background-image IS set. However dark variant: @custom-variant dark (&:is(.dark *)) applies .dark to html; .dark body selector should match in light mode too (no .dark needed). Screenshots show NO logo visible → possibly: (1) body background doesn't apply because DashboardLayout SidebarProvider renders <div class="..."> with bg-something solid covering body height 100%; (2) OR the glass-bg fixed div with z-[-1] sits BELOW body background? fixed inset covers viewport but z-[-1] — body bg is on the body, should show BEHIND z-[-1]? Actually stacking: fixed z-[-1] div creates stacking context; body bg paints behind it? Hmm, a fixed positioned child with z-[-1] paints behind its parent stacking context (the body), so body bg could be hidden BEHIND the div... The div has transparent gradient bg though, not solid. Should still see logo through it.
+- LAG cause: background-attachment: fixed + cover-size logo repaint; glass-drift 28s animation on fixed inset layer; huge (194KB) logo as body bg; heavy radial gradients.
+Fix plan:
+1. Move logo out of body background entirely. Use a single absolutely-positioned fixed pseudo-element approach: keep .glass-bg but add the logo as a faint large image INSIDE .glass-bg (img or pseudo bg), opacity ~0.08-0.12, no attachment:fixed, no animation on logo layer, keep pointer-events-none.
+2. Remove background-image url from .dark body and @layer base body; keep simple flat bg-color (keep light #eaf4f6, dark #0b1d37).
+3. Optimize image: resize logo to ~1000px width webp/jpg (192KB->~80KB) and use as img src in SidebarLayout? Keep /branding file replaced with optimized version.
+4. Reduce/remove glass-drift animation or make slower/subtle (user says lagging).
+5. Verify screenshots (login + dashboard) then checkpoint + deliver.

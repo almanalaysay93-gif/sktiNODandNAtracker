@@ -93,10 +93,12 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <div aria-hidden className="glass-bg" />
-        <TooltipProvider>
-          <Toaster position="top-right" richColors />
-          <Router />
-        </TooltipProvider>
+        <div className="relative z-[1] min-h-screen">
+          <TooltipProvider>
+            <Toaster position="top-right" richColors />
+            <Router />
+          </TooltipProvider>
+        </div>
       </ThemeProvider>
     </ErrorBoundary>
   );
