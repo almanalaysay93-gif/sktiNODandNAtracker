@@ -11,6 +11,7 @@ import CalendarPage from "./pages/Calendar";
 import Dashboard from "./pages/Dashboard";
 import Licenses from "./pages/Licenses";
 import NurseProfile from "./pages/NurseProfile";
+import { NurseEditPage } from "./pages/NurseEditPage";
 import Nurses from "./pages/Nurses";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
@@ -49,6 +50,11 @@ function Router() {
       <Route path="/nurses/:id">
         <Protected>
           <NurseProfile />
+        </Protected>
+      </Route>
+      <Route path="/nurses/:id/edit">
+        <Protected>
+          <NurseEditPage />
         </Protected>
       </Route>
       <Route path="/trainings">

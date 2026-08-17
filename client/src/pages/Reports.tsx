@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
-import { BarChart3, Download, FileSpreadsheet } from "lucide-react";
+import { BarChart3, Download, FileSpreadsheet, Printer } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -160,6 +160,10 @@ function ReportView({ type, onBack }: { type: ReportType; onBack: () => void }) 
       <CardContent className="pt-5 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={onBack}>← All Reports</Button>
+          <Button variant="outline" size="sm" onClick={() => window.print()} disabled={!report.length}>
+            <Printer className="h-4 w-4 mr-1" />
+            Print
+          </Button>
           <Button size="sm" onClick={downloadCsv} disabled={!report.length}>
             <FileSpreadsheet className="h-4 w-4 mr-1" />
             Export CSV

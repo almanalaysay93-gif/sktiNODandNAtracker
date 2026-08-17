@@ -29,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import {
   formatDate,
+  durationBetween,
   nurseFullName,
   EMPLOYMENT_STATUSES,
   ASSIGNMENT_TYPES,
@@ -43,12 +44,21 @@ import {
   Trash2,
   Undo2,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useLocation, useRoute } from "wouter";
 
 const RENEWAL_STATUSES = ["Not Started", "Renewal In Progress", "Submitted", "Renewed"] as const;
 const VERIFICATION_STATUSES = ["Unverified", "Pending Verification", "Verified"] as const;
+
+function StatChip({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="flex flex-col items-center px-2.5 py-1 bg-muted/60 border rounded-lg min-w-16">
+      <span className="text-base font-bold tabular-nums leading-tight">{value}</span>
+      <span className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</span>
+    </div>
+  );
+}
 
 export default function NurseProfile() {
   const [, params] = useRoute("/nurses/:id");
@@ -62,6 +72,23 @@ export default function NurseProfile() {
   const { data: trainings } = trpc.trainings.listForNurse.useQuery({ nurseId: id }, { enabled: !Number.isNaN(id) });
   const { data: compliance } = trpc.trainings.getCompliance.useQuery({ nurseId: id }, { enabled: !Number.isNaN(id) });
   const { data: catalog } = trpc.trainings.listCatalog.useQuery();
+
+  const stats = useMemo(() => {
+    const hire = nurse?.dateHired ? new Date(nurse.dateHired).getTime() : null;
+    const experienceYears = hire ? Math.max(0, (Date.now() - hire) / (1000 * 60 * 60 * 24 * 365)).toFixed(1) : "—";
+    const areasServed = new Set((assignments ?? []).map((a) => a.areaId)).size;
+    const completedTrainings = (trainings ?? []).filter((t) => t.status === "Completed").length;
+    let compliancePct = "—";
+    if (compliance && catalog) {
+      const total = Object.keys(compliance).length;
+      const done = Object.values(compliance).filter((v) => {
+        const c = v as unknown as { completed: boolean } | boolean;
+        return typeof c === "object" && c !== null ? c.completed : Boolean(c);
+      }).length;
+      compliancePct = total > 0 ? Math.round((done / total) * 100).toString() : "—";
+    }
+    return { experienceYears, areasServed, completedTrainings, compliancePct };
+  }, [nurse, assignments, trainings, compliance, catalog]);
 
   const changeArea = trpc.nurses.changeArea.useMutation({
     onSuccess: () => {
@@ -113,6 +140,12 @@ export default function NurseProfile() {
               {nurse.dateHired ? ` · Hired ${formatDate(nurse.dateHired)}` : ""}
             </p>
           </div>
+        </div>
+        <div className="hidden lg:flex items-center gap-2 mr-2">
+          <StatChip label="Years exp." value={stats.experienceYears} />
+          <StatChip label="Areas" value={stats.areasServed} />
+          <StatChip label="Trainings" value={stats.completedTrainings} />
+          <StatChip label="Compliance" value={`${stats.compliancePct}${stats.compliancePct === "—" ? "" : "%"}`} />
         </div>
         <div className="flex items-center gap-2">
           <EmploymentStatusBadge status={nurse.employmentStatus ?? "Active"} />
@@ -183,6 +216,7 @@ export default function NurseProfile() {
                           <td className="px-3 py-2.5 text-muted-foreground">{a.assignmentType ?? "—"}</td>
                           <td className="px-3 py-2.5 text-muted-foreground">{formatDate(a.startDate)}</td>
                           <td className="px-3 py-2.5 text-muted-foreground">{a.endDate ? formatDate(a.endDate) : "Present"}</td>
+                          <td className="px-3 py-2.5 text-muted-foreground">{durationBetween(a.startDate, a.endDate)}</td>
                           <td className="px-3 py-2.5 text-muted-foreground">{a.remarks ?? "—"}</td>
                         </tr>
                       ))}

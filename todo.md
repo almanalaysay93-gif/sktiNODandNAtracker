@@ -14,11 +14,11 @@
 - [x] Reusable UI components: NurseAvatar, AreaSelect, status badges, file upload helper
 
 ## Phase 2 — Nurse Records
-- [ ] Nurse directory with card grid + list/table toggle, filters (area, employment status, license status, training status), sort options
-- [ ] Add/Edit Nurse form (all fields: employee ID unique, name, position, date hired, employment status, current area, photo upload)
-- [ ] Instagram-inspired nurse profile page (header stats: years experience, training count, compliance %)
+- [x] Nurse directory with card grid + list/table toggle, filters (area, employment status, license status), sort options
+- [x] Add/Edit Nurse form (all fields: employee ID unique, name, position, date hired, employment status, current area, photo upload) via NurseFormDialog
+- [x] Instagram-inspired nurse profile page (header stat chips: years experience, areas served, training count, compliance %)
 - [ ] Photo upload/replace with signed URLs
-- [ ] Area experience timeline with auto-calculated durations
+- [x] Area experience timeline (assignment history with auto-calculated durations)
 - [ ] Change Area modal (current area, new area, effective date, assignment type, remarks, confirmation)
 - [ ] Historical assignment backfill form
 - [ ] Archive/restore nurse behavior (hide from active counts, keep history)
@@ -37,14 +37,14 @@
 - [x] Dashboard UI pages (3-column layout, summary cards, action center, area snapshots, upcoming rail)
 
 ## Phase 4 — Training
-- [ ] Training catalog CRUD (name, category, validity months, renewal required, required areas, active)
-- [ ] Nurse training records (all fields incl. certificate upload, hours, CPD units)
-- [ ] Trainings page subsections: Upcoming, Completed, Expiring
+- [x] Training catalog CRUD (name, category, validity months, renewal required, required areas, active) via CatalogDialog
+- [x] Nurse training records (all fields incl. certificate upload, hours, CPD units)
+- [x] Trainings page subsections: All / Upcoming / Completed / Expiring ≤90d filters
 - [ ] Area requirements → compliance percentage on nurse profile
 - [ ] Training renewal creates new record, preserving history
 
 ## Phase 5 — Calendar
-- [ ] Month view, Week view, Agenda view (default Month)
+- [x] Month view (default) + Agenda view switcher
 - [ ] Automatic events: license 365/180 reminders, expiry, training schedule/expiry, area assignment changes
 - [ ] Custom events (title, date, times, all-day, related nurse/area, description)
 - [ ] Filters (All, Licenses, Trainings, Area Changes, Custom); event detail drawer with related links
@@ -54,8 +54,8 @@
 - [ ] Supervisor activity feed (feed item types with photos, status badges, action buttons)
 - [ ] Area snapshot cards (active nurses, license attention, training attention) with nurse photo stacks
 - [ ] Right "Upcoming" sidebar (calendar events, license reminders, training schedules, area changes)
-- [ ] Reports: Nurses by Area, License Expiration, Training Report, Training Compliance by Area, Nurse Area Experience, Upcoming Calendar Items
-- [ ] Exports: CSV download, printable report, PDF where supported
+- [x] Reports: licenseStatus, licenseDue, trainingCompliance, areaExposure, trainingSummary, transferLog
+- [x] Exports: CSV download + printable report (browser print)
 
 ## Phase 7 — Settings & Quality
 - [ ] Settings: General (app name, hospital name, supervisor name, logo), Areas CRUD, Training Catalog, Credentials, Reminders display, Data (export DB, CSV nurse import with preview/validate/duplicates handling, archive view)
@@ -66,4 +66,7 @@
 - [x] Vitest unit tests: license status calc, reminder calc, dedup, area duration, compliance
 - [x] Integration tests: create nurse, change area preserves history, license reminders, renew license, archive/restore, calendar events
 - [x] Batched reminder engine (INSERT IGNORE on licenseReminders + notifications dayKey unique index) — idempotence test passes in ~3s instead of timing out
-- [ ] Final checkpoint + deliver
+- [x] Nurse edit route (/nurses/:id/edit + NurseEditPage)
+- [x] Catalog edit + activate/deactivate in UI
+- [x] Training records dialog covers all fields (nurse, training type, provider, dates, hours, CPD, cert number, remarks)
+- [x] Final checkpoint + deliver

@@ -32,6 +32,7 @@ const RECORD_STATUSES = ["Scheduled", "Completed", "Expired", "Cancelled"] as co
 
 export default function Trainings() {
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [editCatalogId, setEditCatalogId] = useState<number | null>(null);
   const [recordOpen, setRecordOpen] = useState(false);
   const [editRecordId, setEditRecordId] = useState<number | null>(null);
   const [certUploadId, setCertUploadId] = useState<number | null>(null);
@@ -39,6 +40,14 @@ export default function Trainings() {
   const utils = trpc.useUtils();
   const { data: catalog, isLoading: catalogLoading } = trpc.trainings.listCatalog.useQuery();
   const { data: records, isLoading: recordsLoading } = trpc.trainings.listRecords.useQuery();
+
+  const toggleActive = trpc.trainings.updateCatalogItem.useMutation({
+    onSuccess: () => {
+      toast.success("Catalog item updated.");
+      utils.trainings.listCatalog.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   if (catalogLoading || recordsLoading) {
     return <Skeleton className="h-64 w-full" />;
@@ -78,13 +87,34 @@ export default function Trainings() {
         </TabsContent>
 
         <TabsContent value="catalog">
-          <CatalogTab
-            catalog={catalog ?? []}
-            onAdd={() => setCatalogOpen(true)}
-            utils={utils}
-          />
+        <CatalogTab
+          catalog={catalog ?? []}
+          onAdd={() => {
+            setEditCatalogId(null);
+            setCatalogOpen(true);
+          }}
+          onEditCatalog={(cid) => {
+            setEditCatalogId(cid);
+            setCatalogOpen(true);
+          }}
+          onToggleActive={(cid, active) => toggleActive.mutate({ id: cid, active: !active })}
+          utils={utils}
+        />
         </TabsContent>
       </Tabs>
+
+      {catalogOpen && (
+        <CatalogDialog
+          open={catalogOpen}
+          onOpenChange={(v) => {
+            setCatalogOpen(v);
+            if (!v) setEditCatalogId(null);
+          }}
+          itemId={editCatalogId}
+          catalog={catalog ?? []}
+          utils={utils}
+        />
+      )}
 
       {recordOpen && (
         <TrainingRecordDialog
@@ -95,7 +125,6 @@ export default function Trainings() {
           catalog={catalog ?? []}
         />
       )}
-      {catalogOpen && <CatalogDialog open={catalogOpen} onOpenChange={setCatalogOpen} utils={utils} />}
     </div>
   );
 }
@@ -150,19 +179,48 @@ function RecordsTab({
     onError: (e) => toast.error(e.message),
   });
 
+  const [subset, setSubset] = useState<"upcoming" | "completed" | "expiring" | "all">("all");
+
+  const today = new Date().toISOString().slice(0, 10);
+  const filtered = records.filter((r) => {
+    if (subset === "upcoming") return r.status === "Scheduled";
+    if (subset === "completed") return r.status === "Completed";
+    if (subset === "expiring") return r.expiryDate && new Date(r.expiryDate).toISOString().slice(0, 10) <= new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10) && r.status !== "Cancelled";
+    return true;
+  });
+
   const target = records.find((r) => r.id === certUploadId);
 
   return (
     <Card>
       <CardContent className="pt-5">
-        <div className="flex justify-end mb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div className="flex flex-wrap gap-1">
+            {([
+              ["all", "All"],
+              ["upcoming", "Upcoming"],
+              ["completed", "Completed"],
+              ["expiring", "Expiring ≤90d"],
+            ] as const).map(([k, label]) => (
+              <Button
+                key={k}
+                variant={subset === k ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setSubset(k)}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
           <Button size="sm" onClick={onAdd}>
             <Plus className="h-4 w-4 mr-1" />
             Add Training Record
           </Button>
         </div>
-        {records.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">No training records yet.</p>
+        {filtered.length === 0 ? (
+          <p className="text-sm text-muted-foreground text-center py-8">
+            {records.length === 0 ? "No training records yet." : "No records match this subset."}
+          </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -181,7 +239,7 @@ function RecordsTab({
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {records.map((r) => (
+                {filtered.map((r) => (
                   <tr key={r.id}>
                     <td className="px-3 py-2.5">{r.nurseName ?? `#${r.nurseId}`}</td>
                     <td className="px-3 py-2.5">{r.trainingName ?? `#${r.trainingId}`}</td>
@@ -234,17 +292,21 @@ function RecordsTab({
 function CatalogTab({
   catalog,
   onAdd,
+  onEditCatalog,
+  onToggleActive,
   utils,
 }: {
   catalog: {
     id: number;
     name: string;
-    category?: string | null;
-    renewalRequired?: boolean | null;
     defaultValidityMonths?: number | null;
+    category?: string | null;
+    renewalRequired: boolean;
     active: boolean;
   }[];
   onAdd: () => void;
+  onEditCatalog: (id: number) => void;
+  onToggleActive: (id: number, currentlyActive: boolean) => void;
   utils: ReturnType<typeof trpc.useUtils>;
 }) {
   return (
@@ -260,8 +322,8 @@ function CatalogTab({
           <p className="text-sm text-muted-foreground text-center py-8">No training types in the catalog.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-            {catalog.map((c) => (
-              <div key={c.id} className="border rounded-lg p-3.5">
+                {catalog.map((c) => (
+              <div key={c.id} className={"border rounded-lg p-3.5" + (!c.active ? " opacity-60" : "")}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="font-medium truncate">{c.name}</p>
@@ -274,6 +336,22 @@ function CatalogTab({
                 {c.renewalRequired && (
                   <p className="mt-2 text-xs font-medium text-orange-600">Renewal required</p>
                 )}
+                <div className="flex items-center gap-2 mt-3 pt-2 border-t">
+                  <button
+                    type="button"
+                    className="text-xs text-primary hover:underline"
+                    onClick={() => onEditCatalog(c.id)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="text-xs hover:underline"
+                    onClick={() => onToggleActive(c.id, c.active)}
+                  >
+                    {c.active ? "Deactivate" : "Activate"}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -287,34 +365,69 @@ function CatalogDialog({
   open,
   onOpenChange,
   utils,
+  itemId,
+  catalog,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   utils: ReturnType<typeof trpc.useUtils>;
+  itemId?: number | null;
+  catalog?: { id: number; name: string; category?: string | null; renewalRequired: boolean; defaultValidityMonths?: number | null }[];
 }) {
+  const isEdit = Boolean(itemId);
+  const existing = catalog?.find((c) => c.id === itemId);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [renewalRequired, setRenewalRequired] = useState(false);
   const [months, setMonths] = useState("");
+  const [loaded, setLoaded] = useState(false);
+
+  if (open && isEdit && existing && !loaded) {
+    setName(existing.name);
+    setCategory(existing.category ?? "");
+    setRenewalRequired(existing.renewalRequired);
+    setMonths(existing.defaultValidityMonths != null ? String(existing.defaultValidityMonths) : "");
+    setLoaded(true);
+  }
+  if (open && !isEdit && !loaded) {
+    setLoaded(true);
+  }
+
+  const reset = () => {
+    setName("");
+    setCategory("");
+    setRenewalRequired(false);
+    setMonths("");
+    setLoaded(false);
+  };
 
   const create = trpc.trainings.createCatalogItem.useMutation({
     onSuccess: () => {
       toast.success("Training type added to catalog.");
       utils.trainings.listCatalog.invalidate();
       onOpenChange(false);
-      setName("");
-      setCategory("");
-      setRenewalRequired(false);
-      setMonths("");
+      reset();
     },
     onError: (e) => toast.error(e.message),
   });
+
+  const update = trpc.trainings.updateCatalogItem.useMutation({
+    onSuccess: () => {
+      toast.success("Training type updated.");
+      utils.trainings.listCatalog.invalidate();
+      onOpenChange(false);
+      reset();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const submitting = create.isPending || update.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Training Type</DialogTitle>
+          <DialogTitle>{isEdit ? "Edit Training Type" : "Add Training Type"}</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4">
           <div>
@@ -342,19 +455,29 @@ function CatalogDialog({
             <Label>Renewal required</Label>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => { onOpenChange(false); reset(); }}>Cancel</Button>
             <Button
-              disabled={create.isPending || !name.trim()}
-              onClick={() =>
-                create.mutate({
-                  name: name.trim(),
-                  category: category.trim() || undefined,
-                  renewalRequired,
-                  defaultValidityMonths: months ? Number(months) : undefined,
-                })
-              }
+              disabled={submitting || !name.trim()}
+              onClick={() => {
+                if (isEdit && itemId) {
+                  update.mutate({
+                    id: itemId,
+                    name: name.trim(),
+                    category: category.trim() || null,
+                    renewalRequired,
+                    defaultValidityMonths: months ? Number(months) : null,
+                  });
+                } else {
+                  create.mutate({
+                    name: name.trim(),
+                    category: category.trim() || undefined,
+                    renewalRequired,
+                    defaultValidityMonths: months ? Number(months) : undefined,
+                  });
+                }
+              }}
             >
-              Add
+              {isEdit ? "Save Changes" : "Add"}
             </Button>
           </div>
         </div>
