@@ -126,3 +126,11 @@ Remaining tasks:
 3. Check Calendar page badges/severity colors map to logo palette where possible (severity meta is in shared/nursetrack.ts).
 4. Keep .glass-bg gradient uses of these hues.
 5. tsc + 28 tests, checkpoint, deliver.
+
+## GitHub push (current task)
+- Authenticated GitHub user: almanalaysay93-gif (NOT aljohnmanalaysay — that repo creation returned 404)
+- Repo to create/push: almanalaysay93-gif/skti-nursetrack (private)
+- Work dir: /home/ubuntu/skti-nursetrack, branch main at checkpoint 935a98d, clean working tree
+- origin remote points to Manus artifacts git (do not touch)
+- A remote named "github" was already added pointing to https://github.com/aljohnmanalaysay/skti-nursetrack.git — WRONG owner, must remove or re-add with correct owner
+- Steps: gh repo create almanalaysay93-gif/skti-nursetrack --private, git remote set-url github <correct url> (or remove+add), git push github main
