@@ -269,7 +269,13 @@ function NotificationsBell() {
   const { data: unreadCount } = trpc.notifications.unreadCount.useQuery();
   const [open, setOpen] = useState(false);
   const { data: notifications, refetch } = trpc.notifications.list.useQuery();
-  const markAllRead = trpc.notifications.markAllRead.useMutation();
+  const utils = trpc.useUtils();
+  const markAllRead = trpc.notifications.markAllRead.useMutation({
+    onSuccess: async () => {
+      await utils.notifications.unreadCount.invalidate();
+      await utils.notifications.list.invalidate();
+    },
+  });
 
   return (
     <>
@@ -296,9 +302,9 @@ function NotificationsBell() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={async () => {
-                await markAllRead.mutateAsync(undefined as never);
-                refetch();
+              disabled={markAllRead.isPending}
+              onClick={() => {
+                markAllRead.mutate(undefined as never);
               }}
             >
               Mark all read
@@ -310,7 +316,7 @@ function NotificationsBell() {
             )}
             <div className="space-y-2">
               {notifications?.map((n) => (
-                <NotificationRow key={n.id} notification={n} onRead={() => refetch()} />
+                <NotificationRow key={n.id} notification={n} onRead={() => refetch()} invalidateUnread={() => utils.notifications.unreadCount.invalidate()} />
               ))}
             </div>
           </ScrollArea>
@@ -323,6 +329,7 @@ function NotificationsBell() {
 function NotificationRow({
   notification,
   onRead,
+  invalidateUnread,
 }: {
   notification: {
     id: number;
@@ -337,9 +344,14 @@ function NotificationRow({
     createdAt: Date;
   };
   onRead: () => void;
+  invalidateUnread: () => void;
 }) {
   const [, setLocation] = useLocation();
-  const markRead = trpc.notifications.markRead.useMutation();
+  const markRead = trpc.notifications.markRead.useMutation({
+    onSuccess: async () => {
+      await invalidateUnread();
+    },
+  });
 
   const severityColor =
     notification.severity === "urgent_or_expired"

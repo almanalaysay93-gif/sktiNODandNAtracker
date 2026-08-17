@@ -94,3 +94,9 @@
 - [x] Verify logo watermark visible behind glass panels in live preview
 - [x] Fix date parsing bug: mysql2 returns Date objects — String(Date).slice(0,10) produced 'Mon Aug 17' → 'Invalid Date'/NaN in Action Center; added dateKey() helper, replaced all unsafe usages
 - [x] Verify screenshots, tests pass (28/28), checkpoint + deliver
+
+## Phase 11 — Notification badge bug (user report)
+- [x] Bug: unread badge (112) persists after "Mark all as read" — root cause: client cache; markAllRead/markRead mutations never invalidated the unreadCount cached query
+- [x] Fix: onSuccess callbacks now invalidate notifications.unreadCount (+ list for markAllRead) in DashboardLayout bell
+- [x] Added regression test "markAllRead clears the unread count" (29 tests pass)
+- [x] Verified tsc clean, checkpoint + deliver

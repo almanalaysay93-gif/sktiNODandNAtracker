@@ -165,6 +165,46 @@ describe("calendar events", () => {
   }, 30000);
 });
 
+describe("notification reading", () => {
+  it("markAllRead clears the unread count", async () => {
+    const caller = appRouter.createCaller(createAdminContext());
+
+    // Ensure there is at least one notification (create one to be deterministic).
+    await caller.notifications.list(); // no-op, just warm the router
+    const nurse = await caller.nurses.create({
+      employeeId: `NOREAD-${Date.now()}`,
+      firstName: "Badge",
+      lastName: "Tester",
+      position: "RN",
+      dateHired: new Date(),
+      employmentStatus: "Active",
+      currentAreaId: 1,
+    });
+    const types = await caller.credentials.listTypes();
+    const prc = types.find((t) => t.name.includes("PRC"))!;
+    await caller.credentials.create({
+      nurseId: nurse.id,
+      credentialTypeId: prc.id,
+      licenseNumber: `NOREAD-${Date.now()}`,
+      issuingOrganization: "PRC",
+      issueDate: new Date(),
+      expiryDate: new Date(), // expires today -> generates a notification on run
+    });
+    await caller.settings.runRemindersNow();
+
+    const before = (await caller.notifications.unreadCount()) > 0;
+    expect(before).toBe(true);
+
+    await caller.notifications.markAllRead();
+    const after = await caller.notifications.unreadCount();
+    expect(after).toBe(0);
+
+    // A further mark-all-run leaves the count at zero.
+    await caller.notifications.markAllRead();
+    expect(await caller.notifications.unreadCount()).toBe(0);
+  }, 30000);
+});
+
 describe("reminder job idempotence", () => {
   it("does not duplicate notifications on repeated runs", async () => {
     const caller = appRouter.createCaller(createAdminContext());
