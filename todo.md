@@ -19,9 +19,9 @@
 - [x] Instagram-inspired nurse profile page (header stat chips: years experience, areas served, training count, compliance %)
 - [x] Photo upload/replace via storagePut + signed GET URL proxy (/manus-storage/* → presign/get)
 - [x] Area experience timeline (assignment history with auto-calculated durations)
-- [x] Change Area modal (new area, remarks, confirmation) — effectiveDate hardcoded to now, assignmentType defaulted to Transfer
+- [x] Change Area modal (current area context, new area, effective date, assignment type, remarks, confirmation)
 - [x] Historical assignment backfill form on Area Detail page (backfillAssignment mutation)
-- [x] Archive/restore nurse behavior (Archive/Restore buttons on profile; archived excluded from active counts)
+- [x] Archive/restore nurse behavior (Archive/Restore buttons on profile wired to backend; archived excluded from active counts)
 
 ## Phase 3 — Licenses & Reminders
 - [x] License add/edit form (credential type, license number, issue/expiry dates, renewal & verification status, file upload) on Licenses page
@@ -47,7 +47,7 @@
 - [x] Month view (default) + Agenda view switcher
 - [x] Automatic events: license 365/180 reminders, expiry, training schedule/expiry, area assignment changes (calendar.listEvents unified)
 - [x] Custom events (title, date, times, all-day, related nurse/area, description) via CustomEventDialog
-- [x] Filters (license/training/areaChange/custom toggles + text filter); nurse links on events
+- [x] Filters (license/training/areaChange/custom toggles + text filter); nurse links; event detail panel in Month view
 
 ## Phase 6 — Dashboard & Reports
 - [x] Summary cards clickable to filtered lists (navigate to /nurses, /licenses, /trainings)
