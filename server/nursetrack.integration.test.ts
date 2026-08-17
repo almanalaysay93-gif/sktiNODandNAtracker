@@ -155,11 +155,7 @@ describe("calendar events", () => {
     });
     expect(custom.id).toBeGreaterThan(0);
 
-    const allNurses = await caller.nurses.list();
-    const allCreds = await caller.credentials.list();
-    console.log("EVENTS_DEBUG_nurses", allNurses.filter((n) => n.id === nurse.id).length, "creds", allCreds.filter((c) => c.nurseId === nurse.id).length);
     const events = await caller.calendar.listEvents({});
-    console.log("EVENTS_DEBUG", JSON.stringify(events.slice(0, 30).map((e) => ({ id: e.id, type: e.type, nurseId: e.nurseId ?? null, date: String(e.date).slice(0, 10), title: e.title.slice(0, 60) }))));
     const auto = events.filter((e) => e.type === "license" && e.nurseId === nurse.id);
     expect(auto.length).toBeGreaterThan(0);
     const customs = events.filter((e) => e.type === "custom");

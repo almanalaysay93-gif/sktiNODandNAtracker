@@ -24,10 +24,12 @@
 - [ ] Archive/restore nurse behavior (hide from active counts, keep history)
 
 ## Phase 3 — Licenses & Reminders
-- [ ] License add/edit form (credential type, license number, issue/expiry dates, renewal & verification status, file upload)
-- [ ] License list page with filters and expiry-soonest sort, derived status badges
-- [ ] Mark Renewed workflow preserving history (new record + cycle)
-- [ ] Derived status: Expired / Within 6 Months / Within 1 Year / Valid (color + icon, never color alone)
+- [x] License add/edit form (credential type, license number, issue/expiry dates, renewal & verification status, file upload) on Licenses page
+- [x] License list page with filters (status, type) and expiry-soonest sort, derived status badges
+- [x] Mark Renewed workflow preserving history (new record + cycle)
+- [x] Mark Renewed button on Licenses page rows (RenewDialog: new issue/expiry dates → new record + cycle preserved)
+- [x] Calendar Month grid view + Month/Agenda switcher (date-fns grid, day picker, event dots, nurse links, empty state when filtered)
+- [x] Derived status: Expired / Within 6 Months / Within 1 Year / Valid (color + icon, never color alone)
 - [x] Daily scheduled job logic (runDailyReminders, idempotent, catchup-capable); heartbeat cron to be created after publish
 - [x] Notifications backend (list/unreadCount/markRead/markAllRead)
 - [x] Notification bell UI with unread badge/grouping in the main layout

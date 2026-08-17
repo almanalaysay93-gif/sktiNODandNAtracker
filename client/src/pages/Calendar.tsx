@@ -12,8 +12,20 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { CalendarPlus, MapPin, Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
+import {
+  addMonths,
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isSameDay,
+  isSameMonth,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
+} from "date-fns";
+import { CalendarPlus, ChevronLeft, ChevronRight, MapPin, Pencil, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
@@ -64,6 +76,8 @@ export default function Calendar() {
   const [includeTypes, setIncludeTypes] = useState<EventType[]>(["license", "training", "areaChange", "custom"]);
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [view, setView] = useState<"month" | "agenda">("month");
+  const [monthAnchor, setMonthAnchor] = useState(() => new Date());
 
   const { data: events, isLoading } = trpc.calendar.listEvents.useQuery({
     from: new Date(Date.now() - 30 * 86400000),
@@ -124,9 +138,25 @@ export default function Calendar() {
             placeholder="Filter events…"
             className="max-w-sm"
           />
+          <div className="ml-auto flex items-center gap-1" role="group" aria-label="Calendar view">
+            <button
+              className={`px-3 py-1.5 text-sm rounded-md border transition-colors ${view === "month" ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-accent"}`}
+              onClick={() => setView("month")}
+            >
+              Month
+            </button>
+            <button
+              className={`px-3 py-1.5 text-sm rounded-md border transition-colors ${view === "agenda" ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-accent"}`}
+              onClick={() => setView("agenda")}
+            >
+              Agenda
+            </button>
+          </div>
 
           {isLoading ? (
             <Skeleton className="h-64 w-full" />
+          ) : view === "month" ? (
+            <MonthView events={filtered} month={monthAnchor} onMonthChange={setMonthAnchor} navigate={navigate} />
           ) : filtered.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-10">
               {events && events.length === 0
@@ -193,6 +223,138 @@ export default function Calendar() {
       </Card>
 
       {createOpen && <CustomEventDialog open={createOpen} onOpenChange={setCreateOpen} />}
+    </div>
+  );
+}
+
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function MonthView({
+  events,
+  month,
+  onMonthChange,
+  navigate,
+}: {
+  events: { id: string | number; title: string; date: string; severity: string; nurseName?: string | null; nurseId?: string | number | null; type: EventType }[];
+  month: Date;
+  onMonthChange: (d: Date) => void;
+  navigate: (path: string) => void;
+}) {
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const start = startOfWeek(startOfMonth(month), { weekStartsOn: 0 });
+  const end = endOfWeek(endOfMonth(month), { weekStartsOn: 0 });
+  const days = eachDayOfInterval({ start, end });
+  const today = new Date();
+  const dayEvents = useMemo(() => {
+    const map = new Map<string, typeof events>();
+    for (const e of events) {
+      const key = e.date.slice(0, 10);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(e);
+    }
+    return map;
+  }, [events]);
+  const selectedEvents = selectedDay ? dayEvents.get(format(selectedDay, "yyyy-MM-dd")) ?? [] : [];
+
+  return (
+    <div>
+      {events.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-10 mb-3">
+          No events match the current filters. Type-based and text filters are applied to the month grid as well.
+        </p>
+      ) : null}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-medium">{format(month, "MMMM yyyy")}</h2>
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onMonthChange(subMonths(month, 1))} aria-label="Previous month">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className={isSameMonth(month, today) ? "pointer-events-none opacity-60" : undefined}
+            onClick={() => onMonthChange(today)}
+          >
+            Today
+          </Button>
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => onMonthChange(addMonths(month, 1))} aria-label="Next month">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      <div className="grid grid-cols-7 border rounded-lg overflow-hidden bg-background">
+        {WEEKDAYS.map((w) => (
+          <div key={w} className="bg-muted/60 px-2 py-1.5 text-xs font-medium text-muted-foreground text-center">{w}</div>
+        ))}
+        {days.map((d) => {
+          const key = format(d, "yyyy-MM-dd");
+          const evs = dayEvents.get(key) ?? [];
+          const isCurrentMonth = isSameMonth(d, month);
+          const isToday = isSameDay(d, today);
+          const isSelected = selectedDay ? isSameDay(d, selectedDay) : false;
+          return (
+            <button
+              key={key}
+              type="button"
+              className={`min-h-[72px] border-t border-r p-1 text-left transition-colors ${isCurrentMonth ? "bg-background" : "bg-muted/30 text-muted-foreground/60"} ${isSelected ? "ring-2 ring-inset ring-primary" : ""}`}
+              onClick={() => setSelectedDay(d)}
+              aria-label={`${format(d, "EEEE, MMMM d yyyy")}${evs.length ? `, ${evs.length} events` : ""}`}
+            >
+              <span
+                className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${isToday ? "bg-primary text-primary-foreground font-semibold" : ""}`}
+              >
+                {format(d, "d")}
+              </span>
+              <div className="mt-0.5 space-y-0.5">
+                {evs.slice(0, 3).map((e) => {
+                  const meta = SEVERITY_META[e.severity] ?? SEVERITY_META.info;
+                  return (
+                    <div
+                      key={e.id}
+                      className={`truncate rounded px-1 py-0.5 text-[10px] leading-tight ${meta.cls}`}
+                      title={e.title}
+                    >
+                      {e.title}
+                    </div>
+                  );
+                })}
+                {evs.length > 3 ? <p className="text-[10px] text-muted-foreground px-1">+{evs.length - 3} more</p> : null}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      {selectedDay ? (
+        <div className="mt-3 space-y-2">
+          <h3 className="text-sm font-semibold">{format(selectedDay, "EEEE, MMMM d, yyyy")}</h3>
+          {selectedEvents.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No events on this day.</p>
+          ) : (
+            <ul className="space-y-2">
+              {selectedEvents.map((e) => {
+                const meta = SEVERITY_META[e.severity] ?? SEVERITY_META.info;
+                return (
+                  <li key={e.id}>
+                    <a
+                      className={`flex items-start justify-between gap-2 border rounded-lg p-3 cursor-pointer hover:shadow-sm transition-shadow ${meta.cls}`}
+                      onClick={(ev) => {
+                        ev.preventDefault();
+                        if (e.nurseId) navigate(`/nurses/${e.nurseId}`);
+                      }}
+                    >
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm">{e.title}</p>
+                        <p className="text-xs mt-0.5 opacity-80">{e.nurseName ?? ""}</p>
+                      </div>
+                      <span className={`inline-block h-2 w-2 rounded-full self-center shrink-0 mt-1.5 ${meta.dot}`} />
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      ) : null}
     </div>
   );
 }
