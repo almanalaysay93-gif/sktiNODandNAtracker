@@ -1,8 +1,8 @@
 # SKTI NurseTrack — Project TODO
 
 ## Phase 1 — Foundation
-- [ ] Database schema: supervisors profile (backend done; sync TS schema to live DB + verify parity)
-- [ ] Frontend protected routes + auth gating (single supervisor via OAuth; protectedProcedure on all app routes)
+- [x] Database schema: supervisor identity via Manus OAuth (account owner, no dedicated supervisor table); org/app settings stored in settings rows — schema verified live
+- [x] Frontend protected routes + auth gating (single supervisor via OAuth; protectedProcedure on all feature routes)
 - [x] Apply migration SQL and verify tables
 - [x] Seed the 5 fixed areas (RDU MAIN, RDU ANNEX, SKTI SERVICE WARD, SKTI ICU, SKTI PAY) with correct sort order
 - [x] Seed credential type "PRC Registered Nurse License"
