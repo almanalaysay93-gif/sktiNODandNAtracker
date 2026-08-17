@@ -8,7 +8,18 @@ import App from "./App";
 import { startLogin } from "./const";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Cache fetched data for 5 minutes — heavy lists (nurses, areas, credentials)
+      // are shared across pages, so we avoid re-fetching on every navigation.
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      // Avoid refetching while switching browser tabs — pages re-validate on remount anyway.
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;

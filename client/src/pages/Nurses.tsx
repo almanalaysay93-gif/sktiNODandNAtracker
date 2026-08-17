@@ -36,8 +36,10 @@ export default function Nurses() {
   const [licFilter, setLicFilter] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [createOpen, setCreateOpen] = useState(false);
-  const { data: nurses, isLoading } = trpc.nurses.list.useQuery();
-  const { data: areas } = trpc.areas.list.useQuery();
+  // Single round-trip: server merges nurses + areas.
+  const { data: initial, isLoading } = trpc.nurses.initial.useQuery();
+  const nurses = initial?.nurses;
+  const areas = initial?.areas;
   const [, navigate] = useLocation();
 
   const filtered = useMemo(() => {

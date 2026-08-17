@@ -100,3 +100,14 @@
 - [x] Fix: onSuccess callbacks now invalidate notifications.unreadCount (+ list for markAllRead) in DashboardLayout bell
 - [x] Added regression test "markAllRead clears the unread count" (29 tests pass)
 - [x] Verified tsc clean, checkpoint + deliver
+
+## Phase 12 — Slow page loading (user report)
+- [x] Profile: measured prod per-request 7-12s even when warm; local auth.me 3ms — latency is hosting OAuth roundtrip, not app code (DB only ~111 rows)
+- [x] Identify bottlenecks: sequential tRPC queries per page (5 on Dashboard, 3 on Licenses, 2 on Nurses/Trainings)
+- [x] QueryClient global defaults: staleTime 5m, gcTime 10m, refetchOnWindowFocus false (main.tsx)
+- [x] NotificationsBell: notifications.list fetched only when sheet is open
+- [x] dashboard.initial: merges summary+actionCenter+areaSnapshots+activityFeed+upcoming into 1 round trip; Dashboard.tsx switched
+- [x] credentials.initial: merges credentials+nurses+types; Licenses.tsx switched
+- [x] nurses.initial: merges nurses+areas; Nurses.tsx switched
+- [x] trainings.initial: merges catalog+records; Trainings.tsx switched
+- [x] Verify: 29/29 tests pass, tsc clean, checkpoint + deliver (incl. Reserved hosting recommendation)

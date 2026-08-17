@@ -14,6 +14,24 @@ import { storagePut } from "../storage";
 const nullableDateInput = z.union([z.date(), z.string().datetime(), z.null()]).transform((d) => (d === null ? null : d instanceof Date ? d : new Date(d))).optional();
 
 export const trainingsRouter = router({
+  // Single round-trip initial load: catalog + records in one call (same enriched shape as listRecords).
+  initial: protectedProcedure.query(async () => {
+    const [catalog, rows, nurses] = await Promise.all([db.listTrainingCatalog(true), db.listNurseTrainings(), db.listNurses()]);
+    const nurseById = new Map(nurses.map((n) => [n.id, n]));
+    const catById = new Map(catalog.map((t) => [t.id, t]));
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const records = rows.map((r) => {
+      const nurse = nurseById.get(r.nurseId);
+      const item = catById.get(r.trainingId);
+      let derivedStatus = r.status;
+      if (r.status === "Scheduled" && r.scheduledDate && new Date(r.scheduledDate) < today) derivedStatus = "Scheduled";
+      if (r.status === "Completed" && r.expiryDate && new Date(r.expiryDate) < today) derivedStatus = "Expired";
+      return { ...r, nurse, trainingName: item?.name ?? "Unknown", trainingItem: item ?? null, derivedStatus };
+    });
+    return { catalog, records };
+  }),
+
   listCatalog: protectedProcedure.query(() => db.listTrainingCatalog(true)),
 
   createCatalogItem: protectedProcedure

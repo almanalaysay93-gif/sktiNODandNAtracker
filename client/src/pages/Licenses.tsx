@@ -32,9 +32,11 @@ const VERIFICATION_STATUSES = ["Unverified", "Pending Verification", "Verified"]
 export default function Licenses() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
-  const { data: credentials, isLoading } = trpc.credentials.list.useQuery();
-  const { data: nurses } = trpc.nurses.list.useQuery({ archived: false });
-  const { data: types } = trpc.credentials.listTypes.useQuery();
+  // Single round-trip: server merges credentials + nurses + types.
+  const { data: initial, isLoading } = trpc.credentials.initial.useQuery();
+  const credentials = initial?.credentials;
+  const nurses = initial?.nurses;
+  const types = initial?.types;
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");

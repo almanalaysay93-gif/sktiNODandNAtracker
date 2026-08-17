@@ -23,11 +23,17 @@ import { Link, useLocation } from "wouter";
 import { formatDate, LICENSE_STATUS_SEVERITY, type LicenseStatus } from "../../../shared/nursetrack";
 
 export default function Dashboard() {
-  const { data: summary, isLoading: summaryLoading } = trpc.dashboard.summary.useQuery();
-  const { data: actionCenter, isLoading: actionLoading } = trpc.dashboard.actionCenter.useQuery();
-  const { data: areas, isLoading: areasLoading } = trpc.dashboard.areaSnapshots.useQuery();
-  const { data: feed, isLoading: feedLoading } = trpc.dashboard.activityFeed.useQuery({ limit: 20 });
-  const { data: upcoming, isLoading: upcomingLoading } = trpc.dashboard.upcoming.useQuery();
+  const { data: initial, isLoading: initialLoading } = trpc.dashboard.initial.useQuery();
+  const summary = initial?.summary;
+  const actionCenter = initial?.actionCenter;
+  const areas = initial?.areaSnapshots;
+  const feed = initial?.activityFeed;
+  const upcoming = initial?.upcoming;
+  const summaryLoading = initialLoading;
+  const actionLoading = initialLoading;
+  const areasLoading = initialLoading;
+  const feedLoading = initialLoading;
+  const upcomingLoading = initialLoading;
   const [, navigate] = useLocation();
   const runReminders = trpc.settings.runRemindersNow.useMutation({
     onSuccess: (r) => {

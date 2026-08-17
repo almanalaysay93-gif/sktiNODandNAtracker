@@ -38,8 +38,12 @@ export default function Trainings() {
   const [certUploadId, setCertUploadId] = useState<number | null>(null);
 
   const utils = trpc.useUtils();
-  const { data: catalog, isLoading: catalogLoading } = trpc.trainings.listCatalog.useQuery();
-  const { data: records, isLoading: recordsLoading } = trpc.trainings.listRecords.useQuery();
+  // Single round-trip: server merges catalog + records.
+  const { data: initial, isLoading } = trpc.trainings.initial.useQuery();
+  const catalog = initial?.catalog;
+  const records = initial?.records;
+  const catalogLoading = isLoading;
+  const recordsLoading = isLoading;
 
   const toggleActive = trpc.trainings.updateCatalogItem.useMutation({
     onSuccess: () => {

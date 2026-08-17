@@ -10,6 +10,18 @@ const dateInput = z.union([z.date(), z.string().datetime()]).transform((d) => (d
 const nullableDateInput = z.union([z.date(), z.string().datetime(), z.null()]).transform((d) => (d === null ? null : d instanceof Date ? d : new Date(d))).optional();
 
 export const nursesRouter = router({
+  // Single round-trip initial load: nurses with areas in one call.
+  initial: protectedProcedure.query(async () => {
+    const [rows, areaRows] = await Promise.all([db.listNurses(), db.listAreas(false)]);
+    const areaById = new Map(areaRows.map((a) => [a.id, a]));
+    const nurses = await Promise.all(rows.map(async (n) => ({
+      ...n,
+      currentArea: n.currentAreaId ? areaById.get(n.currentAreaId) ?? null : null,
+      licenseStatus: await db.getNurseLicenseStatus(n.id),
+    })));
+    return { nurses, areas: areaRows };
+  }),
+
   list: protectedProcedure
     .input(z.object({ archived: z.boolean().optional(), areaId: z.number().optional() }).optional())
     .query(async ({ input }) => {

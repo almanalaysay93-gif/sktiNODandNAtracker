@@ -268,7 +268,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
 function NotificationsBell() {
   const { data: unreadCount } = trpc.notifications.unreadCount.useQuery();
   const [open, setOpen] = useState(false);
-  const { data: notifications, refetch } = trpc.notifications.list.useQuery();
+  const { data: notifications, refetch } = trpc.notifications.list.useQuery(undefined, { enabled: open });
   const utils = trpc.useUtils();
   const markAllRead = trpc.notifications.markAllRead.useMutation({
     onSuccess: async () => {

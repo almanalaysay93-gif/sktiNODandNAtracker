@@ -24,6 +24,29 @@ export const credentialsRouter = router({
       return { success: true } as const;
     }),
 
+  // Single round-trip initial load merging credentials + nurses + types
+  // (the Licenses page previously fired three sequential network calls).
+  initial: protectedProcedure.query(async () => {
+    const [credentials, nurses, types] = await Promise.all([
+      db.listCredentials(),
+      db.listNurses(),
+      db.listCredentialTypes(),
+    ]);
+    const nurseById = new Map(nurses.map((n) => [n.id, n]));
+    const typeById = new Map(types.map((t) => [t.id, t]));
+    return {
+      credentials: credentials.map((c) => ({
+        ...c,
+        nurse: nurseById.get(c.nurseId),
+        typeName: typeById.get(c.credentialTypeId)?.name ?? "Unknown",
+        derivedStatus: deriveLicenseStatus(dateKey(c.expiryDate)),
+        daysRemaining: Math.floor((parseForDays(c.expiryDate) - parseForDays(dateKey(new Date()))) / 86400000),
+      })),
+      nurses,
+      types,
+    };
+  }),
+
   list: protectedProcedure.query(async () => {
     const rows = await db.listCredentials();
     const nurses = await db.listNurses();
