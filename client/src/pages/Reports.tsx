@@ -156,7 +156,7 @@ function ReportView({ type, onBack }: { type: ReportType; onBack: () => void }) 
   };
 
   return (
-    <Card>
+    <Card className="glass-card">
       <CardContent className="pt-5 space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={onBack}>← All Reports</Button>

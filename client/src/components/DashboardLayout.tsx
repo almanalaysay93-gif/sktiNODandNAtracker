@@ -83,8 +83,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-8 p-8 max-w-md w-full">
           <div className="flex flex-col items-center gap-6">
-            <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <HeartbeatIcon />
+            <div className="h-20 w-20 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+              <img
+                src="/manus-storage/spmc-nephro-logo_11359316.jpg"
+                alt="SPMC Department of Nephrology Nursing"
+                className="h-16 w-16 object-contain rounded-full"
+              />
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-center">SKTI NurseTrack</h1>
             <p className="text-sm text-muted-foreground text-center max-w-sm">
@@ -112,13 +116,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 }
 
-function HeartbeatIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-9 w-9 text-primary" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-    </svg>
-  );
-}
 
 type DashboardLayoutContentProps = {
   children: React.ReactNode;
@@ -145,7 +142,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
       <div className="relative" ref={sidebarRef}>
         <Sidebar
           collapsible="icon"
-          className="border-r-0"
+          className="border-r-0 glass-sidebar"
           disableTransition={isResizing}
         >
           <SidebarHeader className="h-16 justify-center">
@@ -159,14 +156,20 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
               </button>
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <svg viewBox="0 0 24 24" className="h-5 w-5 text-primary" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                    </svg>
-                  </div>
+                  <img
+                    src="/manus-storage/spmc-nephro-logo_11359316.jpg"
+                    alt="SPMC Department of Nephrology Nursing"
+                    className="h-10 w-10 object-contain rounded-full bg-white shrink-0"
+                  />
                   <span className="font-semibold tracking-tight truncate">NurseTrack</span>
                 </div>
-              ) : null}
+              ) : (
+                <img
+                  src="/manus-storage/spmc-nephro-logo_11359316.jpg"
+                  alt="SPMC Department of Nephrology Nursing"
+                  className="h-10 w-10 object-contain rounded-full bg-white shrink-0"
+                />
+              )}
             </div>
           </SidebarHeader>
 
@@ -231,7 +234,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
       </div>
 
       <SidebarInset>
-        <div className="flex border-b h-16 items-center justify-between bg-background/95 px-2 md:px-4 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
+        <div className="flex border-b h-16 items-center justify-between glass-panel px-2 md:px-4 sticky top-0 z-40">
           <div className="flex items-center gap-2 min-w-0">
             <SidebarTrigger className="h-9 w-9 rounded-lg bg-background shrink-0" />
             <div className="flex flex-col gap-0.5 min-w-0">

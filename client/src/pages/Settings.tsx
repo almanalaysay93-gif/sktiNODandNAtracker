@@ -62,7 +62,7 @@ export default function SettingsPage() {
         </TabsList>
 
         <TabsContent value="general" className="mt-4">
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base">Organization Profile</CardTitle>
               <CardDescription>Used in report headers and reminders.</CardDescription>
@@ -89,7 +89,7 @@ export default function SettingsPage() {
         </TabsContent>
 
         <TabsContent value="reminders" className="mt-4">
-          <Card>
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Bell className="h-4 w-4" />
@@ -161,7 +161,7 @@ function ImportTab() {
   });
 
   return (
-    <Card>
+    <Card className="glass-card">
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <Upload className="h-4 w-4" />
@@ -253,7 +253,7 @@ function ExportTab() {
   ] as const;
 
   return (
-    <Card>
+    <Card className="glass-card">
       <CardHeader>
         <CardTitle className="text-base flex items-center gap-2">
           <Download className="h-4 w-4" />

@@ -195,7 +195,7 @@ export default function NurseProfile() {
         </TabsList>
 
         <TabsContent value="assignments">
-          <Card>
+          <Card className="glass-card">
             <CardContent className="pt-5">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-medium">Area Assignment History</h2>
@@ -244,7 +244,7 @@ export default function NurseProfile() {
         </TabsContent>
 
         <TabsContent value="licenses">
-          <Card>
+          <Card className="glass-card">
             <CardContent className="pt-5">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="font-medium">Credentials & Licenses</h2>
@@ -302,7 +302,7 @@ export default function NurseProfile() {
         </TabsContent>
 
         <TabsContent value="trainings">
-          <Card>
+          <Card className="glass-card">
             <CardContent className="pt-5">
               <h2 className="font-medium mb-3">Training Records</h2>
               {(trainings ?? []).length === 0 ? (
@@ -364,7 +364,7 @@ export default function NurseProfile() {
 
         <TabsContent value="details">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
+            <Card className="glass-card">
               <CardContent className="pt-5 space-y-2.5 text-sm">
                 <DetailRow label="First Name" value={nurse.firstName} />
                 <DetailRow label="Middle Name" value={nurse.middleName} />
@@ -376,7 +376,7 @@ export default function NurseProfile() {
                 <DetailRow label="Date Hired" value={nurse.dateHired ? formatDate(nurse.dateHired) : "—"} />
               </CardContent>
             </Card>
-            <Card>
+            <Card className="glass-card">
               <CardContent className="pt-5 space-y-2.5 text-sm">
                 <DetailRow
                   label="Current Area"

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
@@ -63,7 +64,7 @@ export default function Areas() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {areas?.map((a) => (
-          <Card key={a.id} className={a.active ? undefined : "opacity-60"}>
+          <Card key={a.id} className={cn("glass-card", !a.active && "opacity-60")}>
             <CardContent className="pt-5">
               <div className="flex items-start justify-between gap-3">
                 <button

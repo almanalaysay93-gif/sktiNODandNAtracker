@@ -74,7 +74,7 @@ export default function AreaDetail() {
         </div>
       </div>
 
-      <Card>
+      <Card className="glass-card">
         <CardContent className="pt-5">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h2 className="font-medium">Staff Currently Assigned ({filtered.length})</h2>
@@ -120,7 +120,7 @@ export default function AreaDetail() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="glass-card">
         <CardContent className="pt-5">
           <h2 className="font-medium mb-3">Required Trainings</h2>
           {!requirements ? (

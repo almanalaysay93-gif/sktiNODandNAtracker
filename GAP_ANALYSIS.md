@@ -92,3 +92,24 @@ PRIORITY: (1) Change Area modal fields; (2) Restore working + backend check; (4)
 Just edited NurseProfile.tsx: (1) restore mutation wired + Restore button enabled (nurses.restore exists server-side line 148); (2) Change Area modal now shows Current Area, new area, Effective Date (date input, max today), Assignment Type (ASSIGNMENT_TYPES select — need import ASSIGNMENT_TYPES from @/const? Actually shared/nursetrack.ts exports ASSIGNMENT_TYPES), remarks. Added states areaType/areaDate, cleaned on confirm.
 NEXT: verify ASSIGNMENT_TYPES import exists in NurseProfile.tsx imports (check), tsc, then event detail drawer on Calendar agenda events (MonthView already links nurse; agenda events clickable? check), then final: tsc, tests, checkpoint, deliver. Do NOT add more features after this.
 Heartbeat cron reminder for delivery message: after publish run `manus-heartbeat create --name daily-reminders --cron "0 0 8 * * *" --path /api/scheduled/dailyReminders`.
+
+## Phase 8 — SPMC branding status (~04:30)
+DONE:
+- Logo uploaded: /manus-storage/spmc-nephro-logo_11359316.jpg (2048x2048 jpg, white bg)
+- Favicon: /manus-storage/spmc-favicon-64_5f09ee70.png added in client/index.html
+- DashboardLayout: sidebar header shows logo (expanded + collapsed), login page logo replaces HeartbeatIcon (HeartbeatIcon removed), tsc clean
+- index.css: light + dark themes rethemed to logo palette (navy primary oklch(0.33 0.09 263), teal accent, gold/green/coral chart colors, teal ring)
+Screenshots verified: logo renders in sidebar on /dashboard, /nurses, /licenses; skeleton loading shown (pages load with data after ~1s; dashboard cards render fine). / route shows login skeleton only.
+NOTE: Dashboard summary cards showed empty skeletons — they render numbers after data loads (verified earlier in prior session).
+TODO remaining: run tests, checkpoint, deliver.
+App published at: nursetrack-kkebhhek.manus.space (auto-publish enabled)
+
+## Glass morphism round (~04:32)
+DONE:
+- index.css: added .glass-bg (fixed gradient backdrop, SPMC navy/teal/gold/green radial blurs + slow drift animation, prefers-reduced-motion aware), .glass-panel, .glass-card (hover lift), .glass-sidebar
+- App.tsx: glass-bg backdrop layer at root (aria-hidden)
+- DashboardLayout: sidebar uses glass-sidebar; top bar uses glass-panel; logo in header (expanded+collapsed) + login page
+- Dashboard.tsx: all Cards -> glass-card (stat cards, action center, upcoming rail, area snapshots, activity feed); Nurses.tsx card grid -> glass-card
+- tsc clean; 28/28 tests pass (39s)
+Screenshots: logo + navy palette render; pages mostly captured during loading skeleton phase (calendar/settings filters visible). Glass blur will show over gradient in live browser; screenshots show layout OK.
+TODO: checkpoint + deliver. App auto-publishes on checkpoint.

@@ -192,7 +192,7 @@ function RecordsTab({
   const target = records.find((r) => r.id === certUploadId);
 
   return (
-    <Card>
+    <Card className="glass-card">
       <CardContent className="pt-5">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex flex-wrap gap-1">
@@ -310,7 +310,7 @@ function CatalogTab({
   utils: ReturnType<typeof trpc.useUtils>;
 }) {
   return (
-    <Card>
+    <Card className="glass-card">
       <CardContent className="pt-5">
         <div className="flex justify-end mb-3">
           <Button size="sm" onClick={onAdd}>

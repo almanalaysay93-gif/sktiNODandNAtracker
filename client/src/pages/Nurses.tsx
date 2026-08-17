@@ -134,7 +134,7 @@ export default function Nurses() {
       </div>
 
       {filtered.length === 0 ? (
-        <Card>
+        <Card className="glass-card">
           <CardContent className="py-12 text-center">
             <p className="text-sm text-muted-foreground mb-3">No nurses match your filters.</p>
             <Button variant="outline" onClick={() => { setSearch(""); setAreaFilter("all"); setEmpFilter("all"); setLicFilter("all"); }}>
@@ -149,7 +149,7 @@ export default function Nurses() {
           ))}
         </div>
       ) : (
-        <Card>
+        <Card className="glass-card">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -223,7 +223,7 @@ function NurseCard({
   navigate: (p: string) => void;
 }) {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="glass-card hover-shadow-none ">
       <CardContent className="pt-5">
         <div className="flex items-start justify-between">
           <button

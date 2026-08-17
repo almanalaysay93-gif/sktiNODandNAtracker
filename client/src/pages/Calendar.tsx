@@ -119,7 +119,7 @@ export default function Calendar() {
         </Button>
       </div>
 
-      <Card>
+      <Card className="glass-card">
         <CardContent className="pt-5 space-y-4">
           <div className="flex flex-wrap gap-4">
             {(Object.keys(TYPE_LABELS) as EventType[]).map((t) => (
@@ -215,7 +215,7 @@ export default function Calendar() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="glass-card">
         <CardContent className="pt-5 flex items-center gap-2 text-sm text-muted-foreground">
           <MapPin className="h-4 w-4" />
           License and training events are generated automatically. Custom events are managed on this page.

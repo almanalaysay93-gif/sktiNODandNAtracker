@@ -104,7 +104,7 @@ export default function Dashboard() {
             onClick={() => navigate(s.path)}
             className="group"
           >
-            <Card className="hover:shadow-md transition-shadow text-left h-full">
+            <Card className="glass-card text-left h-full">
               <CardContent className="pt-5 flex items-start justify-between gap-2">
                 {summaryLoading ? (
                   <Skeleton className="h-8 w-12" />
@@ -123,7 +123,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 items-start">
         {/* Action center */}
-        <Card className="xl:col-span-2">
+        <Card className="xl:col-span-2 glass-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-orange-500" />
@@ -139,7 +139,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Upcoming rail */}
-        <Card>
+        <Card className="glass-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <CalendarDays className="h-4 w-4 text-blue-500" />
@@ -204,7 +204,7 @@ export default function Dashboard() {
             ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-40" />)
             : areas?.map((a) => (
                 <Link key={a.id} href={`/areas/${a.id}`}>
-                  <Card className="hover:shadow-md transition-shadow h-full">
+                  <Card className="glass-card h-full">
                     <CardContent className="pt-5">
                       <div className="flex items-center gap-2 mb-3">
                         <MapPin className="h-4 w-4 text-primary" />
@@ -247,7 +247,7 @@ export default function Dashboard() {
       </div>
 
       {/* Activity feed */}
-      <Card>
+      <Card className="glass-card">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <Stethoscope className="h-4 w-4 text-primary" />

@@ -92,6 +92,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
+        <div aria-hidden className="glass-bg" />
         <TooltipProvider>
           <Toaster position="top-right" richColors />
           <Router />

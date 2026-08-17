@@ -1,5 +1,13 @@
 # SKTI NurseTrack — Project TODO
 
+## Phase 8 — Branding (SPMC logo)
+- [x] Upload SPMC Nephrology Nursing logo to webdev static assets
+- [x] Show logo in sidebar header + login screen + favicon
+- [x] Retheme app with logo palette (navy #122A5E primary, teal #0FA4C7 accent, gold #E8A617, green #3CB43B accents)
+- [x] Verify pages render well, tests pass (28/28), checkpoint
+- [x] Glass morphism: animated gradient background + frosted-glass classes (.glass-bg root layer, .glass-panel, .glass-card hover lift, .glass-sidebar)
+- [x] Glass treatment on DashboardLayout (sidebar glass-sidebar, top bar glass-panel), all dashboard/main card surfaces -> glass-card
+
 ## Phase 1 — Foundation
 - [x] Database schema: supervisor identity via Manus OAuth (account owner, no dedicated supervisor table); org/app settings stored in settings rows — schema verified live
 - [x] Frontend protected routes + auth gating (single supervisor via OAuth; protectedProcedure on all feature routes)

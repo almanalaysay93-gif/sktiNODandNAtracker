@@ -70,7 +70,7 @@ export default function Licenses() {
         </Button>
       </div>
 
-      <Card>
+      <Card className="glass-card">
         <CardContent className="pt-5">
           <div className="flex flex-wrap gap-3 mb-4">
             <div className="relative flex-1 min-w-48">
@@ -183,7 +183,7 @@ export default function Licenses() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="glass-card">
         <CardContent className="pt-5 flex items-center gap-2 text-sm text-muted-foreground">
           <CalendarCheck className="h-4 w-4" />
           Licenses expiring within 12 months trigger automatic daily reminders. Upload documents to keep the registry complete.
