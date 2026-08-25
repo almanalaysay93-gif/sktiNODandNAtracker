@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   daysUntilExpiry,
+  dateKey,
   deriveLicenseStatus,
   durationBetween,
   isThresholdDue,
@@ -10,6 +11,19 @@ import {
   trainingCompliance,
   urgencyBucket,
 } from "../shared/nursetrack";
+
+describe("dateKey", () => {
+  it("preserves full YYYY-MM-DD string dates", () => {
+    expect(dateKey("2026-04-15")).toBe("2026-04-15");
+    expect(dateKey("2026-04-15T08:30:00.000Z")).toBe("2026-04-15");
+  });
+
+  it("normalizes Date values and rejects malformed strings", () => {
+    expect(dateKey(new Date("2026-04-15T00:00:00.000Z"))).toBe("2026-04-15");
+    expect(dateKey("2026")).toBe("");
+    expect(dateKey("not-a-date")).toBe("");
+  });
+});
 
 describe("license status calculation", () => {
   const today = "2026-08-17";

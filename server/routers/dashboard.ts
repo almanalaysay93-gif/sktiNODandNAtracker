@@ -1,7 +1,7 @@
 import { asc, and, desc, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { getDb, activeNurseCondition } from "../db";
 import {
   activityLog,
   areaAssignments,
@@ -12,6 +12,7 @@ import {
   nurseTrainings,
 } from "../../drizzle/schema";
 import { daysUntilExpiry, deriveLicenseStatus, todayDate, dateKey } from "../../shared/nursetrack";
+import { getLocalDashboardInitial } from "../sqliteHelpers";
 
 export const dashboardRouter = router({
   // Single round-trip initial load: merges the five section queries into one
@@ -19,45 +20,73 @@ export const dashboardRouter = router({
   // hosting layer due to OAuth round-trips.
   initial: protectedProcedure.query(async () => {
     const db = await getDb();
-    if (!db) throw new Error("Database unavailable");
+    if (!db) {
+      return getLocalDashboardInitial();
+    }
     const today = todayDate();
 
-    // ---- summary ----
+    // ---- shared source data ----
+    // nurseCredentials/nurseTrainings joined with nurses once each, then reused
+    // for summary counts, per-area attention, and action-center items below —
+    // previously each of those three sections re-ran its own copy of these
+    // joins (6 full-table joins per dashboard load instead of 2).
     const [activeRow] = await db
       .select({ count: sql<number>`count(*)` })
       .from(nurses)
-      .where(and(isNull(nurses.archivedAt), not(eq(nurses.employmentStatus, "Archived"))));
+      .where(activeNurseCondition());
     const activeNurses = Number(activeRow?.count ?? 0);
 
-    const creds = await db
+    const areaRows = await db.select().from(areas).orderBy(areas.sortOrder);
+    const areaById = new Map(areaRows.map((a) => [a.id, a]));
+
+    const nurseRows = await db
+      .select({ id: nurses.id, firstName: nurses.firstName, lastName: nurses.lastName })
+      .from(nurses)
+      .where(isNull(nurses.archivedAt));
+    const nurseById = new Map(nurseRows.map((n) => [n.id, n]));
+
+    const credsJoined = await db
       .select({
+        id: nurseCredentials.id,
+        nurseId: nurseCredentials.nurseId,
         expiryDate: nurseCredentials.expiryDate,
+        renewalStatus: nurseCredentials.renewalStatus,
         archivedAt: nurses.archivedAt,
+        firstName: nurses.firstName,
+        lastName: nurses.lastName,
+        currentAreaId: nurses.currentAreaId,
       })
       .from(nurseCredentials)
       .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId));
+
+    const trainingsJoined = await db
+      .select({
+        id: nurseTrainings.id,
+        nurseId: nurseTrainings.nurseId,
+        status: nurseTrainings.status,
+        scheduledDate: nurseTrainings.scheduledDate,
+        expiryDate: nurseTrainings.expiryDate,
+        archivedAt: nurses.archivedAt,
+        firstName: nurses.firstName,
+        lastName: nurses.lastName,
+        currentAreaId: nurses.currentAreaId,
+      })
+      .from(nurseTrainings)
+      .innerJoin(nurses, eq(nurses.id, nurseTrainings.nurseId));
+
+    // ---- summary ----
     let within1Year = 0;
     let within6Months = 0;
     let expired = 0;
-    for (const c of creds) {
+    for (const c of credsJoined) {
       if (c.archivedAt) continue;
       const status = deriveLicenseStatus(dateKey(c.expiryDate), today);
       if (status === "Within 1 Year") within1Year++;
       if (status === "Within 6 Months") within6Months++;
       if (status === "Expired") expired++;
     }
-
-    const trainings = await db
-      .select({
-        status: nurseTrainings.status,
-        scheduledDate: nurseTrainings.scheduledDate,
-        expiryDate: nurseTrainings.expiryDate,
-        archivedAt: nurses.archivedAt,
-      })
-      .from(nurseTrainings)
-      .innerJoin(nurses, eq(nurses.id, nurseTrainings.nurseId));
     let trainingsAttention = 0;
-    for (const t of trainings) {
+    for (const t of trainingsJoined) {
       if (t.archivedAt) continue;
       if (t.status === "Scheduled" && t.scheduledDate && dateKey(t.scheduledDate) <= today) trainingsAttention++;
       if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(dateKey(t.expiryDate), today) <= 0) trainingsAttention++;
@@ -71,8 +100,7 @@ export const dashboardRouter = router({
     };
 
     // ---- areaSnapshots ----
-    const areaRows = await db.select().from(areas).orderBy(areas.sortOrder);
-    const activeNurseCond = and(isNull(nurses.archivedAt), not(eq(nurses.employmentStatus, "Archived")));
+    const activeNurseCond = activeNurseCondition();
     const nurseCounts = await db
       .select({ areaId: nurses.currentAreaId, count: sql<number>`count(*)` })
       .from(nurses)
@@ -84,32 +112,19 @@ export const dashboardRouter = router({
       .from(nurses)
       .where(activeNurseCond)
       .limit(300);
-    const credByArea = await db
-      .select({ areaId: nurses.currentAreaId, expiryDate: nurseCredentials.expiryDate })
-      .from(nurseCredentials)
-      .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId))
-      .where(isNull(nurses.archivedAt));
     const attentionByArea = new Map<number, number>();
-    for (const c of credByArea) {
+    for (const c of credsJoined) {
+      if (c.archivedAt) continue;
       const status = deriveLicenseStatus(dateKey(c.expiryDate), today);
-      if (status !== "Valid" && c.areaId) attentionByArea.set(c.areaId, (attentionByArea.get(c.areaId) ?? 0) + 1);
+      if (status !== "Valid" && c.currentAreaId) attentionByArea.set(c.currentAreaId, (attentionByArea.get(c.currentAreaId) ?? 0) + 1);
     }
-    const trainingByArea = await db
-      .select({
-        areaId: nurses.currentAreaId,
-        status: nurseTrainings.status,
-        scheduledDate: nurseTrainings.scheduledDate,
-        expiryDate: nurseTrainings.expiryDate,
-      })
-      .from(nurseTrainings)
-      .innerJoin(nurses, eq(nurses.id, nurseTrainings.nurseId))
-      .where(isNull(nurses.archivedAt));
     const trainingAttentionByArea = new Map<number, number>();
-    for (const t of trainingByArea) {
+    for (const t of trainingsJoined) {
+      if (t.archivedAt) continue;
       let needsAttention = false;
       if (t.status === "Scheduled" && t.scheduledDate && dateKey(t.scheduledDate) <= today) needsAttention = true;
       if (t.status === "Completed" && t.expiryDate && daysUntilExpiry(dateKey(t.expiryDate), today) <= 0) needsAttention = true;
-      if (needsAttention && t.areaId) trainingAttentionByArea.set(t.areaId, (trainingAttentionByArea.get(t.areaId) ?? 0) + 1);
+      if (needsAttention && t.currentAreaId) trainingAttentionByArea.set(t.currentAreaId, (trainingAttentionByArea.get(t.currentAreaId) ?? 0) + 1);
     }
     const photosByArea = new Map<number, { id: number; profilePhotoKey: string }[]>();
     for (const n of photoNurses) {
@@ -138,25 +153,7 @@ export const dashboardRouter = router({
       relatedEntityId?: number;
     }
     const items: ActionItem[] = [];
-    const nurseRows = await db
-      .select({ id: nurses.id, firstName: nurses.firstName, lastName: nurses.lastName })
-      .from(nurses)
-      .where(isNull(nurses.archivedAt));
-    const nurseById = new Map(nurseRows.map((n) => [n.id, n]));
-
-    const credsByName = await db
-      .select({
-        id: nurseCredentials.id,
-        nurseId: nurseCredentials.nurseId,
-        expiryDate: nurseCredentials.expiryDate,
-        renewalStatus: nurseCredentials.renewalStatus,
-        archivedAt: nurses.archivedAt,
-        firstName: nurses.firstName,
-        lastName: nurses.lastName,
-      })
-      .from(nurseCredentials)
-      .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId));
-    for (const c of credsByName) {
+    for (const c of credsJoined) {
       if (c.archivedAt) continue;
       const status = deriveLicenseStatus(dateKey(c.expiryDate), today);
       const days = daysUntilExpiry(dateKey(c.expiryDate), today);
@@ -171,20 +168,7 @@ export const dashboardRouter = router({
         relatedEntityId: c.id,
       });
     }
-    const trainingsByName = await db
-      .select({
-        id: nurseTrainings.id,
-        nurseId: nurseTrainings.nurseId,
-        status: nurseTrainings.status,
-        scheduledDate: nurseTrainings.scheduledDate,
-        expiryDate: nurseTrainings.expiryDate,
-        archivedAt: nurses.archivedAt,
-        firstName: nurses.firstName,
-        lastName: nurses.lastName,
-      })
-      .from(nurseTrainings)
-      .innerJoin(nurses, eq(nurses.id, nurseTrainings.nurseId));
-    for (const t of trainingsByName) {
+    for (const t of trainingsJoined) {
       if (t.archivedAt) continue;
       if (t.status === "Scheduled" && t.scheduledDate && dateKey(t.scheduledDate) <= today) {
         items.push({
@@ -225,7 +209,6 @@ export const dashboardRouter = router({
       .from(areaAssignments)
       .innerJoin(nurses, eq(nurses.id, areaAssignments.nurseId))
       .where(and(isNull(nurses.archivedAt), isNull(areaAssignments.endDate)));
-    const areaById = new Map(areaRows.map((a) => [a.id, a]));
     for (const a of assignments) {
       if (dateKey(a.startDate) > today) {
         items.push({
@@ -318,7 +301,7 @@ export const dashboardRouter = router({
     const [activeRow] = await db
       .select({ count: sql<number>`count(*)` })
       .from(nurses)
-      .where(and(isNull(nurses.archivedAt), not(eq(nurses.employmentStatus, "Archived"))));
+      .where(activeNurseCondition());
     const activeNurses = Number(activeRow?.count ?? 0);
 
     const creds = await db
@@ -369,7 +352,7 @@ export const dashboardRouter = router({
     if (!db) throw new Error("Database unavailable");
     const today = todayDate();
     const areaRows = await db.select().from(areas).orderBy(areas.sortOrder);
-    const activeNurseCond = and(isNull(nurses.archivedAt), not(eq(nurses.employmentStatus, "Archived")));
+    const activeNurseCond = activeNurseCondition();
 
     const nurseCounts = await db
       .select({ areaId: nurses.currentAreaId, count: sql<number>`count(*)` })

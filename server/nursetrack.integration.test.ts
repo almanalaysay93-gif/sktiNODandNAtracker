@@ -11,10 +11,22 @@ import {
 } from "../drizzle/schema";
 
 const TEST_PREFIXES = ["TEST-%", "CAL-%", "LIC-%", "NOREAD-%", "BT%"];
+function isSafeTestDatabase(url: string | undefined) {
+  if (!url) return false;
+  try {
+    return new URL(url).pathname.replace(/^\//, "").endsWith("_test");
+  } catch {
+    return false;
+  }
+}
+const safeTestDatabase = isSafeTestDatabase(process.env.DATABASE_URL);
+const describeWithDb = safeTestDatabase ? describe : describe.skip;
 
 /** Purge rows created by prior integration-test runs so the suite stays fast. */
 async function purgeTestRows() {
+  if (!safeTestDatabase) return;
   const sql = await db.getDb();
+  if (!sql) return;
   for (const prefix of TEST_PREFIXES) {
     const rows = await sql.select({ id: nurses.id }).from(nurses).where(like(nurses.employeeId, prefix));
     const ids = rows.map((r) => r.id);
@@ -52,7 +64,7 @@ function createAdminContext(): TrpcContext {
   };
 }
 
-describe("nurse lifecycle", () => {
+describeWithDb("nurse lifecycle", () => {
   it("creates a nurse, changes area preserving history, archives and restores", async () => {
     const caller = appRouter.createCaller(createAdminContext());
 
@@ -98,7 +110,7 @@ describe("nurse lifecycle", () => {
   }, 30000);
 });
 
-describe("license lifecycle and reminders", () => {
+describeWithDb("license lifecycle and reminders", () => {
   it("creates a license near expiry, sees due-soon status, renews it, and gets valid status", async () => {
     const caller = appRouter.createCaller(createAdminContext());
 
@@ -150,7 +162,7 @@ describe("license lifecycle and reminders", () => {
   }, 30000);
 });
 
-describe("calendar events", () => {
+describeWithDb("calendar events", () => {
   it("lists automatic license events and custom events", async () => {
     const caller = appRouter.createCaller(createAdminContext());
 
@@ -194,7 +206,7 @@ describe("calendar events", () => {
   }, 30000);
 });
 
-describe("notification reading", () => {
+describeWithDb("notification reading", () => {
   it("markAllRead clears the unread count", async () => {
     const caller = appRouter.createCaller(createAdminContext());
 
@@ -234,7 +246,7 @@ describe("notification reading", () => {
   }, 30000);
 });
 
-describe("reminder job idempotence", () => {
+describeWithDb("reminder job idempotence", () => {
   it("does not duplicate notifications on repeated runs", async () => {
     const caller = appRouter.createCaller(createAdminContext());
 

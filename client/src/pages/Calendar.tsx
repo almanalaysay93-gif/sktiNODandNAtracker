@@ -1,3 +1,4 @@
+import { nurseIdLabel } from "@shared/nursetrack";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -472,7 +473,7 @@ function CustomEventDialog({ open, onOpenChange }: { open: boolean; onOpenChange
                 <option value="">None</option>
                 {(nurses ?? []).map((n) => (
                   <option key={n.id} value={n.id}>
-                    {n.firstName} {n.lastName} ({n.employeeId})
+                    {n.firstName} {n.lastName} ({nurseIdLabel(n)})
                   </option>
                 ))}
               </select>

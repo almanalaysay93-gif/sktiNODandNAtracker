@@ -17,11 +17,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { nurseFullName, EMPLOYMENT_STATUSES, formatDate as sharedFormatDate } from "../../../shared/nursetrack";
+import { nurseFullName, nurseIdLabel, EMPLOYMENT_STATUSES, STAFF_TYPES, formatDate as sharedFormatDate } from "../../../shared/nursetrack";
 import { Archive, LayoutGrid, MapPin, Pencil, Plus, Search, Table2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { NurseFormDialog } from "./NurseFormDialog";
 import { formatDate } from "../../../shared/nursetrack";
 
@@ -34,8 +34,15 @@ export default function Nurses() {
   const [areaFilter, setAreaFilter] = useState("");
   const [empFilter, setEmpFilter] = useState("all");
   const [licFilter, setLicFilter] = useState("all");
+  const search_ = useSearch();
+  const [staffTypeFilter, setStaffTypeFilter] = useState("all");
+  useEffect(() => {
+    const type = new URLSearchParams(search_).get("type");
+    setStaffTypeFilter(type && (STAFF_TYPES as readonly string[]).includes(type) ? type : "all");
+  }, [search_]);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [createOpen, setCreateOpen] = useState(false);
+  const [createStaffType, setCreateStaffType] = useState<(typeof STAFF_TYPES)[number]>("Registered Nurse");
   // Single round-trip: server merges nurses + areas.
   const { data: initial, isLoading } = trpc.nurses.initial.useQuery();
   const nurses = initial?.nurses;
@@ -49,23 +56,25 @@ export default function Nurses() {
       rows = rows.filter(
         (n) =>
           nurseFullName(n).toLowerCase().includes(q) ||
-          n.employeeId.toLowerCase().includes(q),
+          n.employeeId.toLowerCase().includes(q) ||
+          (n.licenseNumber ?? "").toLowerCase().includes(q),
       );
     }
     if (areaFilter !== "") rows = rows.filter((n) => String(n.currentAreaId) === areaFilter);
     if (empFilter !== "all") rows = rows.filter((n) => n.employmentStatus === empFilter);
     if (licFilter !== "all") rows = rows.filter((n) => n.licenseStatus === licFilter);
+    if (staffTypeFilter !== "all") rows = rows.filter((n) => n.staffType === staffTypeFilter);
     const areaName = new Map((areas ?? []).map((a) => [a.id, a.name]));
     rows.sort((a, b) => {
       if (sortKey === "name") return nurseFullName(a).localeCompare(nurseFullName(b));
-      if (sortKey === "employeeId") return a.employeeId.localeCompare(b.employeeId);
+      if (sortKey === "employeeId") return nurseIdLabel(a).localeCompare(nurseIdLabel(b));
       if (sortKey === "area") return (areaName.get(a.currentAreaId ?? 0) ?? "").localeCompare(areaName.get(b.currentAreaId ?? 0) ?? "");
       const da = a.dateHired ? new Date(a.dateHired).getTime() : 0;
       const db_ = b.dateHired ? new Date(b.dateHired).getTime() : 0;
       return da - db_;
     });
     return rows;
-  }, [nurses, search, areaFilter, empFilter, licFilter, sortKey, areas]);
+  }, [nurses, search, areaFilter, empFilter, licFilter, staffTypeFilter, sortKey, areas]);
 
   if (isLoading) {
     return (
@@ -83,7 +92,7 @@ export default function Nurses() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Nurses</h1>
-          <p className="text-sm text-muted-foreground">{filtered.length} of {(nurses ?? []).length} active nurses</p>
+          <p className="text-sm text-muted-foreground">{filtered.length} of {(nurses ?? []).length} nurses</p>
         </div>
         <div className="flex items-center gap-2">
           <Tabs value={view} onValueChange={(v) => setView(v as View)}>
@@ -92,9 +101,13 @@ export default function Nurses() {
               <TabsTrigger value="table" aria-label="Table view"><Table2 className="h-4 w-4" /></TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button onClick={() => { setCreateStaffType("Registered Nurse"); setCreateOpen(true); }}>
             <Plus className="h-4 w-4 mr-1" />
             Add Nurse
+          </Button>
+          <Button variant="outline" onClick={() => { setCreateStaffType("Nursing Attendant"); setCreateOpen(true); }}>
+            <Plus className="h-4 w-4 mr-1" />
+            Add Nursing Attendant
           </Button>
         </div>
       </div>
@@ -110,6 +123,13 @@ export default function Nurses() {
           />
         </div>
         <AreaSelect value={areaFilter} onValueChange={setAreaFilter} placeholder="All areas" className="w-44" />
+        <Select value={staffTypeFilter} onValueChange={setStaffTypeFilter}>
+          <SelectTrigger className="w-44"><SelectValue placeholder="Staff type" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Staff type</SelectItem>
+            {STAFF_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+          </SelectContent>
+        </Select>
         <Select value={empFilter} onValueChange={setEmpFilter}>
           <SelectTrigger className="w-40"><SelectValue placeholder="Employment status" /></SelectTrigger>
           <SelectContent>
@@ -128,7 +148,7 @@ export default function Nurses() {
           <SelectTrigger className="w-32"><SelectValue placeholder="Sort" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="name">Name</SelectItem>
-            <SelectItem value="employeeId">Employee ID</SelectItem>
+            <SelectItem value="employeeId">License Number</SelectItem>
             <SelectItem value="area">Area</SelectItem>
             <SelectItem value="dateHired">Date hired</SelectItem>
           </SelectContent>
@@ -139,7 +159,7 @@ export default function Nurses() {
         <Card className="glass-card">
           <CardContent className="py-12 text-center">
             <p className="text-sm text-muted-foreground mb-3">No nurses match your filters.</p>
-            <Button variant="outline" onClick={() => { setSearch(""); setAreaFilter(""); setEmpFilter("all"); setLicFilter("all"); }}>
+            <Button variant="outline" onClick={() => { setSearch(""); setAreaFilter(""); setEmpFilter("all"); setLicFilter("all"); setStaffTypeFilter("all"); }}>
               Clear filters
             </Button>
           </CardContent>
@@ -158,7 +178,7 @@ export default function Nurses() {
                 <thead>
                   <tr className="border-b bg-muted/50 text-left">
                     <th className="px-4 py-3 font-medium">Nurse</th>
-                    <th className="px-4 py-3 font-medium">Employee ID</th>
+                    <th className="px-4 py-3 font-medium">License Number</th>
                     <th className="px-4 py-3 font-medium">Position</th>
                     <th className="px-4 py-3 font-medium">Current Area</th>
                     <th className="px-4 py-3 font-medium">Date Hired</th>
@@ -182,7 +202,7 @@ export default function Nurses() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs">{n.employeeId}</td>
+                      <td className="px-4 py-3 font-mono text-xs">{nurseIdLabel(n)}</td>
                       <td className="px-4 py-3 text-muted-foreground">{n.position ?? "—"}</td>
                       <td className="px-4 py-3 text-muted-foreground">{n.currentArea?.name ?? "—"}</td>
                       <td className="px-4 py-3 text-muted-foreground">{sharedFormatDate(n.dateHired)}</td>
@@ -197,7 +217,7 @@ export default function Nurses() {
         </Card>
       )}
 
-      <NurseFormDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <NurseFormDialog open={createOpen} onOpenChange={setCreateOpen} defaultStaffType={createStaffType} />
     </div>
   );
 }
@@ -213,6 +233,7 @@ function NurseCard({
     lastName: string;
     suffix?: string | null;
     employeeId: string;
+    licenseNumber?: string | null;
     position?: string | null;
     profilePhotoKey?: string | null;
     currentAreaId?: number | null;
@@ -235,7 +256,7 @@ function NurseCard({
             <NurseAvatar nurse={nurse} />
             <div className="min-w-0">
               <p className="font-medium truncate">{nurseFullName(nurse)}</p>
-              <p className="text-xs text-muted-foreground font-mono">{nurse.employeeId}</p>
+              <p className="text-xs text-muted-foreground font-mono">{nurseIdLabel(nurse)}</p>
               <p className="text-xs text-muted-foreground truncate">{nurse.position ?? "Nurse"}</p>
             </div>
           </button>

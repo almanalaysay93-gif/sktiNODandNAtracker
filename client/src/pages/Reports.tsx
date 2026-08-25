@@ -46,7 +46,7 @@ const COLUMNS: Partial<Record<ReportType, { key: string; label: string }[]>> = {
   ],
   areaExposure: [
     { key: "nurse", label: "Nurse" },
-    { key: "employeeId", label: "Employee ID" },
+    { key: "employeeId", label: "License Number" },
     { key: "areaName", label: "Area" },
     { key: "startDate", label: "Start" },
     { key: "endDate", label: "End" },
@@ -68,7 +68,7 @@ const COLUMNS: Partial<Record<ReportType, { key: string; label: string }[]>> = {
   ],
   transferLog: [
     { key: "nurse", label: "Nurse" },
-    { key: "employeeId", label: "Employee ID" },
+    { key: "employeeId", label: "License Number" },
     { key: "areaName", label: "Area" },
     { key: "startDate", label: "Start" },
     { key: "endDate", label: "End" },

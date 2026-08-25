@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { nurseFullName, ASSIGNMENT_TYPES, formatDate } from "../../../shared/nursetrack";
+import { nurseFullName, nurseIdLabel, ASSIGNMENT_TYPES, formatDate } from "../../../shared/nursetrack";
 import { ArrowLeft, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -45,7 +45,12 @@ export default function AreaDetail() {
     const rows = (area?.staff ?? []).filter((s) => {
       if (!search.trim()) return true;
       const n = s.nurse;
-      return nurseFullName(n).toLowerCase().includes(search.trim().toLowerCase()) || n.employeeId.toLowerCase().includes(search.trim().toLowerCase());
+      const q = search.trim().toLowerCase();
+      return (
+        nurseFullName(n).toLowerCase().includes(q) ||
+        n.employeeId.toLowerCase().includes(q) ||
+        (n.licenseNumber ?? "").toLowerCase().includes(q)
+      );
     });
     return rows;
   }, [area, search]);
@@ -107,7 +112,7 @@ export default function AreaDetail() {
                   <NurseAvatar nurse={nurse} size="sm" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{nurseFullName(nurse)}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{nurse.employeeId}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{nurseIdLabel(nurse)}</p>
                   </div>
                   <div className="text-right text-xs text-muted-foreground">
                     <p>{assignment.assignmentType}</p>

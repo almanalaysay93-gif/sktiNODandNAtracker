@@ -7,6 +7,7 @@ import { areas, nurseCredentials, nurseTrainings, areaAssignments, appSettings, 
 import { EMPLOYMENT_STATUSES, nurseFullName } from "../../shared/nursetrack";
 import { runDailyReminders } from "../reminders";
 import { todayDate } from "../../shared/nursetrack";
+import { seedExcelDatabase } from "../seedExcel";
 
 const settingKey = z.enum([
   "appTitle",
@@ -68,6 +69,18 @@ export const settingsRouter = router({
       .map((s) => Number(s.trim()))
       .filter((n) => Number.isInteger(n) && n > 0);
     const results = await runDailyReminders(todayDate(), thresholds.length ? thresholds : [365, 180]);
+    return results;
+  }),
+
+  syncExcelDatabase: protectedProcedure.mutation(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new Error("Database unavailable");
+    const results = await seedExcelDatabase();
+    await logActivity({
+      supervisorId: ctx.user.id,
+      actionType: "settings.excel.sync",
+      summary: `Synced NN LDI Database: ${results.staffCount} staff, ${results.catalogCount} training catalog items, ${results.eventCount} seminar events, ${results.attendanceCount} attendances.`,
+    });
     return results;
   }),
 

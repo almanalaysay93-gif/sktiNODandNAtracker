@@ -2,7 +2,8 @@ import { dateKey } from "../../shared/nursetrack";
 import { and, asc, desc, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { countActiveNurses, listAreas, getDb, activeNurseCondition } from "../db";
+import { getLocalReportData } from "../sqliteHelpers";
 import {
   areas,
   nurses,
@@ -20,9 +21,20 @@ export type ReportType = "licenseStatus" | "licenseDue" | "trainingCompliance" |
 export const reportsRouter = router({
   list: protectedProcedure.query(async () => {
     const db = await getDb();
-    if (!db) throw new Error("Database unavailable");
+    if (!db) {
+      const activeCount = await countActiveNurses();
+      const areaList = await listAreas();
+      return [
+        { type: "licenseStatus" as ReportType, label: "License Status Overview", description: "Active license status of all nurses by area", rowHint: activeCount },
+        { type: "licenseDue" as ReportType, label: "Licenses Due for Renewal", description: "Licenses expiring within 1 year, sorted by urgency", rowHint: null },
+        { type: "trainingCompliance" as ReportType, label: "Training Compliance by Area", description: "Required-training completion per area", rowHint: areaList.length },
+        { type: "areaExposure" as ReportType, label: "Area Exposure Report", description: "Per-nurse time spent in each area across all assignments", rowHint: activeCount },
+        { type: "trainingSummary" as ReportType, label: "Training Summary", description: "Training counts by category, provider, and status", rowHint: null },
+        { type: "transferLog" as ReportType, label: "Transfer Log", description: "Complete history of area transfers, oldest to newest", rowHint: null },
+      ];
+    }
     const today = todayDate();
-    const activeNurseCond = and(isNull(nurses.archivedAt), not(eq(nurses.employmentStatus, "Archived")));
+    const activeNurseCond = activeNurseCondition();
 
     const [activeRow] = await db.select({ count: sql<number>`count(*)` }).from(nurses).where(activeNurseCond);
     const areaCount = (await db.select().from(areas).where(eq(areas.active, true))).length;
@@ -46,7 +58,9 @@ export const reportsRouter = router({
     .input(z.object({ type: z.enum(["licenseStatus", "licenseDue", "trainingCompliance", "areaExposure", "trainingSummary", "transferLog"]) }))
     .query(async ({ input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
+      if (!db) {
+        return getLocalReportData(input.type);
+      }
       const today = todayDate();
 
       if (input.type === "licenseStatus") {
@@ -184,9 +198,10 @@ export const reportsRouter = router({
           .innerJoin(areas, eq(areas.id, areaAssignments.areaId))
           .where(isNull(nurses.archivedAt))
           .orderBy(asc(nurses.lastName), asc(nurses.firstName), asc(areaAssignments.startDate));
+        const licenseByNurse = await latestLicenseNumbersByNurse(db, rows.map((r) => r.nurseId));
         return rows.map((r) => ({
           nurse: nurseFullName(r),
-          employeeId: r.employeeId,
+          employeeId: licenseByNurse.get(r.nurseId) || r.employeeId,
           areaName: r.areaName,
           startDate: dateKey(r.startDate),
           endDate: r.endDate ? dateKey(r.endDate) : "Present",
@@ -256,9 +271,10 @@ export const reportsRouter = router({
         .innerJoin(nurses, eq(nurses.id, areaAssignments.nurseId))
         .innerJoin(areas, eq(areas.id, areaAssignments.areaId))
         .orderBy(asc(areaAssignments.startDate), asc(nurses.lastName));
+      const licenseByNurse = await latestLicenseNumbersByNurse(db, rows.map((r) => r.nurseId));
       return rows.map((r) => ({
         nurse: nurseFullName(r),
-        employeeId: r.employeeId,
+        employeeId: licenseByNurse.get(r.nurseId) || r.employeeId,
         areaName: r.areaName,
         startDate: dateKey(r.startDate),
         endDate: r.endDate ? dateKey(r.endDate) : "Present",
@@ -267,6 +283,26 @@ export const reportsRouter = router({
       }));
     }),
 });
+
+/** Latest-on-file license number per nurseId (by expiryDate), for the given nurse ids. */
+async function latestLicenseNumbersByNurse(db: NonNullable<Awaited<ReturnType<typeof getDb>>>, nurseIds: number[]): Promise<Map<number, string>> {
+  const uniqueIds = Array.from(new Set(nurseIds));
+  if (uniqueIds.length === 0) return new Map();
+  const rows = await db
+    .select({ nurseId: nurseCredentials.nurseId, licenseNumber: nurseCredentials.licenseNumber, expiryDate: nurseCredentials.expiryDate })
+    .from(nurseCredentials)
+    .where(sql`${nurseCredentials.nurseId} IN (${sql.join(uniqueIds.map((id) => sql`${id}`), sql`, `)})`);
+  const latestByNurse = new Map<number, { licenseNumber: string | null; expiryDate: unknown }>();
+  for (const r of rows) {
+    const existing = latestByNurse.get(r.nurseId);
+    if (!existing || String(r.expiryDate) > String(existing.expiryDate)) latestByNurse.set(r.nurseId, r);
+  }
+  const result = new Map<number, string>();
+  for (const [nurseId, r] of Array.from(latestByNurse)) {
+    if (r.licenseNumber) result.set(nurseId, r.licenseNumber);
+  }
+  return result;
+}
 
 function daysBetween(start: string | Date, end: string | Date, today = todayDate()): number {
   const s = new Date(`${String(start)}T00:00:00`).getTime();

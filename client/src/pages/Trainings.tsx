@@ -22,7 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { formatDate, nurseFullName } from "../../../shared/nursetrack";
+import { formatDate, nurseFullName, TRAINING_KINDS } from "../../../shared/nursetrack";
 import { BookOpen, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -376,12 +376,13 @@ function CatalogDialog({
   onOpenChange: (v: boolean) => void;
   utils: ReturnType<typeof trpc.useUtils>;
   itemId?: number | null;
-  catalog?: { id: number; name: string; category?: string | null; renewalRequired: boolean; defaultValidityMonths?: number | null }[];
+  catalog?: { id: number; name: string; category?: string | null; kind: (typeof TRAINING_KINDS)[number]; renewalRequired: boolean; defaultValidityMonths?: number | null }[];
 }) {
   const isEdit = Boolean(itemId);
   const existing = catalog?.find((c) => c.id === itemId);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
+  const [kind, setKind] = useState<(typeof TRAINING_KINDS)[number]>("Training");
   const [renewalRequired, setRenewalRequired] = useState(false);
   const [months, setMonths] = useState("");
   const [loaded, setLoaded] = useState(false);
@@ -389,6 +390,7 @@ function CatalogDialog({
   if (open && isEdit && existing && !loaded) {
     setName(existing.name);
     setCategory(existing.category ?? "");
+    setKind(existing.kind);
     setRenewalRequired(existing.renewalRequired);
     setMonths(existing.defaultValidityMonths != null ? String(existing.defaultValidityMonths) : "");
     setLoaded(true);
@@ -400,6 +402,7 @@ function CatalogDialog({
   const reset = () => {
     setName("");
     setCategory("");
+    setKind("Training");
     setRenewalRequired(false);
     setMonths("");
     setLoaded(false);
@@ -440,6 +443,13 @@ function CatalogDialog({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
+              <Label className="mb-1 block">Activity Type</Label>
+              <Select value={kind} onValueChange={(value) => setKind(value as (typeof TRAINING_KINDS)[number])}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{TRAINING_KINDS.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label className="mb-1 block">Category</Label>
               <Input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g., Clinical" />
             </div>
@@ -468,6 +478,7 @@ function CatalogDialog({
                     id: itemId,
                     name: name.trim(),
                     category: category.trim() || null,
+                    kind,
                     renewalRequired,
                     defaultValidityMonths: months ? Number(months) : null,
                   });
@@ -475,6 +486,7 @@ function CatalogDialog({
                   create.mutate({
                     name: name.trim(),
                     category: category.trim() || undefined,
+                    kind,
                     renewalRequired,
                     defaultValidityMonths: months ? Number(months) : undefined,
                   });

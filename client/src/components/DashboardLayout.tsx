@@ -1,3 +1,4 @@
+import { nurseIdLabel } from "@shared/nursetrack";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -35,9 +36,11 @@ import {
   MapPin,
   PanelLeft,
   FileBarChart,
+  GraduationCap,
   Search,
   Settings,
   Users,
+  UserCog,
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -51,7 +54,9 @@ export const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: MapPin, label: "Areas of Assignment", path: "/areas" },
   { icon: Users, label: "Nurses", path: "/nurses" },
+  { icon: UserCog, label: "Nursing Attendants", path: "/nurses?type=Nursing%20Attendant" },
   { icon: ClipboardList, label: "Trainings", path: "/trainings" },
+  { icon: GraduationCap, label: "Seminars & LDI", path: "/seminars" },
   { icon: CreditCard, label: "Licenses", path: "/licenses" },
   { icon: CalendarDays, label: "Calendar", path: "/calendar" },
   { icon: FileBarChart, label: "Reports", path: "/reports" },
@@ -409,7 +414,7 @@ function NurseSearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange
             >
               <Users className="h-4 w-4 mr-2 text-muted-foreground" />
               <span>{n.firstName} {n.lastName}</span>
-              <span className="text-xs text-muted-foreground ml-2">{n.employeeId}</span>
+              <span className="text-xs text-muted-foreground ml-2">{nurseIdLabel(n)}</span>
             </CommandItem>
           ))}
         </CommandGroup>

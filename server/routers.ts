@@ -11,6 +11,7 @@ import { dashboardRouter } from "./routers/dashboard";
 import { areasRouter } from "./routers/areas";
 import { reportsRouter } from "./routers/reports";
 import { settingsRouter } from "./routers/settings";
+import { seminarsRouter } from "./routers/seminars";
 
 export const appRouter = router({
   system: systemRouter,
@@ -33,6 +34,7 @@ export const appRouter = router({
   areas: areasRouter,
   reports: reportsRouter,
   settings: settingsRouter,
+  seminars: seminarsRouter,
 });
 
 export type AppRouter = typeof appRouter;

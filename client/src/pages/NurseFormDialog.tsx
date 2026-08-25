@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { EMPLOYMENT_STATUSES, nurseFullName } from "../../../shared/nursetrack";
+import { EMPLOYMENT_STATUSES, STAFF_TYPES, nurseFullName } from "../../../shared/nursetrack";
 import { Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -25,6 +25,7 @@ interface NurseEditData {
   lastName: string;
   suffix?: string | null;
   position?: string | null;
+  staffType?: string | null;
   employmentStatus?: string | null;
   dateHired: Date | string;
   contactNumber?: string | null;
@@ -36,10 +37,13 @@ export function NurseFormDialog({
   open,
   onOpenChange,
   nurse,
+  defaultStaffType,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   nurse?: NurseEditData;
+  /** Staff type to pre-select when adding a new nurse (ignored when editing). */
+  defaultStaffType?: (typeof STAFF_TYPES)[number];
 }) {
   const utils = trpc.useUtils();
   const [employeeId, setEmployeeId] = useState("");
@@ -48,6 +52,7 @@ export function NurseFormDialog({
   const [lastName, setLastName] = useState("");
   const [suffix, setSuffix] = useState("");
   const [position, setPosition] = useState("");
+  const [staffType, setStaffType] = useState("Registered Nurse");
   const [employmentStatus, setEmploymentStatus] = useState("Active");
   const [dateHired, setDateHired] = useState("");
   const [contactNumber, setContactNumber] = useState("");
@@ -64,6 +69,7 @@ export function NurseFormDialog({
         setLastName(nurse.lastName);
         setSuffix(nurse.suffix ?? "");
         setPosition(nurse.position ?? "");
+        setStaffType(nurse.staffType ?? "Registered Nurse");
         setEmploymentStatus(nurse.employmentStatus ?? "Active");
         setDateHired(nurse.dateHired instanceof Date ? nurse.dateHired.toISOString().slice(0, 10) : String(nurse.dateHired).slice(0, 10));
         setContactNumber(nurse.contactNumber ?? "");
@@ -76,6 +82,7 @@ export function NurseFormDialog({
         setLastName("");
         setSuffix("");
         setPosition("");
+        setStaffType(defaultStaffType ?? "Registered Nurse");
         setEmploymentStatus("Active");
         setDateHired("");
         setContactNumber("");
@@ -84,7 +91,7 @@ export function NurseFormDialog({
         setPhotoPreview(null);
       }
     }
-  }, [open, nurse]);
+  }, [open, nurse, defaultStaffType]);
 
   const create = trpc.nurses.create.useMutation({
     onSuccess: () => {
@@ -121,6 +128,7 @@ export function NurseFormDialog({
       lastName: lastName.trim(),
       suffix: suffix.trim() || undefined,
       position: position.trim() || undefined,
+      staffType: staffType as (typeof STAFF_TYPES)[number],
       employmentStatus,
       dateHired: dateHired ? new Date(dateHired) : undefined,
       contactNumber: contactNumber.trim() || undefined,
@@ -193,6 +201,15 @@ export function NurseFormDialog({
           <div>
             <Label className="mb-1 block">Position</Label>
             <Input value={position} onChange={(e) => setPosition(e.target.value)} placeholder="e.g., Staff Nurse" />
+          </div>
+          <div>
+            <Label className="mb-1 block">Staff Type</Label>
+            <Select value={staffType} onValueChange={setStaffType}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {STAFF_TYPES.map((type) => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label className="mb-1 block">Contact Number</Label>

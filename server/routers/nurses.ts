@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
-import { ASSIGNMENT_TYPES, EMPLOYMENT_STATUSES, storageKey, validateMime, nurseFullName, dateKey } from "../../shared/nursetrack";
+import { ASSIGNMENT_TYPES, EMPLOYMENT_STATUSES, STAFF_TYPES, storageKey, validateMime, nurseFullName, dateKey } from "../../shared/nursetrack";
 import { sanitizeFilename } from "../../shared/nursetrack";
 import { storagePut } from "../storage";
 
@@ -14,11 +14,15 @@ export const nursesRouter = router({
   initial: protectedProcedure.query(async () => {
     const [rows, areaRows] = await Promise.all([db.listNurses(), db.listAreas(false)]);
     const areaById = new Map(areaRows.map((a) => [a.id, a]));
-    const nurses = await Promise.all(rows.map(async (n) => ({
-      ...n,
-      currentArea: n.currentAreaId ? areaById.get(n.currentAreaId) ?? null : null,
-      licenseStatus: await db.getNurseLicenseStatus(n.id),
-    })));
+    const nurses = await Promise.all(rows.map(async (n) => {
+      const { status, licenseNumber } = await db.getNurseLicenseInfo(n.id);
+      return {
+        ...n,
+        currentArea: n.currentAreaId ? areaById.get(n.currentAreaId) ?? null : null,
+        licenseStatus: status,
+        licenseNumber,
+      };
+    }));
     return { nurses, areas: areaRows };
   }),
 
@@ -28,11 +32,15 @@ export const nursesRouter = router({
       const rows = await db.listNurses({ archived: input?.archived, areaId: input?.areaId });
       const areaRows = await db.listAreas(false);
       const areaById = new Map(areaRows.map((a) => [a.id, a]));
-      return Promise.all(rows.map(async (n) => ({
-        ...n,
-        currentArea: n.currentAreaId ? areaById.get(n.currentAreaId) ?? null : null,
-        licenseStatus: await db.getNurseLicenseStatus(n.id),
-      })));
+      return Promise.all(rows.map(async (n) => {
+        const { status, licenseNumber } = await db.getNurseLicenseInfo(n.id);
+        return {
+          ...n,
+          currentArea: n.currentAreaId ? areaById.get(n.currentAreaId) ?? null : null,
+          licenseStatus: status,
+          licenseNumber,
+        };
+      }));
     }),
 
   search: protectedProcedure
@@ -41,11 +49,15 @@ export const nursesRouter = router({
       const rows = await db.searchNurses(input.query);
       const areaRows = await db.listAreas(false);
       const areaById = new Map(areaRows.map((a) => [a.id, a]));
-      return Promise.all(rows.map(async (n) => ({
-        ...n,
-        currentArea: n.currentAreaId ? areaById.get(n.currentAreaId) ?? null : null,
-        licenseStatus: await db.getNurseLicenseStatus(n.id),
-      })));
+      return Promise.all(rows.map(async (n) => {
+        const { status, licenseNumber } = await db.getNurseLicenseInfo(n.id);
+        return {
+          ...n,
+          currentArea: n.currentAreaId ? areaById.get(n.currentAreaId) ?? null : null,
+          licenseStatus: status,
+          licenseNumber,
+        };
+      }));
     }),
 
   get: protectedProcedure
@@ -55,7 +67,8 @@ export const nursesRouter = router({
       if (!nurse) throw new TRPCError({ code: "NOT_FOUND", message: "Nurse not found" });
       const areaRows = await db.listAreas(false);
       const areaById = new Map(areaRows.map((a) => [a.id, a]));
-      return { ...nurse, currentArea: nurse.currentAreaId ? areaById.get(nurse.currentAreaId) ?? null : null, licenseStatus: await db.getNurseLicenseStatus(nurse.id) };
+      const { status, licenseNumber } = await db.getNurseLicenseInfo(nurse.id);
+      return { ...nurse, currentArea: nurse.currentAreaId ? areaById.get(nurse.currentAreaId) ?? null : null, licenseStatus: status, licenseNumber };
     }),
 
   create: protectedProcedure
@@ -67,6 +80,7 @@ export const nursesRouter = router({
         lastName: z.string().min(1).max(128),
         suffix: z.string().max(32).optional(),
         position: z.string().max(128).optional(),
+        staffType: z.enum(STAFF_TYPES).optional(),
         dateHired: nullableDateInput,
         employmentStatus: z.enum([...EMPLOYMENT_STATUSES] as [string, ...string[]]),
         currentAreaId: z.number().optional(),
@@ -107,6 +121,7 @@ export const nursesRouter = router({
         lastName: z.string().min(1).max(128).optional(),
         suffix: z.string().max(32).optional().nullable(),
         position: z.string().max(128).optional().nullable(),
+        staffType: z.enum(STAFF_TYPES).optional(),
         dateHired: nullableDateInput,
         employmentStatus: z.enum([...EMPLOYMENT_STATUSES] as [string, ...string[]]).optional(),
         currentAreaId: z.number().optional(),

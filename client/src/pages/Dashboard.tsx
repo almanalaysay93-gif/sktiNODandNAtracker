@@ -236,7 +236,7 @@ export default function Dashboard() {
                         {a.samplePhotos.length === 0 && (
                           <p className="text-xs text-muted-foreground">No nurses assigned</p>
                         )}
-                        {a.samplePhotos.map((p) => (
+                        {a.samplePhotos.map((p: { id: number; profilePhotoKey: string }) => (
                           <img
                             key={p.id}
                             src={`/manus-storage/${p.profilePhotoKey}`}

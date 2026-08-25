@@ -2,10 +2,10 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNull, not, sql } from "drizzle-orm";
 import { protectedProcedure, router } from "../_core/trpc";
-import { getDb, getAssignmentsForArea } from "../db";
+import { getDb, getAssignmentsForArea, listAreas, listNurses, listCredentials, getAreaById, getNurseLicenseInfo, activeNurseCondition } from "../db";
 import { areas } from "../../drizzle/schema";
 import { areaAssignments, nurses, nurseCredentials, nurseTrainings } from "../../drizzle/schema";
-import { daysBetween, todayDate, deriveLicenseStatus, daysUntilExpiry, dateKey } from "../../shared/nursetrack";
+import { daysBetween, todayDate, deriveLicenseStatus, daysUntilExpiry, dateKey, INACTIVE_EMPLOYMENT_STATUSES } from "../../shared/nursetrack";
 
 export const areasRouter = router({
   list: protectedProcedure.query(() => listAreasWithCounts()),
@@ -18,7 +18,12 @@ export const areasRouter = router({
       const rows = await db.select().from(areas).where(eq(areas.id, input.id)).limit(1);
       const area = rows[0];
       if (!area) throw new TRPCError({ code: "NOT_FOUND", message: "Area not found" });
-      const staff = await getAssignmentsForArea(input.id);
+      const staff = await Promise.all(
+        (await getAssignmentsForArea(input.id)).map(async (s) => ({
+          ...s,
+          nurse: { ...s.nurse, licenseNumber: (await getNurseLicenseInfo(s.nurse.id)).licenseNumber },
+        })),
+      );
       return { ...area, staff };
     }),
 
@@ -83,15 +88,30 @@ export const areasRouter = router({
   areaDashboard: protectedProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
       const today = todayDate();
-      const rows = await db.select().from(areas).where(eq(areas.id, input.id)).limit(1);
-      const area = rows[0];
+      const area = await getAreaById(input.id);
       if (!area) throw new TRPCError({ code: "NOT_FOUND", message: "Area not found" });
 
       const staff = await getAssignmentsForArea(input.id);
       const nurseIds = staff.map((s: { nurse: { id: number } }) => s.nurse.id);
+
+      const db = await getDb();
+      if (!db) {
+        const durations = staff
+          .filter((s) => s.assignment.startDate)
+          .map((s: { assignment: { startDate: Date | string } }) => daysBetween(dateKey(s.assignment.startDate), today));
+
+        return {
+          area,
+          staffCount: staff.length,
+          capacity: null,
+          licenseAttention: 0,
+          licensesExpired: 0,
+          trainingAttention: 0,
+          upcomingOutboundTransfers: [],
+          avgDurationDays: durations.length ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0,
+        };
+      }
 
       // Area-level license attention
       let licenseAttention = 0;
@@ -158,13 +178,37 @@ export const areasRouter = router({
 
 async function listAreasWithCounts() {
   const db = await getDb();
-  if (!db) return [];
+  if (!db) {
+    const today = todayDate();
+    const areaRows = await listAreas();
+    const allNurses = await listNurses({ archived: false });
+    const countByArea = new Map<number, number>();
+    for (const n of allNurses) {
+      if (n.currentAreaId && !(INACTIVE_EMPLOYMENT_STATUSES as readonly string[]).includes(n.employmentStatus)) {
+        countByArea.set(n.currentAreaId, (countByArea.get(n.currentAreaId) ?? 0) + 1);
+      }
+    }
+    const allCreds = await listCredentials();
+    const nurseById = new Map(allNurses.map((n) => [n.id, n]));
+    const attentionByArea = new Map<number, number>();
+    for (const c of allCreds) {
+      const nurse = nurseById.get(c.nurseId);
+      if (nurse?.currentAreaId && deriveLicenseStatus(dateKey(c.expiryDate), today) !== "Valid") {
+        attentionByArea.set(nurse.currentAreaId, (attentionByArea.get(nurse.currentAreaId) ?? 0) + 1);
+      }
+    }
+    return areaRows.map((a) => ({
+      ...a,
+      nurseCount: countByArea.get(a.id) ?? 0,
+      licenseAttention: attentionByArea.get(a.id) ?? 0,
+    }));
+  }
   const today = todayDate();
   const areaRows = await db.select().from(areas).orderBy(areas.sortOrder);
   const nurseCounts = await db
     .select({ areaId: nurses.currentAreaId, count: sql<number>`count(*)` })
     .from(nurses)
-    .where(and(isNull(nurses.archivedAt), not(eq(nurses.employmentStatus, "Archived"))))
+    .where(activeNurseCondition())
     .groupBy(nurses.currentAreaId);
   const countByArea = new Map(nurseCounts.map((r) => [r.areaId ?? 0, Number(r.count)]));
   const creds = await db

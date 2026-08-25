@@ -31,6 +31,7 @@ import {
   formatDate,
   durationBetween,
   nurseFullName,
+  nurseIdLabel,
   EMPLOYMENT_STATUSES,
   ASSIGNMENT_TYPES,
 } from "../../../shared/nursetrack";
@@ -145,7 +146,7 @@ export default function NurseProfile() {
           <div className="min-w-0">
             <h1 className="text-2xl font-semibold tracking-tight truncate">{nurseFullName(nurse)}</h1>
             <p className="text-sm text-muted-foreground">
-              <span className="font-mono">{nurse.employeeId}</span>
+              <span className="font-mono">{nurseIdLabel(nurse)}</span>
               {nurse.position ? ` · ${nurse.position}` : ""}
               {nurse.dateHired ? ` · Hired ${formatDate(nurse.dateHired)}` : ""}
             </p>
@@ -316,6 +317,8 @@ export default function NurseProfile() {
                         <th className="px-3 py-2.5 font-medium">Provider</th>
                         <th className="px-3 py-2.5 font-medium">Scheduled</th>
                         <th className="px-3 py-2.5 font-medium">Completed</th>
+                        <th className="px-3 py-2.5 font-medium">Role</th>
+                        <th className="px-3 py-2.5 font-medium">Hours / CPD</th>
                         <th className="px-3 py-2.5 font-medium">Expires</th>
                         <th className="px-3 py-2.5 font-medium">Status</th>
                       </tr>
@@ -323,10 +326,12 @@ export default function NurseProfile() {
                     <tbody className="divide-y">
                       {(trainings ?? []).map((t) => (
                         <tr key={t.id}>
-                          <td className="px-3 py-2.5">{t.trainingName}</td>
+                          <td className="px-3 py-2.5">{t.eventId ? <button className="font-medium text-primary hover:underline" onClick={() => navigate(`/seminars/${t.eventId}`)}>{t.trainingName}</button> : t.trainingName}</td>
                           <td className="px-3 py-2.5 text-muted-foreground">{t.provider ?? "—"}</td>
                           <td className="px-3 py-2.5 text-muted-foreground">{formatDate(t.scheduledDate)}</td>
                           <td className="px-3 py-2.5 text-muted-foreground">{formatDate(t.completionDate)}</td>
+                          <td className="px-3 py-2.5 text-muted-foreground">{t.participationRole}</td>
+                          <td className="px-3 py-2.5 text-muted-foreground">{t.trainingHours ?? "-"} / {t.cpdUnits ?? "-"}</td>
                           <td className="px-3 py-2.5 text-muted-foreground">{formatDate(t.expiryDate)}</td>
                           <td className="px-3 py-2.5"><TrainingStatusBadge status={t.status} /></td>
                         </tr>

@@ -16,6 +16,8 @@ import Nurses from "./pages/Nurses";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
 import Trainings from "./pages/Trainings";
+import Seminars from "./pages/Seminars";
+import SeminarDetail from "./pages/SeminarDetail";
 
 function Protected({ children }: { children: React.ReactNode }) {
   return <DashboardLayout>{children}</DashboardLayout>;
@@ -60,6 +62,16 @@ function Router() {
       <Route path="/trainings">
         <Protected>
           <Trainings />
+        </Protected>
+      </Route>
+      <Route path="/seminars/:id">
+        <Protected>
+          <SeminarDetail />
+        </Protected>
+      </Route>
+      <Route path="/seminars">
+        <Protected>
+          <Seminars />
         </Protected>
       </Route>
       <Route path="/licenses">

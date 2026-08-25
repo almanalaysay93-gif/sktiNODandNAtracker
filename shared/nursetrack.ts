@@ -6,7 +6,7 @@ export function dateKey(value: string | Date | null | undefined): string {
     return value.toISOString().slice(0, 10);
   }
   // Already a YYYY-MM-DD-ish string: take the first 10 chars only if it starts with a digit year
-  return /^d{4}-d{2}-d{2}/.test(value) ? value.slice(0, 10) : "";
+  return /^\d{4}-\d{2}-\d{2}/.test(value) ? value.slice(0, 10) : "";
 }
 
 /**
@@ -169,6 +169,11 @@ export function nurseFullName(n: { firstName: string; middleName?: string | null
   return parts.join(" ");
 }
 
+/** Label shown as a nurse's ID: their PRC/credential license number, falling back to employeeId when no credential is on file. */
+export function nurseIdLabel(n: { employeeId: string; licenseNumber?: string | null }): string {
+  return n.licenseNumber || n.employeeId;
+}
+
 export const ASSIGNMENT_TYPES = [
   "Permanent Transfer",
   "Temporary Assignment",
@@ -183,10 +188,22 @@ export const EMPLOYMENT_STATUSES = [
   "On Leave",
   "Temporary Assignment",
   "Transferred",
+  "Rotated",
   "Resigned",
   "Retired",
   "Archived",
 ] as const;
+
+/** Statuses that mean a nurse is no longer part of the active roster (separate from soft-delete/archivedAt). */
+export const INACTIVE_EMPLOYMENT_STATUSES = ["Archived", "Resigned", "Retired"] as const;
+
+export const STAFF_TYPES = ["Registered Nurse", "Nursing Attendant"] as const;
+
+export const TRAINING_KINDS = ["Training", "Seminar", "LDI"] as const;
+
+export const PARTICIPATION_ROLES = ["Participant", "Speaker", "Facilitator", "Preceptor"] as const;
+
+export const TARGET_STAFF_TYPES = ["All", ...STAFF_TYPES] as const;
 
 export const RENEWAL_STATUSES = ["Not Started", "Renewal In Progress", "Submitted", "Renewed"] as const;
 

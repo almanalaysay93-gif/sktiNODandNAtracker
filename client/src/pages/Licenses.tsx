@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/lib/trpc";
-import { formatDate, nurseFullName } from "../../../shared/nursetrack";
+import { formatDate, nurseFullName, nurseIdLabel } from "../../../shared/nursetrack";
 import { CalendarCheck, Pencil, Plus, RefreshCw, Search } from "lucide-react";
 import { safeDateKey } from "@/lib/utils";
 import { useMemo, useState } from "react";
@@ -139,7 +139,7 @@ export default function Licenses() {
                         >
                           {c.nurse ? nurseFullName(c.nurse) : `Nurse #${c.nurseId}`}
                         </a>
-                        <p className="text-xs text-muted-foreground">{c.nurse?.employeeId}</p>
+                        <p className="text-xs text-muted-foreground">{c.licenseNumber || c.nurse?.employeeId}</p>
                       </td>
                       <td className="px-3 py-2.5">{c.typeName}</td>
                       <td className="px-3 py-2.5 font-mono text-xs">{c.licenseNumber ?? "—"}</td>
@@ -295,7 +295,7 @@ function CredentialDialog({
                 <option value={0} disabled>Choose a nurse…</option>
                 {(nurses ?? []).map((n) => (
                   <option key={n.id} value={n.id}>
-                    {n.firstName} {n.lastName} ({n.employeeId})
+                    {n.firstName} {n.lastName} ({nurseIdLabel(n)})
                   </option>
                 ))}
               </select>

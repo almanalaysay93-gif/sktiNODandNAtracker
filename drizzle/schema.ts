@@ -3,6 +3,7 @@ import {
   date,
   datetime,
   int,
+  index,
   json,
   mysqlEnum,
   mysqlTable,
@@ -56,12 +57,16 @@ export const nurses = mysqlTable(
     lastName: varchar("lastName", { length: 128 }).notNull(),
     suffix: varchar("suffix", { length: 32 }),
     position: varchar("position", { length: 128 }),
+    staffType: mysqlEnum("staffType", ["Registered Nurse", "Nursing Attendant"])
+      .default("Registered Nurse")
+      .notNull(),
     dateHired: date("dateHired"),
     employmentStatus: mysqlEnum("employmentStatus", [
       "Active",
       "On Leave",
       "Temporary Assignment",
       "Transferred",
+      "Rotated",
       "Resigned",
       "Retired",
       "Archived",
@@ -76,8 +81,8 @@ export const nurses = mysqlTable(
   },
   (t) => ({
     idxEmployee: uniqueIndex("idx_nurses_employee").on(t.employeeId),
-    idxLastName: uniqueIndex("idx_nurses_lastname").on(t.lastName),
-    idxArea: uniqueIndex("idx_nurses_area").on(t.currentAreaId),
+    idxLastName: index("idx_nurses_lastname").on(t.lastName),
+    idxArea: index("idx_nurses_area").on(t.currentAreaId),
   }),
 );
 export type Nurse = typeof nurses.$inferSelect;
@@ -99,8 +104,8 @@ export const areaAssignments = mysqlTable(
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
   (t) => ({
-    idxNurse: uniqueIndex("idx_asgn_nurse").on(t.nurseId),
-    idxArea: uniqueIndex("idx_asgn_area").on(t.areaId),
+    idxNurse: index("idx_asgn_nurse").on(t.nurseId),
+    idxArea: index("idx_asgn_area").on(t.areaId),
   }),
 );
 export type AreaAssignment = typeof areaAssignments.$inferSelect;
@@ -147,8 +152,8 @@ export const nurseCredentials = mysqlTable(
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
   (t) => ({
-    idxNurse: uniqueIndex("idx_cred_nurse").on(t.nurseId),
-    idxExpiry: uniqueIndex("idx_cred_expiry").on(t.expiryDate),
+    idxNurse: index("idx_cred_nurse").on(t.nurseId),
+    idxExpiry: index("idx_cred_expiry").on(t.expiryDate),
   }),
 );
 export type NurseCredential = typeof nurseCredentials.$inferSelect;
@@ -177,6 +182,7 @@ export const trainingCatalog = mysqlTable("trainingCatalog", {
   id: int("id").autoincrement().primaryKey(),
   name: varchar("name", { length: 128 }).notNull().unique(),
   category: varchar("category", { length: 64 }),
+  kind: mysqlEnum("kind", ["Training", "Seminar", "LDI"]).default("Training").notNull(),
   renewalRequired: boolean("renewalRequired").default(false).notNull(),
   defaultValidityMonths: int("defaultValidityMonths"),
   active: boolean("active").default(true).notNull(),
@@ -184,6 +190,31 @@ export const trainingCatalog = mysqlTable("trainingCatalog", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type TrainingCatalog = typeof trainingCatalog.$inferSelect;
+
+/** Scheduled seminar/LDI occurrence. A catalog item may run on multiple dates. */
+export const trainingEvents = mysqlTable(
+  "trainingEvents",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    trainingId: int("trainingId").notNull(),
+    provider: varchar("provider", { length: 128 }),
+    venue: varchar("venue", { length: 256 }),
+    startDate: date("startDate").notNull(),
+    endDate: date("endDate").notNull(),
+    startTime: varchar("startTime", { length: 8 }),
+    endTime: varchar("endTime", { length: 8 }),
+    targetStaffType: mysqlEnum("targetStaffType", ["All", "Registered Nurse", "Nursing Attendant"])
+      .default("All")
+      .notNull(),
+    remarks: text("remarks"),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  },
+  (t) => ({
+    idxTrainingDate: index("idx_training_event_date").on(t.trainingId, t.startDate),
+  }),
+);
+export type TrainingEvent = typeof trainingEvents.$inferSelect;
 
 /** Which trainings are required for which areas. */
 export const areaTrainingRequirements = mysqlTable(
@@ -207,6 +238,10 @@ export const nurseTrainings = mysqlTable(
     id: int("id").autoincrement().primaryKey(),
     nurseId: int("nurseId").notNull(),
     trainingId: int("trainingId").notNull(),
+    eventId: int("eventId"),
+    participationRole: mysqlEnum("participationRole", ["Participant", "Speaker", "Facilitator", "Preceptor"])
+      .default("Participant")
+      .notNull(),
     provider: varchar("provider", { length: 128 }),
     status: mysqlEnum("status", ["Scheduled", "Completed", "Expired", "Cancelled"]).default("Scheduled").notNull(),
     scheduledDate: date("scheduledDate"),
@@ -221,8 +256,11 @@ export const nurseTrainings = mysqlTable(
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
   (t) => ({
-    idxNurse: uniqueIndex("idx_nt_nurse").on(t.nurseId),
-    idxExpiry: uniqueIndex("idx_nt_expiry").on(t.expiryDate),
+    idxNurse: index("idx_nt_nurse").on(t.nurseId),
+    idxTraining: index("idx_nt_training").on(t.trainingId),
+    idxEvent: index("idx_nt_event").on(t.eventId),
+    uniqEventNurse: uniqueIndex("uniq_nt_event_nurse").on(t.eventId, t.nurseId),
+    idxExpiry: index("idx_nt_expiry").on(t.expiryDate),
   }),
 );
 export type NurseTraining = typeof nurseTrainings.$inferSelect;
@@ -244,7 +282,7 @@ export const customCalendarEvents = mysqlTable(
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   },
   (t) => ({
-    idxDate: uniqueIndex("idx_cce_date").on(t.eventDate),
+    idxDate: index("idx_cce_date").on(t.eventDate),
   }),
 );
 export type CustomCalendarEvent = typeof customCalendarEvents.$inferSelect;
@@ -266,7 +304,7 @@ export const notifications = mysqlTable(
     dayKey: date("dayKey"),
   },
   (t) => ({
-    idxRead: uniqueIndex("idx_notif_read").on(t.readAt),
+    idxRead: index("idx_notif_read").on(t.readAt),
     uniqDay: uniqueIndex("uniq_notif_day").on(t.type, t.nurseId, t.relatedEntityType, t.relatedEntityId, t.dayKey),
   }),
 );
@@ -287,7 +325,7 @@ export const activityLog = mysqlTable(
     createdAt: timestamp("createdAt").defaultNow().notNull(),
   },
   (t) => ({
-    idxNurse: uniqueIndex("idx_activity_nurse").on(t.nurseId),
+    idxNurse: index("idx_activity_nurse").on(t.nurseId),
   }),
 );
 export type ActivityLog = typeof activityLog.$inferSelect;

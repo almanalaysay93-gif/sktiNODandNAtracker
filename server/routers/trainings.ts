@@ -4,10 +4,12 @@ import { protectedProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import {
   nurseFullName,
+  PARTICIPATION_ROLES,
   sanitizeFilename,
   storageKey,
   trainingCompliance,
   validateMime,
+  TRAINING_KINDS,
 } from "../../shared/nursetrack";
 import { storagePut } from "../storage";
 
@@ -39,6 +41,7 @@ export const trainingsRouter = router({
       z.object({
         name: z.string().min(1).max(128),
         category: z.string().max(64).optional(),
+        kind: z.enum(TRAINING_KINDS).optional(),
         renewalRequired: z.boolean().optional(),
         defaultValidityMonths: z.number().int().positive().max(600).optional(),
       }),
@@ -54,6 +57,7 @@ export const trainingsRouter = router({
         id: z.number(),
         name: z.string().min(1).max(128).optional(),
         category: z.string().max(64).optional().nullable(),
+        kind: z.enum(TRAINING_KINDS).optional(),
         renewalRequired: z.boolean().optional(),
         defaultValidityMonths: z.number().int().positive().max(600).optional().nullable(),
         active: z.boolean().optional(),
@@ -101,6 +105,8 @@ export const trainingsRouter = router({
       z.object({
         nurseId: z.number(),
         trainingId: z.number(),
+        eventId: z.number().optional(),
+        participationRole: z.enum(PARTICIPATION_ROLES).optional(),
         provider: z.string().max(128).optional(),
         status: z.enum(["Scheduled", "Completed", "Expired", "Cancelled"]).optional(),
         scheduledDate: nullableDateInput,
@@ -136,6 +142,7 @@ export const trainingsRouter = router({
       z.object({
         id: z.number(),
         status: z.enum(["Scheduled", "Completed", "Expired", "Cancelled"]).optional(),
+        participationRole: z.enum(PARTICIPATION_ROLES).optional(),
         scheduledDate: nullableDateInput,
         completionDate: nullableDateInput,
         expiryDate: nullableDateInput,
