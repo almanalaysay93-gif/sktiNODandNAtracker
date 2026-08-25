@@ -64,9 +64,9 @@ export const NAV_ITEMS = [
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
-const DEFAULT_WIDTH = 250;
-const MIN_WIDTH = 200;
-const MAX_WIDTH = 480;
+const DEFAULT_WIDTH = 290;
+const MIN_WIDTH = 240;
+const MAX_WIDTH = 520;
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [sidebarWidth, setSidebarWidth] = useState(() => {
@@ -88,22 +88,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="flex items-center justify-center min-h-screen p-4">
         <div className="auth-welcome-panel flex flex-col items-center gap-8 p-8 max-w-md w-full">
           <div className="flex flex-col items-center gap-6">
-            <div className="h-20 w-20 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+            <div className="h-24 w-24 rounded-2xl bg-white flex items-center justify-center shadow-sm">
               <img
                 src="/branding/spmc-nephro-cluster.jpg"
                 alt="SPMC Department of Nephrology Nursing"
-                className="h-16 w-16 object-contain rounded-full"
+                className="h-20 w-20 object-contain rounded-full"
               />
             </div>
-            <h1 className="text-2xl font-semibold tracking-tight text-center">SKTI NurseTrack</h1>
-            <p className="text-sm text-muted-foreground text-center max-w-sm">
+            <h1 className="text-3xl font-bold tracking-tight text-center">SKTI NurseTrack</h1>
+            <p className="text-base text-muted-foreground text-center max-w-sm">
               Sign in as the supervisor to manage nurse training, licensing, and area assignments.
             </p>
           </div>
           <Button
             onClick={() => startLogin()}
             size="lg"
-            className="w-full shadow-lg hover:shadow-xl transition-all"
+            className="w-full text-base py-6 shadow-lg hover:shadow-xl transition-all"
           >
             Sign in
           </Button>
@@ -168,36 +168,36 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
           className="border-r-0 glass-sidebar"
           disableTransition={isResizing}
         >
-          <SidebarHeader className="h-16 justify-center">
+          <SidebarHeader className="h-20 justify-center">
             <div className="flex items-center gap-3 px-2 transition-all w-full">
               <button
                 onClick={toggleSidebar}
-                className="h-8 w-8 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
+                className="h-10 w-10 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                 aria-label="Toggle navigation"
               >
-                <PanelLeft className="h-4 w-4 text-muted-foreground" />
+                <PanelLeft className="h-5 w-5 text-muted-foreground" />
               </button>
               {!isCollapsed ? (
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <img
                     src="/branding/spmc-nephro-cluster.jpg"
                     alt="SPMC Department of Nephrology Nursing"
-                    className="h-10 w-10 object-contain rounded-full bg-white shrink-0"
+                    className="h-13 w-13 object-contain rounded-full bg-white shrink-0 shadow-sm"
                   />
-                  <span className="font-semibold tracking-tight truncate">NurseTrack</span>
+                  <span className="font-bold text-xl tracking-tight truncate">NurseTrack</span>
                 </div>
               ) : (
                 <img
                   src="/branding/spmc-nephro-cluster.jpg"
                   alt="SPMC Department of Nephrology Nursing"
-                  className="h-10 w-10 object-contain rounded-full bg-white shrink-0"
+                  className="h-10 w-10 object-contain rounded-full bg-white shrink-0 shadow-sm"
                 />
               )}
             </div>
           </SidebarHeader>
 
           <SidebarContent className="gap-0">
-            <SidebarMenu className="px-2 py-1">
+            <SidebarMenu className="px-2 py-1 gap-1">
               {NAV_ITEMS.map((item) => {
                 const isActive = isItemActive(item.path);
                 return (
@@ -207,14 +207,14 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
                       onClick={() => setLocation(item.path)}
                       tooltip={item.label}
                       className={cn(
-                        "h-10 transition-all duration-200 ease-out font-normal",
+                        "h-12 text-base transition-all duration-200 ease-out font-medium",
                         isActive
-                          ? "bg-primary/20 text-primary font-semibold shadow-xs ring-1 ring-primary/30 translate-x-1"
-                          : "hover:bg-accent/60 text-foreground/80 hover:text-foreground"
+                          ? "bg-primary/20 text-primary font-bold shadow-xs ring-1 ring-primary/30 translate-x-1"
+                          : "hover:bg-accent/60 text-foreground/85 hover:text-foreground"
                       )}
                     >
-                      <item.icon className={cn("h-4 w-4 transition-transform duration-200", isActive ? "text-primary scale-110" : "")} />
-                      <span>{item.label}</span>
+                      <item.icon className={cn("h-5 w-5 transition-transform duration-200", isActive ? "text-primary scale-110" : "")} />
+                      <span className="text-base">{item.label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -222,19 +222,18 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
             </SidebarMenu>
           </SidebarContent>
 
-
           <SidebarFooter className="p-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 rounded-lg px-1 py-1 hover:bg-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                  <Avatar className="h-9 w-9 border shrink-0">
-                    <AvatarFallback className="text-xs font-medium">
+                <button className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-accent/50 transition-colors w-full text-left group-data-[collapsible=icon]:justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <Avatar className="h-11 w-11 border shrink-0">
+                    <AvatarFallback className="text-sm font-semibold">
                       {user?.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-                    <p className="text-sm font-medium truncate leading-none">{user?.name || "-"}</p>
-                    <p className="text-xs text-muted-foreground truncate mt-1.5">{user?.email || "-"}</p>
+                    <p className="text-base font-semibold truncate leading-none">{user?.name || "-"}</p>
+                    <p className="text-xs text-muted-foreground truncate mt-1">{user?.email || "-"}</p>
                   </div>
                 </button>
               </DropdownMenuTrigger>
@@ -263,15 +262,16 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
       </div>
 
       <SidebarInset className="nurse-track-inset">
-        <div className="flex border-b h-16 items-center justify-between glass-panel px-2 md:px-4 sticky top-0 z-40">
-          <div className="flex items-center gap-2 min-w-0">
-            <SidebarTrigger className="h-9 w-9 rounded-lg bg-background shrink-0" />
+        <div className="flex border-b h-20 items-center justify-between glass-panel px-3 md:px-6 sticky top-0 z-40">
+          <div className="flex items-center gap-3 min-w-0">
+            <SidebarTrigger className="h-10 w-10 rounded-lg bg-background shrink-0" />
             <div className="flex flex-col gap-0.5 min-w-0">
-              <span className="tracking-tight text-foreground text-sm md:text-base truncate">
+              <span className="font-bold text-foreground text-lg md:text-2xl tracking-tight truncate">
                 {activeMenuItem?.label ?? "SKTI NurseTrack"}
               </span>
             </div>
           </div>
+
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"

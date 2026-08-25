@@ -327,17 +327,20 @@
   }
   .dark .glass-table-row:hover {
     background: oklch(1 0 0 / 0.08);
-  }
-
   .glass-table-head {
     background: transparent;
     color: var(--foreground);
-    font-weight: 500;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    padding: 1rem 1rem;
   }
 
   .glass-table-cell {
     background: transparent;
     border-bottom: 1px solid oklch(1 0 0 / 0.25);
+    font-size: 1rem;
+    padding: 0.9rem 1rem;
   }
   .dark .glass-table-cell {
     border-bottom-color: oklch(1 0 0 / 0.08);
