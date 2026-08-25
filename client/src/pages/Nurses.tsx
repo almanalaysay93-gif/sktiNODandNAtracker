@@ -15,6 +15,14 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { nurseFullName, nurseIdLabel, EMPLOYMENT_STATUSES, STAFF_TYPES, formatDate as sharedFormatDate } from "../../../shared/nursetrack";
@@ -91,8 +99,17 @@ export default function Nurses() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Nurses</h1>
-          <p className="text-sm text-muted-foreground">{filtered.length} of {(nurses ?? []).length} nurses</p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {staffTypeFilter === "Nursing Attendant"
+              ? "Nursing Attendants"
+              : staffTypeFilter === "Registered Nurse"
+              ? "Registered Nurses"
+              : "Nurses"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {filtered.length} of {(nurses ?? []).length}{" "}
+            {staffTypeFilter === "Nursing Attendant" ? "nursing attendants" : "nurses & personnel"}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Tabs value={view} onValueChange={(v) => setView(v as View)}>
@@ -171,51 +188,49 @@ export default function Nurses() {
           ))}
         </div>
       ) : (
-        <Card className="glass-card">
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50 text-left">
-                    <th className="px-4 py-3 font-medium">Nurse</th>
-                    <th className="px-4 py-3 font-medium">License Number</th>
-                    <th className="px-4 py-3 font-medium">Position</th>
-                    <th className="px-4 py-3 font-medium">Current Area</th>
-                    <th className="px-4 py-3 font-medium">Date Hired</th>
-                    <th className="px-4 py-3 font-medium">Employment</th>
-                    <th className="px-4 py-3 font-medium">License Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {filtered.map((n) => (
-                    <tr
-                      key={n.id}
-                      onClick={() => navigate(`/nurses/${n.id}`)}
-                      className="cursor-pointer hover:bg-accent/50 transition-colors"
-                    >
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <NurseAvatar nurse={n} size="sm" />
-                          <div>
-                            <p className="font-medium leading-tight">{nurseFullName(n)}</p>
-                            {n.suffix && <p className="text-xs text-muted-foreground">{n.suffix}</p>}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs">{nurseIdLabel(n)}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{n.position ?? "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{n.currentArea?.name ?? "—"}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{sharedFormatDate(n.dateHired)}</td>
-                      <td className="px-4 py-3"><EmploymentStatusBadge status={n.employmentStatus ?? "Active"} /></td>
-                      <td className="px-4 py-3">{n.licenseStatus ? <LicenseStatusBadge status={n.licenseStatus as never} /> : "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              <Card className="glass-card">
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nurse</TableHead>
+                        <TableHead>License Number</TableHead>
+                        <TableHead>Position</TableHead>
+                        <TableHead>Current Area</TableHead>
+                        <TableHead>Date Hired</TableHead>
+                        <TableHead>Employment</TableHead>
+                        <TableHead>License Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filtered.map((n) => (
+                        <TableRow
+                          key={n.id}
+                          onClick={() => navigate(`/nurses/${n.id}`)}
+                          className="cursor-pointer"
+                        >
+                          <TableCell>
+                            <div className="flex items-center gap-2.5">
+                              <NurseAvatar nurse={n} size="sm" />
+                              <div>
+                                <p className="font-medium leading-tight">{nurseFullName(n)}</p>
+                                {n.suffix && <p className="text-xs text-muted-foreground">{n.suffix}</p>}
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-mono text-xs">{nurseIdLabel(n)}</TableCell>
+                          <TableCell className="text-muted-foreground">{n.position ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{n.currentArea?.name ?? "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{sharedFormatDate(n.dateHired)}</TableCell>
+                          <TableCell><EmploymentStatusBadge status={n.employmentStatus ?? "Active"} /></TableCell>
+                          <TableCell>{n.licenseStatus ? <LicenseStatusBadge status={n.licenseStatus as never} /> : "—"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
 
       <NurseFormDialog open={createOpen} onOpenChange={setCreateOpen} defaultStaffType={createStaffType} />
     </div>
