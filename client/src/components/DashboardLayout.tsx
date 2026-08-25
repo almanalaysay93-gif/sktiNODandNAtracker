@@ -42,8 +42,8 @@ import {
   Users,
   UserCog,
 } from "lucide-react";
-import { CSSProperties, useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useSearch } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { Button } from "./ui/button";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./ui/command";
@@ -130,11 +130,29 @@ type DashboardLayoutContentProps = {
 function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutContentProps) {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
+  const searchString = useSearch();
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = NAV_ITEMS.find((item) => item.path === location);
+  
+  const isItemActive = useMemo(() => {
+    const params = new URLSearchParams(searchString);
+    const typeParam = params.get("type");
+    return (itemPath: string) => {
+      if (itemPath.includes("?")) {
+        const [itemBase, itemQuery] = itemPath.split("?");
+        const itemType = new URLSearchParams(itemQuery).get("type");
+        return location === itemBase && typeParam === itemType;
+      }
+      if (itemPath === "/nurses") {
+        return location === "/nurses" && !typeParam;
+      }
+      return location === itemPath;
+    };
+  }, [location, searchString]);
+
+  const activeMenuItem = NAV_ITEMS.find((item) => isItemActive(item.path)) || NAV_ITEMS.find((item) => item.path === location);
   const isMobile = useIsMobile();
   const [searchOpen, setSearchOpen] = useState(false);
   const { data: nurseSearchResults } = trpc.nurses.search.useQuery(
@@ -181,16 +199,21 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
           <SidebarContent className="gap-0">
             <SidebarMenu className="px-2 py-1">
               {NAV_ITEMS.map((item) => {
-                const isActive = location === item.path;
+                const isActive = isItemActive(item.path);
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
                       isActive={isActive}
                       onClick={() => setLocation(item.path)}
                       tooltip={item.label}
-                      className={cn("h-10 transition-all font-normal", isActive && "bg-primary/10 text-primary hover:bg-primary/10")}
+                      className={cn(
+                        "h-10 transition-all duration-200 ease-out font-normal",
+                        isActive
+                          ? "bg-primary/20 text-primary font-semibold shadow-xs ring-1 ring-primary/30 translate-x-1"
+                          : "hover:bg-accent/60 text-foreground/80 hover:text-foreground"
+                      )}
                     >
-                      <item.icon className={cn("h-4 w-4", isActive ? "text-primary" : "")} />
+                      <item.icon className={cn("h-4 w-4 transition-transform duration-200", isActive ? "text-primary scale-110" : "")} />
                       <span>{item.label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -198,6 +221,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
               })}
             </SidebarMenu>
           </SidebarContent>
+
 
           <SidebarFooter className="p-3">
             <DropdownMenu>
@@ -425,18 +449,33 @@ function NurseSearchDialog({ open, onOpenChange }: { open: boolean; onOpenChange
 
 function MobileBottomNav() {
   const [location, setLocation] = useLocation();
+  const searchString = useSearch();
+  const currentStaffType = new URLSearchParams(searchString).get("type");
+
+  const isItemActive = (itemPath: string) => {
+    if (itemPath.includes("?")) {
+      const [itemBase, itemQuery] = itemPath.split("?");
+      const itemType = new URLSearchParams(itemQuery).get("type");
+      return location === itemBase && currentStaffType === itemType;
+    }
+    if (itemPath === "/nurses") {
+      return location === "/nurses" && !currentStaffType;
+    }
+    return location === itemPath;
+  };
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:backdrop-blur md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t glass-panel md:hidden">
       <div className="grid grid-cols-6 items-center h-16">
         {NAV_ITEMS.slice(0, 5).map((item) => {
-          const active = location === item.path;
+          const active = isItemActive(item.path);
           return (
             <button
               key={item.path}
               onClick={() => setLocation(item.path)}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 h-full transition-colors",
-                active ? "text-primary" : "text-muted-foreground",
+                active ? "text-primary font-medium" : "text-muted-foreground",
               )}
             >
               <item.icon className="h-5 w-5" />
@@ -452,14 +491,29 @@ function MobileBottomNav() {
 
 function MoreMenu() {
   const [location, setLocation] = useLocation();
+  const searchString = useSearch();
+  const currentStaffType = new URLSearchParams(searchString).get("type");
   const [open, setOpen] = useState(false);
+
+  const isItemActive = (itemPath: string) => {
+    if (itemPath.includes("?")) {
+      const [itemBase, itemQuery] = itemPath.split("?");
+      const itemType = new URLSearchParams(itemQuery).get("type");
+      return location === itemBase && currentStaffType === itemType;
+    }
+    if (itemPath === "/nurses") {
+      return location === "/nurses" && !currentStaffType;
+    }
+    return location === itemPath;
+  };
+
   return (
     <>
       <button
         onClick={() => setOpen(true)}
         className={cn(
           "flex flex-col items-center justify-center gap-1 h-full transition-colors",
-          NAV_ITEMS.slice(5).some((i) => i.path === location) ? "text-primary" : "text-muted-foreground",
+          NAV_ITEMS.slice(5).some((i) => isItemActive(i.path)) ? "text-primary" : "text-muted-foreground",
         )}
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>
@@ -468,25 +522,29 @@ function MoreMenu() {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="bottom" className="max-h-[60vh] rounded-t-2xl">
           <div className="grid grid-cols-4 gap-4 pt-4">
-            {NAV_ITEMS.map((item) => (
-              <button
-                key={item.path}
-                onClick={() => {
-                  setOpen(false);
-                  setLocation(item.path);
-                }}
-                className={cn(
-                  "flex flex-col items-center gap-2 py-3 rounded-lg transition-colors",
-                  location === item.path ? "bg-primary/10 text-primary" : "hover:bg-accent",
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="text-xs text-center leading-tight">{item.label}</span>
-              </button>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const active = isItemActive(item.path);
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => {
+                    setOpen(false);
+                    setLocation(item.path);
+                  }}
+                  className={cn(
+                    "flex flex-col items-center gap-2 py-3 rounded-lg transition-colors",
+                    active ? "bg-primary/15 text-primary font-medium" : "hover:bg-accent",
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span className="text-xs text-center leading-tight">{item.label}</span>
+                </button>
+              );
+            })}
           </div>
         </SheetContent>
       </Sheet>
     </>
   );
 }
+
