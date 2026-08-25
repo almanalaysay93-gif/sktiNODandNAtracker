@@ -181,7 +181,19 @@
       max-width: 1280px; /* Standard content width */
     }
   }
+}
 
+/*
+ * Glass morphism must live in @layer utilities, not @layer components.
+ * Tailwind v4's fixed cascade layer order (base < components < utilities)
+ * means bg-sidebar/bg-card/bg-background from shadcn's base component
+ * classes (ui/sidebar.tsx, ui/card.tsx) always beat a components-layer
+ * background — same specificity, later layer wins — regardless of DOM
+ * class order. That's what silently killed the transparency here before:
+ * these rules were declared but never actually applied over the opaque
+ * component defaults.
+ */
+@layer utilities {
   /* Glass morphism — SPMC palette (navy/teal/gold/green gradient backdrop) */
   .glass-bg {
     position: fixed;
@@ -235,29 +247,105 @@
   }
 
   .glass-card {
-    background: oklch(1 0 0 / 0.55);
-    backdrop-filter: blur(10px) saturate(1.2);
-    -webkit-backdrop-filter: blur(10px) saturate(1.2);
-    border: 1px solid oklch(1 0 0 / 0.5);
-    box-shadow:
-      0 4px 16px -6px oklch(0.33 0.09 263 / 0.15),
-      inset 0 1px 0 oklch(1 0 0 / 0.55);
-    transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s cubic-bezier(0.23, 1, 0.32, 1);
-  }
-  .glass-card:hover {
-    background: oklch(1 0 0 / 0.72);
-    box-shadow:
-      0 10px 28px -8px oklch(0.33 0.09 263 / 0.25),
-      inset 0 1px 0 oklch(1 0 0 / 0.7);
-    transform: translateY(-1px);
-  }
+      background: oklch(1 0 0 / 0.3);
+      backdrop-filter: blur(10px) saturate(1.2);
+      -webkit-backdrop-filter: blur(10px) saturate(1.2);
+      border: 1px solid oklch(1 0 0 / 0.25);
+      box-shadow:
+        0 4px 16px -6px oklch(0.33 0.09 263 / 0.08),
+        inset 0 1px 0 oklch(1 0 0 / 0.3);
+      transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .glass-card:hover {
+      background: oklch(1 0 0 / 0.45);
+      box-shadow:
+        0 10px 28px -8px oklch(0.33 0.09 263 / 0.15),
+        inset 0 1px 0 oklch(1 0 0 / 0.5);
+      transform: translateY(-1px);
+    }
 
-  .glass-sidebar {
-    background: oklch(1 0 0 / 0.68);
-    backdrop-filter: blur(18px) saturate(1.35);
-    -webkit-backdrop-filter: blur(18px) saturate(1.35);
-    border-right: 1px solid oklch(1 0 0 / 0.6);
-  }
+    .glass-table-container {
+          background: oklch(1 0 0 / 0.25);
+          backdrop-filter: blur(10px) saturate(1.2);
+          -webkit-backdrop-filter: blur(10px) saturate(1.2);
+          border: 1px solid oklch(1 0 0 / 0.25);
+          border-radius: var(--radius-lg);
+          box-shadow:
+            0 4px 16px -6px oklch(0.33 0.09 263 / 0.08),
+            inset 0 1px 0 oklch(1 0 0 / 0.3);
+          transition: box-shadow 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .glass-table-container:hover {
+          box-shadow:
+            0 8px 24px -8px oklch(0.33 0.09 263 / 0.15),
+            inset 0 1px 0 oklch(1 0 0 / 0.4);
+        }
+
+        .glass-table-header {
+          background: oklch(1 0 0 / 0.35);
+          backdrop-filter: blur(8px) saturate(1.1);
+          -webkit-backdrop-filter: blur(8px) saturate(1.1);
+          border-bottom: 1px solid oklch(1 0 0 / 0.3);
+        }
+
+        .glass-table-body {
+          background: transparent;
+        }
+
+        .glass-table-footer {
+          background: oklch(1 0 0 / 0.25);
+          backdrop-filter: blur(6px) saturate(1.1);
+          -webkit-backdrop-filter: blur(6px) saturate(1.1);
+          border-top: 1px solid oklch(1 0 0 / 0.2);
+        }
+
+    .glass-table-row {
+      background: transparent;
+      transition: background-color 0.15s ease;
+    }
+    .glass-table-row:hover {
+      background: oklch(1 0 0 / 0.35);
+    }
+
+    .glass-table-head {
+      background: transparent;
+      color: var(--foreground);
+      font-weight: 500;
+    }
+
+    .glass-table-cell {
+      background: transparent;
+      border-bottom: 1px solid oklch(1 0 0 / 0.25);
+    }
+
+    .glass-sidebar,
+    .glass-sidebar [data-slot="sidebar-inner"],
+    .glass-sidebar [data-sidebar="sidebar"],
+    .glass-sidebar [data-slot="sidebar-container"],
+    [data-slot="sidebar-wrapper"] {
+      background: transparent !important;
+      background-color: transparent !important;
+    }
+
+    .glass-sidebar {
+      backdrop-filter: blur(14px) saturate(1.25);
+      -webkit-backdrop-filter: blur(14px) saturate(1.25);
+      border-right: 1px solid oklch(1 0 0 / 0.3);
+    }
+
+    .dark .glass-sidebar {
+      border-right: 1px solid oklch(1 0 0 / 0.12);
+    }
+
+      .glass-panel {
+        background: oklch(1 0 0 / 0.4);
+        backdrop-filter: blur(14px) saturate(1.3);
+        -webkit-backdrop-filter: blur(14px) saturate(1.3);
+        border: 1px solid oklch(1 0 0 / 0.35);
+        box-shadow:
+          0 8px 24px -8px oklch(0.33 0.09 263 / 0.18),
+          inset 0 1px 0 oklch(1 0 0 / 0.6);
+      }
 
   .nurse-track-inset {
     background: transparent;
@@ -278,6 +366,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .glass-card { transition: none; }
-  }
+      .glass-card { transition: none; }
+      .glass-table-container { transition: none; }
+      .glass-table-row { transition: none; }
+    }
 }
