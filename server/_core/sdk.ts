@@ -261,8 +261,6 @@ class SDKServer {
       throw ForbiddenError("User not found");
     }
 
-    console.log("[DEBUG-OWNER-CHECK]", JSON.stringify({ sessionOpenId: session.openId, userOpenId: user.openId, userRole: user.role, ownerOpenIdEnv: ENV.ownerOpenId }));
-
     await db.upsertUser({
       openId: user.openId,
       lastSignedIn: signedInAt,
