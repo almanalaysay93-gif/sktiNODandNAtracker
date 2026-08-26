@@ -8,7 +8,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
+  --color-background: var(--background);h
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -327,6 +327,7 @@
   }
   .dark .glass-table-row:hover {
     background: oklch(1 0 0 / 0.08);
+  }
   .glass-table-head {
     background: transparent;
     color: var(--foreground);
