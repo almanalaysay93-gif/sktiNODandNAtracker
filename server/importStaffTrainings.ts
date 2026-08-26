@@ -100,8 +100,11 @@ export async function importStaffTrainingsHandler(req: Request, res: Response) {
       byShortKey.get(short)!.push(n);
     }
 
+    // MySQL's default collation is case-insensitive, so the unique index on
+    // trainingCatalog.name collides across casing (e.g. "CDP in Hemodialysis"
+    // vs "CDP IN Hemodialysis"). Key the lookup map the same way.
     const catalogIdByName = new Map<string, number>();
-    for (const t of await db.listTrainingCatalog(true)) catalogIdByName.set(t.name, t.id);
+    for (const t of await db.listTrainingCatalog(true)) catalogIdByName.set(t.name.toLowerCase(), t.id);
 
     const existing = await db.listNurseTrainings();
     const existingKeys = new Set(existing.map((e) => `${e.nurseId}:${e.trainingId}:${e.remarks ?? ""}`));
@@ -130,14 +133,24 @@ export async function importStaffTrainingsHandler(req: Request, res: Response) {
       const nurse = candidates[0]!;
 
       const title = row.title.trim();
-      let trainingId = catalogIdByName.get(title);
+      let trainingId = catalogIdByName.get(title.toLowerCase());
       if (!trainingId) {
-        trainingId = await db.createTrainingType({ name: title, kind: "Seminar" });
-        catalogIdByName.set(title, trainingId);
+        try {
+          trainingId = await db.createTrainingType({ name: title, kind: "Seminar" });
+        } catch {
+          // Lost a race against another row in this batch with a
+          // differently-cased but colliding title; re-fetch and reuse it.
+          const fresh = await db.listTrainingCatalog(true);
+          const match = fresh.find((t) => t.name.toLowerCase() === title.toLowerCase());
+          if (!match) throw new Error(`Could not create or find training catalog entry for "${title}"`);
+          trainingId = match.id;
+        }
+        catalogIdByName.set(title.toLowerCase(), trainingId!);
       }
 
+      const resolvedTrainingId = trainingId!;
       const remarks = `${row.quarter}: ${row.dateText ?? ""}`.trim();
-      const dedupeKey = `${nurse.id}:${trainingId}:${remarks}`;
+      const dedupeKey = `${nurse.id}:${resolvedTrainingId}:${remarks}`;
       if (existingKeys.has(dedupeKey)) {
         skippedDuplicate++;
         continue;
@@ -146,7 +159,7 @@ export async function importStaffTrainingsHandler(req: Request, res: Response) {
       const completionDate = parseBestEffortDate(row.dateText);
       await db.createNurseTraining({
         nurseId: nurse.id,
-        trainingId,
+        trainingId: resolvedTrainingId,
         status: "Completed",
         completionDate,
         provider: row.provider,
