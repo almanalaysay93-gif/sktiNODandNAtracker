@@ -6,7 +6,28 @@ import * as db from "./db";
 const rowSchema = z.object({ fullName: z.string().min(1).max(256), areaName: z.string().min(1).max(128) });
 const bodySchema = z.object({ rows: z.array(rowSchema).max(500) });
 
-const normalizeForMatch = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+// Token-set match: order-independent (handles "LAST, First Middle" vs
+// "First Middle Last") and tolerant of punctuation differences between sheets.
+function normTokenSet(s: string): string {
+  return s
+    .split(",")
+    .join(" ")
+    .split(/\s+/)
+    .map((t) => t.toLowerCase().replace(/[^a-z0-9]/g, ""))
+    .filter(Boolean)
+    .sort()
+    .join("|");
+}
+
+// Row names are "LAST, First Middle...". Build a first+last-only key (same
+// shape as the nurse short key) so a middle-name/initial mismatch between
+// sheets doesn't block the match.
+function rowShortKey(fullName: string): string {
+  const [lastPart, ...restParts] = fullName.split(",");
+  if (restParts.length === 0) return normTokenSet(fullName);
+  const firstToken = restParts.join(",").trim().split(/\s+/)[0] ?? "";
+  return normTokenSet(`${firstToken} ${lastPart}`);
+}
 
 function areaCode(name: string): string {
   return name
@@ -39,14 +60,15 @@ export async function importStaffAreasHandler(req: Request, res: Response) {
     }
 
     const nurses = await db.listNurses();
-    const byNormName = new Map<string, typeof nurses>();
+    const byFullKey = new Map<string, typeof nurses>();
+    const byShortKey = new Map<string, typeof nurses>();
     for (const n of nurses) {
-      const full = normalizeForMatch(`${n.firstName} ${n.middleName ?? ""} ${n.lastName} ${n.suffix ?? ""}`);
-      const short = normalizeForMatch(`${n.firstName} ${n.lastName}`);
-      for (const key of [full, short]) {
-        if (!byNormName.has(key)) byNormName.set(key, []);
-        byNormName.get(key)!.push(n);
-      }
+      const full = normTokenSet(`${n.firstName} ${n.middleName ?? ""} ${n.lastName} ${n.suffix ?? ""}`);
+      const short = normTokenSet(`${n.firstName} ${n.lastName}`);
+      if (!byFullKey.has(full)) byFullKey.set(full, []);
+      byFullKey.get(full)!.push(n);
+      if (!byShortKey.has(short)) byShortKey.set(short, []);
+      byShortKey.get(short)!.push(n);
     }
 
     const areaIdByName = new Map<string, number>();
@@ -64,8 +86,11 @@ export async function importStaffAreasHandler(req: Request, res: Response) {
         areaIdByName.set(row.areaName, areaId);
       }
 
-      const key = normalizeForMatch(row.fullName);
-      const candidates = byNormName.get(key) ?? [];
+      const fullKey = normTokenSet(row.fullName);
+      let candidates = byFullKey.get(fullKey) ?? [];
+      if (candidates.length === 0) {
+        candidates = byShortKey.get(rowShortKey(row.fullName)) ?? [];
+      }
       if (candidates.length === 0) {
         notFound.push(row.fullName);
         continue;
