@@ -10,6 +10,7 @@ import { startDailyReminderScheduler } from "../scheduled";
 import { importStaffEmailsHandler } from "../importStaffEmails";
 import { importStaffRosterHandler } from "../importStaffRoster";
 import { importStaffAreasHandler } from "../importStaffAreas";
+import { importStaffTrainingsHandler } from "../importStaffTrainings";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -57,6 +58,7 @@ async function startServer() {
   app.post("/api/admin/import-staff-emails", importStaffEmailsHandler);
   app.post("/api/admin/import-staff-roster", importStaffRosterHandler);
   app.post("/api/admin/import-staff-areas", importStaffAreasHandler);
+  app.post("/api/admin/import-staff-trainings", importStaffTrainingsHandler);
   // tRPC API
   app.use(
     "/api/trpc",
