@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { deriveLicenseStatus, LICENSE_STATUS_META, nurseFullName, renewalCycleKey, sanitizeFilename, storageKey, validateMime, dateKey } from "../../shared/nursetrack";
 import { storagePut } from "../storage";
@@ -8,16 +8,16 @@ import { storagePut } from "../storage";
 const nullableDateInput = z.union([z.date(), z.string().datetime(), z.null()]).transform((d) => (d === null ? null : d instanceof Date ? d : new Date(d))).optional();
 
 export const credentialsRouter = router({
-  listTypes: protectedProcedure.query(() => db.listCredentialTypes()),
+  listTypes: adminProcedure.query(() => db.listCredentialTypes()),
 
-  createType: protectedProcedure
+  createType: adminProcedure
     .input(z.object({ name: z.string().min(1).max(128), issuingOrganizationDefault: z.string().max(200).optional() }))
     .mutation(async ({ input }) => {
       const id = await db.createCredentialType(input.name, input.issuingOrganizationDefault);
       return { id };
     }),
 
-  updateType: protectedProcedure
+  updateType: adminProcedure
     .input(z.object({ id: z.number(), name: z.string().min(1).max(128).optional(), issuingOrganizationDefault: z.string().max(200).optional().nullable(), active: z.boolean().optional() }))
     .mutation(async ({ input }) => {
       await db.updateCredentialType(input.id, { ...input, issuingOrganizationDefault: input.issuingOrganizationDefault ?? undefined });
@@ -26,7 +26,7 @@ export const credentialsRouter = router({
 
   // Single round-trip initial load merging credentials + nurses + types
   // (the Licenses page previously fired three sequential network calls).
-  initial: protectedProcedure.query(async () => {
+  initial: adminProcedure.query(async () => {
     const [credentials, nurses, types] = await Promise.all([
       db.listCredentials(),
       db.listNurses(),
@@ -47,7 +47,7 @@ export const credentialsRouter = router({
     };
   }),
 
-  list: protectedProcedure.query(async () => {
+  list: adminProcedure.query(async () => {
     const rows = await db.listCredentials();
     const nurses = await db.listNurses();
     const nurseById = new Map(nurses.map((n) => [n.id, n]));
@@ -66,7 +66,7 @@ export const credentialsRouter = router({
     });
   }),
 
-  listForNurse: protectedProcedure
+  listForNurse: adminProcedure
     .input(z.object({ nurseId: z.number() }))
     .query(async ({ input }) => {
       const rows = await db.listCredentials({ nurseId: input.nurseId });
@@ -80,7 +80,7 @@ export const credentialsRouter = router({
       }));
     }),
 
-  create: protectedProcedure
+  create: adminProcedure
     .input(
       z.object({
         nurseId: z.number(),
@@ -115,7 +115,7 @@ export const credentialsRouter = router({
       return { id };
     }),
 
-  update: protectedProcedure
+  update: adminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -156,7 +156,7 @@ export const credentialsRouter = router({
       return { success: true } as const;
     }),
 
-  uploadDocument: protectedProcedure
+  uploadDocument: adminProcedure
     .input(
       z.object({
         credentialId: z.number(),
@@ -187,7 +187,7 @@ export const credentialsRouter = router({
       return { url };
     }),
 
-  markRenewed: protectedProcedure
+  markRenewed: adminProcedure
     .input(
       z.object({
         credentialId: z.number(),

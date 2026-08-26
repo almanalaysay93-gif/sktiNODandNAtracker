@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import {
   nurseFullName,
@@ -17,7 +17,7 @@ const nullableDateInput = z.union([z.date(), z.string().datetime(), z.null()]).t
 
 export const trainingsRouter = router({
   // Single round-trip initial load: catalog + records in one call (same enriched shape as listRecords).
-  initial: protectedProcedure.query(async () => {
+  initial: adminProcedure.query(async () => {
     const [catalog, rows, nurses] = await Promise.all([db.listTrainingCatalog(true), db.listNurseTrainings(), db.listNurses()]);
     const nurseById = new Map(nurses.map((n) => [n.id, n]));
     const catById = new Map(catalog.map((t) => [t.id, t]));
@@ -34,9 +34,9 @@ export const trainingsRouter = router({
     return { catalog, records };
   }),
 
-  listCatalog: protectedProcedure.query(() => db.listTrainingCatalog(true)),
+  listCatalog: adminProcedure.query(() => db.listTrainingCatalog(true)),
 
-  createCatalogItem: protectedProcedure
+  createCatalogItem: adminProcedure
     .input(
       z.object({
         name: z.string().min(1).max(128),
@@ -51,7 +51,7 @@ export const trainingsRouter = router({
       return { id };
     }),
 
-  updateCatalogItem: protectedProcedure
+  updateCatalogItem: adminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -73,7 +73,7 @@ export const trainingsRouter = router({
       return { success: true } as const;
     }),
 
-  listRecords: protectedProcedure.query(async () => {
+  listRecords: adminProcedure.query(async () => {
     const rows = await db.listNurseTrainings();
     const nurses = await db.listNurses();
     const nurseById = new Map(nurses.map((n) => [n.id, n]));
@@ -91,7 +91,7 @@ export const trainingsRouter = router({
     });
   }),
 
-  listForNurse: protectedProcedure
+  listForNurse: adminProcedure
     .input(z.object({ nurseId: z.number() }))
     .query(async ({ input }) => {
       const rows = await db.listNurseTrainings({ nurseId: input.nurseId });
@@ -100,7 +100,7 @@ export const trainingsRouter = router({
       return rows.map((r) => ({ ...r, trainingName: catById.get(r.trainingId)?.name ?? "Unknown" }));
     }),
 
-  createRecord: protectedProcedure
+  createRecord: adminProcedure
     .input(
       z.object({
         nurseId: z.number(),
@@ -137,7 +137,7 @@ export const trainingsRouter = router({
       return { id };
     }),
 
-  updateRecord: protectedProcedure
+  updateRecord: adminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -170,7 +170,7 @@ export const trainingsRouter = router({
       return { success: true } as const;
     }),
 
-  uploadCertificate: protectedProcedure
+  uploadCertificate: adminProcedure
     .input(
       z.object({
         recordId: z.number(),
@@ -201,20 +201,20 @@ export const trainingsRouter = router({
       return { url };
     }),
 
-  getAreaRequirements: protectedProcedure
+  getAreaRequirements: adminProcedure
     .input(z.object({ areaId: z.number() }))
     .query(async ({ input }) => {
       return await db.getAreaTrainingRequirementIds(input.areaId);
     }),
 
-  setAreaRequirement: protectedProcedure
+  setAreaRequirement: adminProcedure
     .input(z.object({ areaId: z.number(), trainingId: z.number(), required: z.boolean() }))
     .mutation(async ({ input }) => {
       await db.setAreaTrainingRequirement(input.areaId, input.trainingId, input.required);
       return { success: true } as const;
     }),
 
-  getCompliance: protectedProcedure
+  getCompliance: adminProcedure
     .input(z.object({ nurseId: z.number() }))
     .query(async ({ input }) => {
       const nurse = await db.getNurseById(input.nurseId);

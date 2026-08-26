@@ -1,7 +1,7 @@
 import { dateKey } from "../../shared/nursetrack";
 import { and, asc, desc, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, router } from "../_core/trpc";
 import { countActiveNurses, listAreas, getDb, activeNurseCondition } from "../db";
 import { getLocalReportData } from "../sqliteHelpers";
 import {
@@ -19,7 +19,7 @@ import { daysUntilExpiry, deriveLicenseStatus, durationBetween, todayDate, nurse
 export type ReportType = "licenseStatus" | "licenseDue" | "trainingCompliance" | "areaExposure" | "trainingSummary" | "transferLog";
 
 export const reportsRouter = router({
-  list: protectedProcedure.query(async () => {
+  list: adminProcedure.query(async () => {
     const db = await getDb();
     if (!db) {
       const activeCount = await countActiveNurses();
@@ -54,7 +54,7 @@ export const reportsRouter = router({
     ];
   }),
 
-  generate: protectedProcedure
+  generate: adminProcedure
     .input(z.object({ type: z.enum(["licenseStatus", "licenseDue", "trainingCompliance", "areaExposure", "trainingSummary", "transferLog"]) }))
     .query(async ({ input }) => {
       const db = await getDb();
