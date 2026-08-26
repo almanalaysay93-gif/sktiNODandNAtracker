@@ -306,7 +306,20 @@ export async function seedExcelDatabase(dataFilePath?: string) {
   };
 }
 
-if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, "/")}`) {
+// Only run when this file is invoked directly as a CLI script
+// (e.g. `pnpm seed:excel` -> `tsx server/seedExcel.ts`).
+//
+// NOTE: do NOT use the usual `import.meta.url === file://${process.argv[1]}`
+// check here. This module is imported by server/routers/settings.ts, so esbuild
+// inlines it into the single-file production bundle (dist/index.js). Inside that
+// bundle `import.meta.url` and `process.argv[1]` both resolve to dist/index.js,
+// so the classic check evaluates to TRUE and the seeder runs on every server
+// boot -- which then throws and kills the process. Matching on the entry
+// filename keeps CLI usage working while staying inert inside the bundle.
+const entryPath = process.argv[1]?.replace(/\\/g, "/") ?? "";
+const isDirectCliInvocation = /(^|\/)seedExcel(\.[cm]?[jt]s)?$/.test(entryPath);
+
+if (isDirectCliInvocation) {
   seedExcelDatabase()
     .then((res) => {
       console.log("Success:", res);
