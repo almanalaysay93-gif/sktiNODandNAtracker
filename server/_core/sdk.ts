@@ -270,16 +270,7 @@ class SDKServer {
   }
 }
 
-/**
- * Result of `sdk.authenticateRequest`. `taskUid`/`isCron` are dead since the
- * Manus-hosted heartbeat scheduler that minted `cron_`-prefixed sessions for
- * server/scheduled.ts no longer runs this app — kept only so that file still
- * type-checks. Give scheduled.ts a real trigger (Railway cron + shared secret,
- * or similar) before relying on it again.
- */
-export type AuthenticatedUser = User & {
-  taskUid?: string;
-  isCron?: boolean;
-};
+/** Result of `sdk.authenticateRequest`. */
+export type AuthenticatedUser = User;
 
 export const sdk = new SDKServer();
