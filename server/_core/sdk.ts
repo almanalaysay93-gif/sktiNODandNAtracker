@@ -261,12 +261,17 @@ class SDKServer {
       throw ForbiddenError("User not found");
     }
 
+    console.log("[DEBUG-OWNER-CHECK]", JSON.stringify({ sessionOpenId: session.openId, userOpenId: user.openId, userRole: user.role, ownerOpenIdEnv: ENV.ownerOpenId }));
+
     await db.upsertUser({
       openId: user.openId,
       lastSignedIn: signedInAt,
     });
 
-    return user;
+    // Re-fetch: upsertUser may have just promoted this openId to admin
+    // (ENV.ownerOpenId match) — the pre-upsert `user` above would still say
+    // "user" for the rest of this request otherwise.
+    return (await db.getUserByOpenId(user.openId)) ?? user;
   }
 }
 
