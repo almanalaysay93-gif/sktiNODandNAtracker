@@ -8,6 +8,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { startDailyReminderScheduler } from "../scheduled";
 import { importStaffEmailsHandler } from "../importStaffEmails";
+import { importStaffRosterHandler } from "../importStaffRoster";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -53,6 +54,7 @@ async function startServer() {
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   app.post("/api/admin/import-staff-emails", importStaffEmailsHandler);
+  app.post("/api/admin/import-staff-roster", importStaffRosterHandler);
   // tRPC API
   app.use(
     "/api/trpc",
