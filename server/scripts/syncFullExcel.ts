@@ -7,14 +7,14 @@ import { canonicalAreaInfo, CANONICAL_AREAS } from "../deduplicate";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-function getCellValue(cell: ExcelJS.Cell | undefined): string {
+function getCellValue(cell: any): string {
   if (!cell || cell.value === null || cell.value === undefined) return "";
   if (typeof cell.value === "object") {
     if (cell.value instanceof Date) return cell.value.toISOString().slice(0, 10);
-    if ((cell.value as any).result !== undefined) return String((cell.value as any).result || "").trim();
-    if ((cell.value as any).text !== undefined) return String((cell.value as any).text || "").trim();
-    if (Array.isArray((cell.value as any).richText)) {
-      return (cell.value as any).richText.map((t: any) => t.text).join("").trim();
+    if (cell.value.result !== undefined) return String(cell.value.result || "").trim();
+    if (cell.value.text !== undefined) return String(cell.value.text || "").trim();
+    if (Array.isArray(cell.value.richText)) {
+      return cell.value.richText.map((t: any) => t.text).join("").trim();
     }
   }
   return String(cell.value).trim();
@@ -89,6 +89,25 @@ function parseName(raw: string) {
   };
 }
 
+function cleanTrainingTitle(raw: string): string {
+  let s = raw.replace(/\s+/g, " ").trim();
+  s = s.replace(/^(NEW HIRES - |NEPHRO NSG SEMINAR - |NOTIFIABLE DISEASE - )/i, "");
+  s = s.replace(/^(NN:\s*|ND:\s*)/i, "");
+  if (s.length > 120) s = s.slice(0, 117) + "...";
+  return s.trim();
+}
+
+function parseCompletionDate(valStr: string): string {
+  const s = valStr.trim();
+  const iso = parseSafeDateIso(s);
+  if (iso) return iso;
+  if (/^2026/i.test(s)) return "2026-03-15";
+  if (/^2025/i.test(s)) return "2025-06-15";
+  if (/^2024/i.test(s)) return "2024-06-15";
+  if (/^2023/i.test(s) || /earlier/i.test(s)) return "2023-01-01";
+  return "2026-01-15";
+}
+
 async function extractWorkbookData() {
   const wb = new ExcelJS.Workbook();
   const filePath = "C:/Users/Admin/Downloads/NN LDI DATABASE SUMMARY.xlsx";
@@ -99,8 +118,8 @@ async function extractWorkbookData() {
   const staffMap = new Map<string, any>();
   const catalogMap = new Map<string, any>();
   const eventsList: any[] = [];
+  const matrixTrainingsList: any[] = [];
 
-  // Helper to add/merge staff
   function addStaff(s: any) {
     const key = `${s.nameInfo.lastName} ${s.nameInfo.firstName}`.toLowerCase().replace(/[^a-z0-9]/g, "");
     if (!key) return;
@@ -118,35 +137,49 @@ async function extractWorkbookData() {
     }
   }
 
+  function addCatalogItem(title: string, category = "Clinical Specialization", kind: "Training" | "Seminar" | "LDI" = "Training") {
+    const cleanTitle = cleanTrainingTitle(title);
+    if (!cleanTitle || cleanTitle.length < 2) return null;
+    const catKey = cleanTitle.toLowerCase();
+    if (!catalogMap.has(catKey)) {
+      const isRenewal = cleanTitle.toLowerCase().includes("bls") || cleanTitle.toLowerCase().includes("acls");
+      catalogMap.set(catKey, {
+        name: cleanTitle,
+        category: cleanTitle.toLowerCase().includes("privacy") || cleanTitle.toLowerCase().includes("space") || cleanTitle.toLowerCase().includes("ethics") || cleanTitle.toLowerCase().includes("integrity") ? "Mandatory / Hospital Compliance" : category,
+        kind,
+        renewalRequired: isRenewal,
+        defaultValidityMonths: isRenewal ? 24 : null,
+      });
+    }
+    return cleanTitle;
+  }
+
   // 1. Process Sheet "NURSES"
   const nursesSheet = wb.getWorksheet("NURSES");
   if (nursesSheet) {
     let currentArea = "RDU Main";
-    let trainingHeaders: { col: number; title: string }[] = [];
+    const colHeaders: { col: number; title: string }[] = [];
 
-    // Scan row 4 and 5 for headers
-    const row4 = nursesSheet.getRow(4);
-    const row5 = nursesSheet.getRow(5);
+    const r3 = nursesSheet.getRow(3);
+    const r4 = nursesSheet.getRow(4);
+    const r5 = nursesSheet.getRow(5);
+
     for (let c = 6; c <= nursesSheet.columnCount; c++) {
-      const title = getCellValue(row4.getCell(c)) || getCellValue(row5.getCell(c));
-      if (title && title.length > 2 && !/^\d{4}/.test(title)) {
-        trainingHeaders.push({ col: c, title });
-        const catKey = title.trim().toLowerCase();
-        if (!catalogMap.has(catKey)) {
-          catalogMap.set(catKey, {
-            name: title.trim(),
-            category: "Clinical Specialization",
-            kind: "Training",
-            renewalRequired: title.toLowerCase().includes("bls") || title.toLowerCase().includes("acls"),
-            defaultValidityMonths: title.toLowerCase().includes("bls") || title.toLowerCase().includes("acls") ? 24 : null,
-          });
+      const t3 = getCellValue(r3.getCell(c));
+      const t4 = getCellValue(r4.getCell(c));
+      const t5 = getCellValue(r5.getCell(c));
+      const rawTitle = [t3, t4, t5].filter((t) => t && !/^\d{4}/.test(t) && t.length > 1).join(" - ") || t4 || t5 || t3;
+      if (rawTitle && rawTitle.length > 2) {
+        const cleanTitle = addCatalogItem(rawTitle, "Clinical Specialization", "Training");
+        if (cleanTitle) {
+          colHeaders.push({ col: c, title: cleanTitle });
         }
       }
     }
 
     for (let r = 6; r <= nursesSheet.rowCount; r++) {
       const row = nursesSheet.getRow(r);
-      const col2 = getCellValue(row.getCell(2)); // Name or Area Header
+      const col2 = getCellValue(row.getCell(2));
       if (!col2) continue;
 
       const areaCheck = canonicalAreaInfo(col2);
@@ -154,6 +187,8 @@ async function extractWorkbookData() {
         currentArea = areaCheck.name;
         continue;
       }
+
+      if (col2.toUpperCase().includes("NAME") || col2.toUpperCase().includes("DATABASE") || col2.toUpperCase().includes("SUMMARY")) continue;
 
       const email = getCellValue(row.getCell(3));
       const prc = getCellValue(row.getCell(4));
@@ -163,10 +198,18 @@ async function extractWorkbookData() {
       if (nameInfo.lastName.length < 2) continue;
 
       const matrixTrainings: Record<string, string> = {};
-      for (const th of trainingHeaders) {
-        const val = getCellValue(row.getCell(th.col));
+      for (const h of colHeaders) {
+        const val = getCellValue(row.getCell(h.col));
         if (val && val !== "0" && val !== "-" && val.toLowerCase() !== "no") {
-          matrixTrainings[th.title] = val;
+          matrixTrainings[h.title] = val;
+          matrixTrainingsList.push({
+            staffName: col2,
+            employeeId: prc || null,
+            trainingTitle: h.title,
+            completionDate: parseCompletionDate(val),
+            role: "Participant",
+            provider: "SPMC",
+          });
         }
       }
 
@@ -191,7 +234,26 @@ async function extractWorkbookData() {
   const naSheet = wb.getWorksheet("NURSING ATTENDANTS") || wb.getWorksheet("List of All Nursing Attendants ");
   if (naSheet) {
     let currentArea = "RDU Main";
-    for (let r = 1; r <= naSheet.rowCount; r++) {
+    const naHeaders: { col: number; title: string }[] = [];
+
+    const r3 = naSheet.getRow(3);
+    const r4 = naSheet.getRow(4);
+    const r5 = naSheet.getRow(5);
+
+    for (let c = 5; c <= naSheet.columnCount; c++) {
+      const t3 = getCellValue(r3.getCell(c));
+      const t4 = getCellValue(r4.getCell(c));
+      const t5 = getCellValue(r5.getCell(c));
+      const rawTitle = t4 || t5 || t3;
+      if (rawTitle && rawTitle.length > 2 && !/^\d{4}/.test(rawTitle) && !rawTitle.toUpperCase().includes("EMAIL")) {
+        const cleanTitle = addCatalogItem(rawTitle, "Patient Care Skills", "Training");
+        if (cleanTitle) {
+          naHeaders.push({ col: c, title: cleanTitle });
+        }
+      }
+    }
+
+    for (let r = 6; r <= naSheet.rowCount; r++) {
       const row = naSheet.getRow(r);
       const col1 = getCellValue(row.getCell(1));
       const col2 = getCellValue(row.getCell(2));
@@ -213,6 +275,22 @@ async function extractWorkbookData() {
       const exp = getCellValue(row.getCell(5));
       const email = getCellValue(row.getCell(3));
 
+      const matrixTrainings: Record<string, string> = {};
+      for (const h of naHeaders) {
+        const val = getCellValue(row.getCell(h.col));
+        if (val && val !== "0" && val !== "-" && val.toLowerCase() !== "no") {
+          matrixTrainings[h.title] = val;
+          matrixTrainingsList.push({
+            staffName: nameRaw,
+            employeeId: prc && /^\d+$/.test(prc) ? prc : null,
+            trainingTitle: h.title,
+            completionDate: parseCompletionDate(val),
+            role: "Participant",
+            provider: "SPMC",
+          });
+        }
+      }
+
       const areaInfo = canonicalAreaInfo(currentArea) || { code: "RDU-MAIN", name: "RDU Main" };
 
       addStaff({
@@ -225,6 +303,7 @@ async function extractWorkbookData() {
         currentAreaCode: areaInfo.code,
         licenseNumber: prc || null,
         licenseExpiry: parseSafeDateIso(exp),
+        matrixTrainings,
       });
     }
   }
@@ -234,7 +313,7 @@ async function extractWorkbookData() {
   if (rotSheet) {
     for (let r = 2; r <= rotSheet.rowCount; r++) {
       const row = rotSheet.getRow(r);
-      const statusType = getCellValue(row.getCell(1)); // ROTATION or RESIGNEE
+      const statusType = getCellValue(row.getCell(1));
       const nameRaw = getCellValue(row.getCell(3));
       if (!nameRaw) continue;
 
@@ -274,34 +353,15 @@ async function extractWorkbookData() {
 
       const normNameKey = `${parseName(staffName).lastName.toUpperCase()}, ${parseName(staffName).firstName.toUpperCase()}`;
 
-      // Split multiple titles in a single cell by newlines
-      const titles = rawTitleCell
-        .split(/\r?\n/)
-        .map((t) => t.trim())
-        .filter((t) => t.length > 2);
-
-      const dates = rawDateCell
-        .split(/\r?\n/)
-        .map((d) => d.trim())
-        .filter(Boolean);
+      const titles = rawTitleCell.split(/\r?\n/).map((t) => t.trim()).filter((t) => t.length > 2);
+      const dates = rawDateCell.split(/\r?\n/).map((d) => d.trim()).filter(Boolean);
 
       for (let idx = 0; idx < titles.length; idx++) {
         const fullTitle = titles[idx];
-        const singleTitle = fullTitle.slice(0, 120).trim();
+        const cleanTitle = addCatalogItem(fullTitle, "Clinical Specialization", "Seminar");
+        if (!cleanTitle) continue;
+
         const dateText = dates[idx] || dates[0] || rawDateCell;
-
-        const catKey = singleTitle.toLowerCase();
-        if (!catalogMap.has(catKey)) {
-          catalogMap.set(catKey, {
-            name: singleTitle,
-            category: singleTitle.toLowerCase().includes("privacy") || singleTitle.toLowerCase().includes("space") ? "Mandatory / Hospital Compliance" : "Clinical Specialization",
-            kind: "Seminar",
-            renewalRequired: false,
-            defaultValidityMonths: null,
-          });
-        }
-
-        // Parse date
         let dateIso = "2026-03-15";
         const isoMatch = dateText.match(/2026-\d{2}-\d{2}/);
         if (isoMatch) {
@@ -313,11 +373,10 @@ async function extractWorkbookData() {
         else if (dateText.match(/may/i)) dateIso = "2026-05-15";
         else if (dateText.match(/jun/i)) dateIso = "2026-06-15";
 
-        // Find or create event
-        let event = eventsList.find((e) => e.title === singleTitle && e.startDate === dateIso);
+        let event = eventsList.find((e) => e.title === cleanTitle && e.startDate === dateIso);
         if (!event) {
           event = {
-            title: singleTitle,
+            title: cleanTitle,
             startDate: dateIso,
             endDate: dateIso,
             provider,
@@ -340,7 +399,12 @@ async function extractWorkbookData() {
   const finalStaff = Array.from(staffMap.values());
   const finalCatalog = Array.from(catalogMap.values());
 
-  console.log(`Extracted: ${finalStaff.length} staff, ${finalCatalog.length} catalog items, ${eventsList.length} events.`);
+  console.log(`\n=== SUMMARY OF EXTRACTED DATA ===`);
+  console.log(`- Total Staff Profiles: ${finalStaff.length}`);
+  console.log(`- Total Catalog Trainings/Seminars: ${finalCatalog.length}`);
+  console.log(`- Total Seminar Events: ${eventsList.length}`);
+  console.log(`- Total Seminar Attendances: ${eventsList.reduce((acc, e) => acc + e.attendees.length, 0)}`);
+  console.log(`- Total Matrix Training Completions: ${matrixTrainingsList.length}`);
 
   const seedPayload = {
     areas: CANONICAL_AREAS.map((a) => ({
@@ -352,6 +416,7 @@ async function extractWorkbookData() {
     trainingCatalog: finalCatalog,
     staff: finalStaff,
     events: eventsList,
+    matrixCompletions: matrixTrainingsList,
   };
 
   const outPath = path.resolve(__dirname, "../data/seedData.json");

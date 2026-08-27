@@ -85,11 +85,21 @@ interface EventSeed {
   attendees: AttendeeSeed[];
 }
 
+interface MatrixCompletionSeed {
+  staffName: string;
+  employeeId?: string | null;
+  trainingTitle: string;
+  completionDate: string;
+  role: "Participant" | "Speaker" | "Facilitator" | "Preceptor";
+  provider: string;
+}
+
 interface SeedData {
   areas: Array<{ code: string; name: string; description: string; sortOrder: number }>;
   trainingCatalog: TrainingCatalogSeed[];
   staff: StaffSeed[];
   events: EventSeed[];
+  matrixCompletions?: MatrixCompletionSeed[];
 }
 
 const catalogKey = (name: string) => name.slice(0, 128).trim().toLowerCase();
@@ -341,18 +351,59 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     }
   }
 
+  // 6. Seed Matrix Training Completions (from NURSES and NURSING ATTENDANTS sheets)
+  console.log(`[Seed] Seeding ${data.matrixCompletions?.length ?? 0} matrix training completions...`);
+  let matrixCompletionsCount = 0;
+  for (const mc of data.matrixCompletions ?? []) {
+    const catItem = catalogByName.get(mc.trainingTitle.trim().toLowerCase());
+    if (!catItem) continue;
+
+    let nurseId = (mc.employeeId && nurseIdByEmployeeId.get(mc.employeeId)) || nurseIdByNormName.get(mc.staffName.toUpperCase());
+    if (!nurseId) {
+      const lastNameToken = mc.staffName.split(",")[0]?.trim().toUpperCase();
+      if (lastNameToken) nurseId = nurseIdByNormName.get(lastNameToken);
+    }
+    if (!nurseId) continue;
+
+    const completionDate = parseSafeDate(mc.completionDate) || new Date("2026-01-15T00:00:00");
+    const existing = await db.select().from(nurseTrainings).where(
+      and(
+        eq(nurseTrainings.nurseId, nurseId),
+        eq(nurseTrainings.trainingId, catItem.id)
+      )
+    ).limit(1);
+
+    if (existing.length === 0) {
+      try {
+        await db.insert(nurseTrainings).values({
+          nurseId,
+          trainingId: catItem.id,
+          status: "Completed",
+          completionDate,
+          scheduledDate: completionDate,
+          provider: mc.provider || "SPMC",
+          participationRole: mc.role || "Participant",
+          remarks: `Completed ${mc.trainingTitle}`,
+        });
+        matrixCompletionsCount++;
+      } catch {
+        // ignore duplicate
+      }
+    }
+  }
+
   // Log activity
   await db.insert(activityLog).values({
     actionType: "system.seed.excel",
-    summary: `Synchronized NN LDI Database Summary: ${data.staff.length} staff, ${data.trainingCatalog.length} catalog items, ${data.events.length} seminar events, ${totalAttendances} attendance records.`,
+    summary: `Synchronized NN LDI Database Summary: ${data.staff.length} staff, ${data.trainingCatalog.length} catalog items, ${data.events.length} seminar events, ${totalAttendances + matrixCompletionsCount} attendance records.`,
   });
 
-  console.log(`[Seed] Complete! Seeded ${data.staff.length} staff, ${data.trainingCatalog.length} catalog items, ${data.events.length} events, and ${totalAttendances} attendances.`);
+  console.log(`[Seed] Complete! Seeded ${data.staff.length} staff, ${data.trainingCatalog.length} catalog items, ${data.events.length} events, and ${totalAttendances + matrixCompletionsCount} total attendances/completions.`);
   return {
     staffCount: data.staff.length,
     catalogCount: data.trainingCatalog.length,
     eventCount: data.events.length,
-    attendanceCount: totalAttendances,
+    attendanceCount: totalAttendances + matrixCompletionsCount,
   };
 }
 
