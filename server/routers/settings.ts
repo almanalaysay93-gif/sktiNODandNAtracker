@@ -8,6 +8,7 @@ import { EMPLOYMENT_STATUSES, nurseFullName } from "../../shared/nursetrack";
 import { runDailyReminders } from "../reminders";
 import { todayDate } from "../../shared/nursetrack";
 import { seedExcelDatabase } from "../seedExcel";
+import { deduplicateDatabase } from "../deduplicate";
 
 const settingKey = z.enum([
   "appTitle",
@@ -80,6 +81,16 @@ export const settingsRouter = router({
       supervisorId: ctx.user.id,
       actionType: "settings.excel.sync",
       summary: `Synced NN LDI Database: ${results.staffCount} staff, ${results.catalogCount} training catalog items, ${results.eventCount} seminar events, ${results.attendanceCount} attendances.`,
+    });
+    return results;
+  }),
+
+  deduplicateDatabase: adminProcedure.mutation(async ({ ctx }) => {
+    const results = await deduplicateDatabase();
+    await logActivity({
+      supervisorId: ctx.user.id,
+      actionType: "settings.deduplicate",
+      summary: `Cleaned database duplicates: merged ${results.mergedNursesGroups} nurse groups, removed ${results.deletedDuplicateNurses} duplicate profiles, ${results.deduplicatedTrainings} duplicate trainings, ${results.deduplicatedCredentials} duplicate credentials.`,
     });
     return results;
   }),

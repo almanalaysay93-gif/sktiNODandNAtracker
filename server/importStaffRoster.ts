@@ -47,14 +47,25 @@ export async function importStaffRosterHandler(req: Request, res: Response) {
     const typeIdByName = new Map<string, number>();
     for (const t of await db.listCredentialTypes()) typeIdByName.set(t.name, t.id);
 
+    const allExistingNurses = await db.listNurses();
+    const nurseByName = new Map(
+      allExistingNurses.map((n) => [`${n.lastName.trim()} ${n.firstName.trim()}`.toLowerCase().replace(/[^a-z0-9]/g, ""), n])
+    );
+
     let created = 0;
     let skipped = 0;
     const errors: Array<{ licenseNumber: string; error: string }> = [];
 
     for (const row of parsed.data.rows) {
       try {
-        const existing = await db.getNurseByEmployeeId(row.licenseNumber);
+        const nameKey = `${row.lastName.trim()} ${row.firstName.trim()}`.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const existing = (await db.getNurseByEmployeeId(row.licenseNumber)) ?? nurseByName.get(nameKey);
+        
         if (existing) {
+          // Nurse already exists: update email and ensure license without creating duplicate nurse
+          if (!existing.accountEmail && row.email) {
+            await db.updateNurse(existing.id, { accountEmail: row.email });
+          }
           skipped++;
           continue;
         }

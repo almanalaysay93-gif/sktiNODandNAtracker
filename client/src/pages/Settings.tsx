@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Bell, Download, FileSpreadsheet, Play, Save, Upload } from "lucide-react";
+import { Bell, Download, FileSpreadsheet, Play, RefreshCw, Save, Upload } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -252,21 +252,54 @@ function ExportTab() {
     { value: "all", label: "All (JSON backup)" },
   ] as const;
 
+  const dedup = trpc.settings.deduplicateDatabase.useMutation({
+    onSuccess: (res) => {
+      toast.success(`Cleaned duplicates: merged ${res.mergedNursesGroups} nurse groups, removed ${res.deletedDuplicateNurses} duplicate profiles, ${res.deduplicatedTrainings} duplicate trainings.`);
+      utils.nurses.list.invalidate();
+      utils.trainings.listRecords.invalidate();
+      utils.credentials.list.invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   return (
-    <Card className="glass-card">
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <Download className="h-4 w-4" />
-          Data Export
-        </CardTitle>
-        <CardDescription>Download raw data for records or backup purposes.</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-wrap gap-2">
-        {entities.map((e) => (
-          <ExportButton key={e.value} entity={e.value} label={e.label} />
-        ))}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Data Export
+          </CardTitle>
+          <CardDescription>Download raw data for records or backup purposes.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          {entities.map((e) => (
+            <ExportButton key={e.value} entity={e.value} label={e.label} />
+          ))}
+        </CardContent>
+      </Card>
+
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Database Maintenance & Deduplication
+          </CardTitle>
+          <CardDescription>
+            Merge duplicate staff profiles (matching by normalized name/license), merge their assignments, credentials, and training records, and clean duplicate training completions.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button
+            variant="outline"
+            disabled={dedup.isPending}
+            onClick={() => dedup.mutate()}
+          >
+            {dedup.isPending ? "Deduplicating..." : "Run Database Deduplication"}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

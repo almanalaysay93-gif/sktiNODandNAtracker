@@ -157,14 +157,19 @@ export async function seedExcelDatabase(dataFilePath?: string) {
   // 4. Seed Staff (Nurses & Attendants)
   console.log(`[Seed] Seeding ${data.staff.length} staff members...`);
   const nurseIdByNormName = new Map<string, number>();
+  const allExistingNurses = await db.select().from(nurses);
+  const nurseByName = new Map(
+    allExistingNurses.map((n) => [`${n.lastName.trim()} ${n.firstName.trim()}`.toLowerCase().replace(/[^a-z0-9]/g, ""), n])
+  );
 
   for (const person of data.staff) {
     const area = areaByCode.get(person.currentAreaCode) ?? allAreas[0];
-    const existing = await db.select().from(nurses).where(eq(nurses.employeeId, person.employeeId)).limit(1);
+    const nameKey = `${person.nameInfo.lastName.trim()} ${person.nameInfo.firstName.trim()}`.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const existing = (await db.select().from(nurses).where(eq(nurses.employeeId, person.employeeId)).limit(1))[0] ?? nurseByName.get(nameKey);
     
     let nurseId: number;
-    if (existing.length > 0) {
-      nurseId = existing[0].id;
+    if (existing) {
+      nurseId = existing.id;
       await db.update(nurses).set({
         firstName: person.nameInfo.firstName || person.nameInfo.lastName,
         middleName: person.nameInfo.middleName ?? null,
@@ -251,16 +256,28 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     const startDate = new Date(`${ev.startDate}T00:00:00`);
     const endDate = new Date(`${ev.endDate}T00:00:00`);
 
-    const eventRes = await db.insert(trainingEvents).values({
-      trainingId: catalogItem.id,
-      provider: ev.provider,
-      venue: ev.venue,
-      startDate,
-      endDate,
-      targetStaffType: "All",
-      remarks: `Conducted by ${ev.provider}`,
-    });
-    const eventId = Number(eventRes[0].insertId);
+    const existingEvents = await db.select().from(trainingEvents).where(
+      and(
+        eq(trainingEvents.trainingId, catalogItem.id),
+        eq(trainingEvents.startDate, startDate)
+      )
+    ).limit(1);
+
+    let eventId: number;
+    if (existingEvents.length > 0) {
+      eventId = existingEvents[0].id;
+    } else {
+      const eventRes = await db.insert(trainingEvents).values({
+        trainingId: catalogItem.id,
+        provider: ev.provider,
+        venue: ev.venue,
+        startDate,
+        endDate,
+        targetStaffType: "All",
+        remarks: `Conducted by ${ev.provider}`,
+      });
+      eventId = Number(eventRes[0].insertId);
+    }
 
     for (const att of ev.attendees) {
       let nurseId = nurseIdByNormName.get(att.normName);
@@ -272,21 +289,31 @@ export async function seedExcelDatabase(dataFilePath?: string) {
 
       const completionDate = new Date(`${att.completionDate}T00:00:00`);
 
-      try {
-        await db.insert(nurseTrainings).values({
-          nurseId,
-          trainingId: catalogItem.id,
-          eventId,
-          status: "Completed",
-          completionDate,
-          scheduledDate: startDate,
-          provider: ev.provider,
-          participationRole: att.role,
-          remarks: `Attended ${ev.title}`,
-        });
-        totalAttendances++;
-      } catch (err) {
-        // Ignore duplicate attendance
+      const existingTrainings = await db.select().from(nurseTrainings).where(
+        and(
+          eq(nurseTrainings.nurseId, nurseId),
+          eq(nurseTrainings.trainingId, catalogItem.id),
+          eq(nurseTrainings.completionDate, completionDate)
+        )
+      ).limit(1);
+
+      if (existingTrainings.length === 0) {
+        try {
+          await db.insert(nurseTrainings).values({
+            nurseId,
+            trainingId: catalogItem.id,
+            eventId,
+            status: "Completed",
+            completionDate,
+            scheduledDate: startDate,
+            provider: ev.provider,
+            participationRole: att.role,
+            remarks: `Attended ${ev.title}`,
+          });
+          totalAttendances++;
+        } catch (err) {
+          // Ignore duplicate attendance
+        }
       }
     }
   }
