@@ -18,6 +18,26 @@ import { eq, and } from "drizzle-orm";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+function parseSafeDate(raw: any): Date | null {
+  if (!raw) return null;
+  if (raw instanceof Date && !isNaN(raw.getTime())) return raw;
+  const s = String(raw).trim();
+  if (!s || s === "null" || s === "undefined") return null;
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const d = new Date(s.slice(0, 10) + "T00:00:00");
+    if (!isNaN(d.getTime())) return d;
+  }
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (mdy) {
+    const d = new Date(`${mdy[3]}-${mdy[1].padStart(2, "0")}-${mdy[2].padStart(2, "0")}T00:00:00`);
+    if (!isNaN(d.getTime())) return d;
+  }
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) return d;
+  return null;
+}
+
 interface NameInfo {
   fullName: string;
   lastName: string;
@@ -216,10 +236,10 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     }
 
     // Seed License / Credential if available
-    if (person.licenseExpiry) {
+    const expiry = parseSafeDate(person.licenseExpiry);
+    if (expiry) {
       const credTypeId = person.staffType === "Registered Nurse" ? rnCredTypeId : naCredTypeId;
-      const expiry = new Date(`${person.licenseExpiry}T00:00:00`);
-      const cycleKey = `${nurseId}-${person.licenseExpiry}`;
+      const cycleKey = `${nurseId}-${expiry.toISOString().slice(0, 10)}`;
       
       const existingCred = await db.select().from(nurseCredentials).where(
         and(eq(nurseCredentials.nurseId, nurseId), eq(nurseCredentials.credentialTypeId, credTypeId))
@@ -256,8 +276,8 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     const catalogItem = catalogByName.get(ev.title.trim().toLowerCase());
     if (!catalogItem) continue;
 
-    const startDate = new Date(`${ev.startDate}T00:00:00`);
-    const endDate = new Date(`${ev.endDate}T00:00:00`);
+    const startDate = parseSafeDate(ev.startDate) || new Date("2026-03-15T00:00:00");
+    const endDate = parseSafeDate(ev.endDate) || startDate;
 
     const existingEvents = await db.select().from(trainingEvents).where(
       and(
@@ -291,7 +311,7 @@ export async function seedExcelDatabase(dataFilePath?: string) {
       }
       if (!nurseId) continue;
 
-      const completionDate = new Date(`${att.completionDate}T00:00:00`);
+      const completionDate = parseSafeDate(att.completionDate) || startDate;
 
       const existingTrainings = await db.select().from(nurseTrainings).where(
         and(

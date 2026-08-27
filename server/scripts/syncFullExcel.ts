@@ -20,6 +20,26 @@ function getCellValue(cell: ExcelJS.Cell | undefined): string {
   return String(cell.value).trim();
 }
 
+function parseSafeDateIso(raw: any): string | null {
+  if (!raw) return null;
+  if (raw instanceof Date && !isNaN(raw.getTime())) return raw.toISOString().slice(0, 10);
+  const s = String(raw).trim();
+  if (!s || s === "null" || s === "undefined") return null;
+
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const d = new Date(s.slice(0, 10));
+    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+  }
+  const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (mdy) {
+    const d = new Date(Date.UTC(Number(mdy[3]), Number(mdy[1]) - 1, Number(mdy[2])));
+    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+  }
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+  return null;
+}
+
 function parseName(raw: string) {
   let clean = raw.replace(/\s+(RN|MAN|BSN|MD|LPT|NC\s*II)\b/gi, "").trim();
   clean = clean.replace(/\s+/g, " ");
@@ -161,7 +181,7 @@ async function extractWorkbookData() {
         employmentStatus: "Active",
         currentAreaCode: areaInfo.code,
         licenseNumber: prc || null,
-        licenseExpiry: exp ? exp.slice(0, 10) : null,
+        licenseExpiry: parseSafeDateIso(exp),
         matrixTrainings,
       });
     }
@@ -204,7 +224,7 @@ async function extractWorkbookData() {
         employmentStatus: "Active",
         currentAreaCode: areaInfo.code,
         licenseNumber: prc || null,
-        licenseExpiry: exp ? exp.slice(0, 10) : null,
+        licenseExpiry: parseSafeDateIso(exp),
       });
     }
   }
@@ -232,7 +252,7 @@ async function extractWorkbookData() {
         employmentStatus: statusType.toUpperCase().includes("ROTAT") ? "Rotated" : "Resigned",
         currentAreaCode: "NEPHRO-OFFICE",
         licenseNumber: prc || null,
-        licenseExpiry: exp ? exp.slice(0, 10) : null,
+        licenseExpiry: parseSafeDateIso(exp),
       });
     }
   }

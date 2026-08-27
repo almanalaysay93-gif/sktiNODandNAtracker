@@ -2202,7 +2202,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "OTSU-SHARE",
       "licenseNumber": "0878023",
-      "licenseExpiry": "03/15/2028",
+      "licenseExpiry": "2028-03-15",
       "matrixTrainings": {
         "BLS RN": "2025",
         "MENTAL HEALTH WRKPLCE": "2025",
@@ -2243,7 +2243,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "OTSU-SHARE",
       "licenseNumber": "544667",
-      "licenseExpiry": "08/31/27",
+      "licenseExpiry": "2027-08-30",
       "matrixTrainings": {
         "COMPASSIONATE LEADERSHIP": "2025",
         "EMPOWERING SELF SAKTO": "2025",
@@ -2267,7 +2267,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "OTSU-SHARE",
       "licenseNumber": "691169",
-      "licenseExpiry": "06/03/29",
+      "licenseExpiry": "2029-06-02",
       "matrixTrainings": {
         "INCIDENT REPORTING": "2025",
         "NN: PMOD": "SP",
@@ -2289,7 +2289,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "OTSU-SHARE",
       "licenseNumber": "610646",
-      "licenseExpiry": "05/10/28",
+      "licenseExpiry": "2028-05-09",
       "matrixTrainings": {
         "INTEGRITY  LECTURE SERIES": "2025",
         "MASTERING DIABETES CARE": "2025",
@@ -4679,7 +4679,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2030-02-19",
-      "licenseExpiry": "kathyabear"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-127",
@@ -4696,7 +4696,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2029-11-27",
-      "licenseExpiry": "paulitaabu"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-128",
@@ -4713,7 +4713,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-03-01",
-      "licenseExpiry": "anoblingje"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-129",
@@ -4747,7 +4747,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-02-14",
-      "licenseExpiry": "ellamarieb"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-131",
@@ -4764,7 +4764,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-06-08",
-      "licenseExpiry": "benaventea"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-132",
@@ -4781,7 +4781,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2026-11-17",
-      "licenseExpiry": "jamzkie112"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-133",
@@ -4798,7 +4798,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2029-02-04",
-      "licenseExpiry": "apolonioca"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-134",
@@ -4815,7 +4815,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": null,
-      "licenseExpiry": "ronaldcolo"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-135",
@@ -4832,7 +4832,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2029-07-07",
-      "licenseExpiry": "[object Ob"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-136",
@@ -4849,7 +4849,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2029-02-05",
-      "licenseExpiry": "Jaysalgud@"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-137",
@@ -4866,7 +4866,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2027-08-07",
-      "licenseExpiry": "rubeneupen"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-138",
@@ -4883,7 +4883,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-12-27",
-      "licenseExpiry": "ejhamal018"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-139",
@@ -4900,7 +4900,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2030-05-08",
-      "licenseExpiry": "joycelingo"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-140",
@@ -4917,7 +4917,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2030-08-19",
-      "licenseExpiry": "junicolims"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-141",
@@ -4934,7 +4934,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2030-01-06",
-      "licenseExpiry": "johnkier19"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-142",
@@ -4951,7 +4951,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-07-20",
-      "licenseExpiry": "macpaoreym"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-143",
@@ -4985,7 +4985,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2029-07-07",
-      "licenseExpiry": "rannie.man"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-145",
@@ -5002,7 +5002,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2029-12-09",
-      "licenseExpiry": "mahalko913"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-146",
@@ -5019,7 +5019,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2030-02-12",
-      "licenseExpiry": "willene.la"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-147",
@@ -5036,7 +5036,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2027-07-13",
-      "licenseExpiry": "roquelinep"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-148",
@@ -5070,7 +5070,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-06-13",
-      "licenseExpiry": "orbudangel"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-150",
@@ -5087,7 +5087,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-04-18",
-      "licenseExpiry": "sophiaorqu"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-151",
@@ -5104,7 +5104,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2027-08-04",
-      "licenseExpiry": "osabeljere"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-152",
@@ -5121,7 +5121,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2027-06-09",
-      "licenseExpiry": "nelpacanz@"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-153",
@@ -5155,7 +5155,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2029-01-29",
-      "licenseExpiry": "antoniopal"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-155",
@@ -5172,7 +5172,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-09-13",
-      "licenseExpiry": "0424rodz@g"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-156",
@@ -5189,7 +5189,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2026-11-17",
-      "licenseExpiry": "payotjohnr"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-157",
@@ -5257,7 +5257,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2030-08-19",
-      "licenseExpiry": "ramirezshe"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-161",
@@ -5274,7 +5274,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-12-12",
-      "licenseExpiry": "michellere"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-162",
@@ -5291,7 +5291,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2024-12-10",
-      "licenseExpiry": "sanchezmay"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-163",
@@ -5308,7 +5308,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2028-08-16",
-      "licenseExpiry": "ericahyesa"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-164",
@@ -5325,7 +5325,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2027-06-28",
-      "licenseExpiry": "sottomaryg"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-165",
@@ -5342,7 +5342,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2027-01-16",
-      "licenseExpiry": "suertegene"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-166",
@@ -5359,7 +5359,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2027-01-16",
-      "licenseExpiry": "marilouval"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-167",
@@ -5376,7 +5376,7 @@
       "employmentStatus": "Active",
       "currentAreaCode": "RDU-MAIN",
       "licenseNumber": "2027-09-26",
-      "licenseExpiry": "villamorar"
+      "licenseExpiry": null
     },
     {
       "employeeId": "NA-168",
@@ -5495,7 +5495,7 @@
       "employmentStatus": "Resigned",
       "currentAreaCode": "NEPHRO-OFFICE",
       "licenseNumber": "2030-02-24",
-      "licenseExpiry": "[object Ob"
+      "licenseExpiry": null
     }
   ],
   "events": [
