@@ -14,6 +14,7 @@ import { settingsRouter } from "./routers/settings";
 import { seminarsRouter } from "./routers/seminars";
 import { staffAccountRouter } from "./routers/staffAccount";
 import { smartImportRouter } from "./routers/smartImport";
+import { aiInsightsRouter } from "./routers/aiInsights";
 
 export const appRouter = router({
   system: systemRouter,
@@ -39,6 +40,7 @@ export const appRouter = router({
   seminars: seminarsRouter,
   staffAccount: staffAccountRouter,
   smartImport: smartImportRouter,
+  aiInsights: aiInsightsRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { startLogin } from "@/const";
 import {
   Bell,
+  Bot,
   CalendarDays,
   ClipboardList,
   CreditCard,
@@ -60,6 +61,7 @@ export const NAV_ITEMS = [
   { icon: CalendarDays, label: "Calendar", path: "/calendar" },
   { icon: FileBarChart, label: "Reports", path: "/reports" },
   { icon: Sparkles, label: "Smart Import", path: "/smart-import" },
+  { icon: Bot, label: "AI Insights", path: "/ai-insights" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
 

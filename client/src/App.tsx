@@ -22,6 +22,7 @@ import Trainings from "./pages/Trainings";
 import Seminars from "./pages/Seminars";
 import SeminarDetail from "./pages/SeminarDetail";
 import SmartImportPage from "./pages/SmartImport";
+import AiInsightsPage from "./pages/AiInsights";
 
 // Admin/supervisor routes. Signed-in non-admin (staff) accounts are bounced
 // to /me — they only ever get their own profile, never the full dashboard.
@@ -112,6 +113,11 @@ function Router() {
       <Route path="/smart-import">
         <Protected>
           <SmartImportPage />
+        </Protected>
+      </Route>
+      <Route path="/ai-insights">
+        <Protected>
+          <AiInsightsPage />
         </Protected>
       </Route>
       <Route path="/settings">
