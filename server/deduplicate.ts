@@ -10,6 +10,7 @@ import {
   nurseTrainings,
   customCalendarEvents,
   notifications,
+  credentialTypes,
   type Nurse,
 } from "../drizzle/schema";
 
@@ -24,6 +25,18 @@ export const CANONICAL_AREAS = [
   { code: "SKTI-ICU", name: "SKTI ICU", description: "SKTI Intensive Care Unit", sortOrder: 8 },
   { code: "TRIAGE", name: "Triage & Receiving", description: "Nephrology Triage and Outpatient Receiving", sortOrder: 9 },
 ] as const;
+
+/** Canonical credential type names — the only ones seedExcel.ts should ever create. */
+export const CANONICAL_CREDENTIAL_TYPES = {
+  RN: "PRC Registered Nurse License",
+  NA: "TESDA NC II / PRC Attendant Certification",
+} as const;
+
+/** Legacy type names (created by the older importStaffRoster.ts bulk importer) that mean the same license as a canonical type above. */
+const LEGACY_CREDENTIAL_TYPE_ALIASES: Record<string, string> = {
+  "PRC License": CANONICAL_CREDENTIAL_TYPES.RN,
+  "PRC / NC II License": CANONICAL_CREDENTIAL_TYPES.NA,
+};
 
 export function canonicalAreaInfo(rawName: string): { code: string; name: string } | null {
   const s = rawName.trim().toUpperCase();
@@ -116,9 +129,25 @@ export async function deduplicateDatabase() {
   let deduplicatedTrainingsCount = 0;
   let deduplicatedCredentialsCount = 0;
   let cleanedAreasCount = 0;
+  let mergedCredentialTypesCount = 0;
 
   if (db) {
-    // 0. Ensure Canonical Areas exist and consolidate non-standard areas (e.g. "DU MAIN NURSES" -> "RDU Main", "DU ANNEX NURSES" -> "RDU Annex")
+    // 0a. Merge legacy credential types (e.g. "PRC License" from the old roster importer)
+    // into the canonical ones seedExcel.ts uses (e.g. "PRC Registered Nurse License"),
+    // so the same license doesn't show as two separate credential rows per nurse.
+    const allCredTypesPreMerge = await db.select().from(credentialTypes);
+    const credTypeByName = new Map(allCredTypesPreMerge.map((t) => [t.name, t]));
+    for (const [legacyName, canonicalName] of Object.entries(LEGACY_CREDENTIAL_TYPE_ALIASES)) {
+      const legacy = credTypeByName.get(legacyName);
+      const canonical = credTypeByName.get(canonicalName);
+      if (legacy && canonical && legacy.id !== canonical.id) {
+        await db.update(nurseCredentials).set({ credentialTypeId: canonical.id }).where(eq(nurseCredentials.credentialTypeId, legacy.id));
+        await db.delete(credentialTypes).where(eq(credentialTypes.id, legacy.id));
+        mergedCredentialTypesCount++;
+      }
+    }
+
+    // 0b. Ensure Canonical Areas exist and consolidate non-standard areas (e.g. "DU MAIN NURSES" -> "RDU Main", "DU ANNEX NURSES" -> "RDU Annex")
     for (const ca of CANONICAL_AREAS) {
       await db.insert(areas).values({
         code: ca.code,
@@ -471,5 +500,6 @@ export async function deduplicateDatabase() {
     deduplicatedTrainings: deduplicatedTrainingsCount,
     deduplicatedCredentials: deduplicatedCredentialsCount,
     cleanedAreasCount,
+    mergedCredentialTypesCount,
   };
 }

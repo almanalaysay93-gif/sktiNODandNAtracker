@@ -3,6 +3,7 @@ import { z } from "zod";
 import { sdk } from "./_core/sdk";
 import * as db from "./db";
 import { renewalCycleKey } from "../shared/nursetrack";
+import { CANONICAL_CREDENTIAL_TYPES } from "./deduplicate";
 
 const rowSchema = z.object({
   firstName: z.string().min(1).max(128),
@@ -17,8 +18,8 @@ const rowSchema = z.object({
 const bodySchema = z.object({ rows: z.array(rowSchema).max(500) });
 
 const CREDENTIAL_TYPE_BY_STAFF_TYPE: Record<string, string> = {
-  "Registered Nurse": "PRC License",
-  "Nursing Attendant": "PRC / NC II License",
+  "Registered Nurse": CANONICAL_CREDENTIAL_TYPES.RN,
+  "Nursing Attendant": CANONICAL_CREDENTIAL_TYPES.NA,
 };
 
 /**
