@@ -14,7 +14,7 @@ import {
 } from "drizzle-orm/mysql-core";
 
 /**
- * Core user table backing auth flow (Manus OAuth).
+ * Core user table backing auth flow (Google OAuth).
  * Single supervisor role in v1 — the supervisor is the account owner.
  */
 export const users = mysqlTable("users", {

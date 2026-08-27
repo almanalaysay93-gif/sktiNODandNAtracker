@@ -51,7 +51,7 @@ function createAdminContext(): TrpcContext {
     openId: "integration-test-user",
     email: "integration@test.com",
     name: "Integration Test",
-    loginMethod: "manus",
+    loginMethod: "google",
     role: "admin",
     createdAt: new Date(),
     updatedAt: new Date(),

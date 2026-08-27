@@ -74,7 +74,7 @@ export function NurseFormDialog({
         setDateHired(nurse.dateHired instanceof Date ? nurse.dateHired.toISOString().slice(0, 10) : String(nurse.dateHired).slice(0, 10));
         setContactNumber(nurse.contactNumber ?? "");
         setAreaId(nurse.currentAreaId ? String(nurse.currentAreaId) : "");
-        setPhotoPreview(nurse.profilePhotoKey ? `/manus-storage/${nurse.profilePhotoKey}` : null);
+        setPhotoPreview(nurse.profilePhotoKey ? `/storage/${nurse.profilePhotoKey}` : null);
       } else {
         setEmployeeId("");
         setFirstName("");

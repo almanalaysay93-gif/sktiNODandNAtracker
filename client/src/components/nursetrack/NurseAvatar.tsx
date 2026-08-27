@@ -28,7 +28,7 @@ export function NurseAvatar({
   return (
     <Avatar className={cn(sizeClasses[size], "border bg-muted", className)}>
       {nurse.profilePhotoKey ? (
-        <AvatarImage src={`/manus-storage/${nurse.profilePhotoKey}`} alt={`${nurse.firstName} ${nurse.lastName}`} />
+        <AvatarImage src={`/storage/${nurse.profilePhotoKey}`} alt={`${nurse.firstName} ${nurse.lastName}`} />
       ) : null}
       <AvatarFallback className="font-medium">{initials.toUpperCase()}</AvatarFallback>
     </Avatar>

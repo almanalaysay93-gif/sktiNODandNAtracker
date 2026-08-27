@@ -239,7 +239,7 @@ export default function Dashboard() {
                         {a.samplePhotos.map((p: { id: number; profilePhotoKey: string }) => (
                           <img
                             key={p.id}
-                            src={`/manus-storage/${p.profilePhotoKey}`}
+                            src={`/storage/${p.profilePhotoKey}`}
                             alt=""
                             className="h-7 w-7 rounded-full border-2 border-background object-cover"
                           />

@@ -202,11 +202,6 @@ temp/
 .swarm/
 .agents/
 
-# Webdev artifacts
-.webdev/
-
-# Manus version file
-client/public/__manus__/version.json
 .project-config.json
 
 # Ruflo local secrets and runtime data
