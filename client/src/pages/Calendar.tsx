@@ -97,8 +97,8 @@ export default function Calendar() {
   const [monthAnchor, setMonthAnchor] = useState(() => new Date());
 
   const { data: events, isLoading } = trpc.calendar.listEvents.useQuery({
-    from: new Date(Date.now() - 30 * 86400000),
-    to: new Date(Date.now() + 365 * 86400000),
+    from: new Date("2026-01-01T00:00:00"),
+    to: new Date("2027-12-31T23:59:59"),
     includeTypes,
   });
 

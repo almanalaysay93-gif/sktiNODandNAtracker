@@ -1,0 +1,207 @@
+{
+  "timestamp": "2026-08-27T06:01:02.895Z",
+  "target": ".",
+  "depth": "deep",
+  "type": "all",
+  "summary": {
+    "critical": 0,
+    "high": 31,
+    "medium": 1,
+    "low": 0,
+    "total": 32
+  },
+  "findings": [
+    {
+      "severity": "MEDIUM",
+      "type": "React XSS",
+      "location": "client\\src\\components\\ui\\chart.tsx:81",
+      "description": "React XSS risk"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:34",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:138",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:194",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:217",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:558",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:599",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:694",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:766",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:817",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:857",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:915",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\db.ts:1011",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\localDb.ts:233",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\reminders.ts:138",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\reminders.ts:151",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\areas.ts:123",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\areas.ts:137",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\areas.ts:153",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\areas.ts:154",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\dashboard.ts:263",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\dashboard.ts:272",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\dashboard.ts:276",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\dashboard.ts:599",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\dashboard.ts:609",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\dashboard.ts:613",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\reports.ts:123",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\reports.ts:124",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\routers\\reports.ts:294",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\sqliteHelpers.ts:4",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\sqliteHelpers.ts:11",
+      "description": "Possible SQL injection"
+    },
+    {
+      "severity": "HIGH",
+      "type": "SQL Injection",
+      "location": "server\\sqliteHelpers.ts:54",
+      "description": "Possible SQL injection"
+    }
+  ]
+}

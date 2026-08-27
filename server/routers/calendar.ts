@@ -91,6 +91,9 @@ export const calendarRouter = router({
         }
       }
 
+      const catalogRows = await db.listTrainingCatalog();
+      const catalogById = new Map(catalogRows.map((c) => [c.id, c]));
+
       // Training schedule & expiry events.
       if (includeTypes.has("training")) {
         const records = await db.listNurseTrainings();
@@ -98,29 +101,43 @@ export const calendarRouter = router({
           const nurse = nurseById.get(r.nurseId);
           if (!nurse || nurse.archivedAt) continue;
           if (r.status === "Cancelled") continue;
-          if (r.scheduledDate && inRange(dateIso(r.scheduledDate))) {
+          const trnDate = r.scheduledDate ? dateIso(r.scheduledDate) : r.completionDate ? dateIso(r.completionDate) : null;
+          const cat = catalogById.get(r.trainingId);
+          const catName = cat?.name ? (cat.name.length > 40 ? cat.name.slice(0, 37) + "..." : cat.name) : "Training";
+
+          if (trnDate && inRange(trnDate)) {
             events.push({
-              id: `trn-${r.id}`, type: "training", subtype: "schedule",
-              title: `Training: ${r.status === "Scheduled" ? "scheduled" : r.status} — ${nurse.firstName} ${nurse.lastName}`,
-              date: dateIso(r.scheduledDate), allDay: true,
+              id: `trn-${r.id}`,
+              type: "training",
+              subtype: "schedule",
+              title: `${catName} — ${nurse.firstName} ${nurse.lastName}`,
+              date: trnDate,
+              allDay: true,
               severity: r.status === "Scheduled" ? "informational" : r.status === "Completed" ? "healthy" : "attention",
-              nurseId: nurse.id, nurseName: `${nurse.firstName} ${nurse.lastName}`,
+              nurseId: nurse.id,
+              nurseName: `${nurse.firstName} ${nurse.lastName}`,
               areaId: nurse.currentAreaId ?? undefined,
               areaName: nurse.currentAreaId ? areaById.get(nurse.currentAreaId)?.name : null,
-              relatedEntityType: "nurseTraining", relatedEntityId: r.id,
+              relatedEntityType: "nurseTraining",
+              relatedEntityId: r.id,
             });
           }
           if (r.status === "Completed" && r.expiryDate && inRange(dateIso(r.expiryDate))) {
             const days = daysUntilExpiry(dateIso(r.expiryDate), today);
             events.push({
-              id: `trne-${r.id}`, type: "training", subtype: "expiry",
-              title: `Training expires — ${nurse.firstName} ${nurse.lastName}${days <= 0 ? " (expired)" : ""}`,
-              date: dateIso(r.expiryDate), allDay: true,
+              id: `trne-${r.id}`,
+              type: "training",
+              subtype: "expiry",
+              title: `${catName} expires — ${nurse.firstName} ${nurse.lastName}${days <= 0 ? " (expired)" : ""}`,
+              date: dateIso(r.expiryDate),
+              allDay: true,
               severity: days <= 0 ? "urgent_or_expired" : days <= 180 ? "upcoming_renewal" : "attention",
-              nurseId: nurse.id, nurseName: `${nurse.firstName} ${nurse.lastName}`,
+              nurseId: nurse.id,
+              nurseName: `${nurse.firstName} ${nurse.lastName}`,
               areaId: nurse.currentAreaId ?? undefined,
               areaName: nurse.currentAreaId ? areaById.get(nurse.currentAreaId)?.name : null,
-              relatedEntityType: "nurseTraining", relatedEntityId: r.id,
+              relatedEntityType: "nurseTraining",
+              relatedEntityId: r.id,
             });
           }
         }

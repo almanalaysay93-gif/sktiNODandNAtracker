@@ -71,7 +71,7 @@ interface TrainingCatalogSeed {
 interface AttendeeSeed {
   staffName: string;
   normName: string;
-  employeeId?: string;
+  employeeId: string;
   role: "Participant" | "Speaker" | "Facilitator" | "Preceptor";
   completionDate: string;
 }
@@ -91,6 +91,8 @@ interface SeedData {
   staff: StaffSeed[];
   events: EventSeed[];
 }
+
+const catalogKey = (name: string) => name.slice(0, 128).trim().toLowerCase();
 
 export async function seedExcelDatabase(dataFilePath?: string) {
   const jsonPath = dataFilePath ?? path.join(__dirname, "data", "seedData.json");
@@ -151,8 +153,8 @@ export async function seedExcelDatabase(dataFilePath?: string) {
   console.log(`[Seed] Seeding ${data.trainingCatalog.length} Training Catalog items...`);
   const seenCatalogNames = new Set<string>();
   for (const item of data.trainingCatalog) {
-    const safeName = item.name.slice(0, 120).trim();
-    const key = safeName.toLowerCase();
+    const safeName = item.name.slice(0, 128).trim();
+    const key = catalogKey(item.name);
     if (seenCatalogNames.has(key)) continue;
     seenCatalogNames.add(key);
     await db.insert(trainingCatalog).values({
@@ -173,7 +175,7 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     });
   }
   const allCatalog = await db.select().from(trainingCatalog);
-  const catalogByName = new Map(allCatalog.map((c) => [c.name.trim().toLowerCase(), c]));
+  const catalogByName = new Map(allCatalog.map((c) => [catalogKey(c.name), c]));
 
   // 4. Seed Staff (Nurses & Attendants)
   console.log(`[Seed] Seeding ${data.staff.length} staff members...`);
@@ -273,7 +275,7 @@ export async function seedExcelDatabase(dataFilePath?: string) {
   let totalAttendances = 0;
 
   for (const ev of data.events) {
-    const catalogItem = catalogByName.get(ev.title.trim().toLowerCase());
+    const catalogItem = catalogByName.get(catalogKey(ev.title));
     if (!catalogItem) continue;
 
     const startDate = parseSafeDate(ev.startDate) || new Date("2026-03-15T00:00:00");
@@ -303,13 +305,10 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     }
 
     for (const att of ev.attendees) {
-      let nurseId = (att.employeeId && nurseIdByEmployeeId.get(att.employeeId)) || nurseIdByNormName.get(att.normName);
+      const nurseId = nurseIdByEmployeeId.get(att.employeeId) ?? nurseIdByNormName.get(att.normName);
       if (!nurseId) {
-        // Try loose token match against existing nurses
-        const lastNameToken = att.staffName.split(",")[0]?.trim().toUpperCase();
-        if (lastNameToken) nurseId = nurseIdByNormName.get(lastNameToken);
+        throw new Error(`Seed attendee did not resolve uniquely: ${att.staffName} (${att.employeeId})`);
       }
-      if (!nurseId) continue;
 
       const completionDate = parseSafeDate(att.completionDate) || startDate;
 
