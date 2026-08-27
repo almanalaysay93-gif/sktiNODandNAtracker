@@ -225,13 +225,34 @@ export const TRAINING_CATEGORIES = [
 
 export const ALLOWED_PHOTO_MIMES = ["image/jpeg", "image/png", "image/jpg"];
 export const ALLOWED_DOCUMENT_MIMES = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
+export const ALLOWED_SMART_IMPORT_MIMES = [
+  "image/jpeg",
+  "image/png",
+  "image/jpg",
+  "image/webp",
+  "application/pdf",
+  "text/plain",
+  "text/csv",
+  "application/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
 export const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
 
 /** Basic MIME validation for uploads. */
-export function validateMime(mime: string | undefined, kind: "photo" | "document"): { ok: boolean; error?: string } {
+export function validateMime(mime: string | undefined, kind: "photo" | "document" | "smartImport"): { ok: boolean; error?: string } {
   if (!mime) return { ok: false, error: "File type could not be detected." };
-  const allowed = kind === "photo" ? ALLOWED_PHOTO_MIMES : ALLOWED_DOCUMENT_MIMES;
-  if (!allowed.includes(mime)) return { ok: false, error: "File type not supported. Use JPG, PNG" + (kind === "document" ? " or PDF" : "") + "." };
+  const allowed = kind === "photo" ? ALLOWED_PHOTO_MIMES : kind === "document" ? ALLOWED_DOCUMENT_MIMES : ALLOWED_SMART_IMPORT_MIMES;
+  if (!allowed.includes(mime)) {
+    return {
+      ok: false,
+      error:
+        kind === "smartImport"
+          ? "File type not supported. Use JPG, PNG, WEBP, PDF, TXT, CSV, XLS, XLSX or DOCX."
+          : "File type not supported. Use JPG, PNG" + (kind === "document" ? " or PDF" : "") + ".",
+    };
+  }
   return { ok: true };
 }
 

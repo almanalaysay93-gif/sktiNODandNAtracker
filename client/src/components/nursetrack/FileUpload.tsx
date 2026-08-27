@@ -7,11 +7,14 @@ import { Upload } from "lucide-react";
  * File picker that returns base64 content ready for the upload mutations.
  * Validates MIME type and size before returning.
  */
-export function pickFile(kind: "photo" | "document"): Promise<{ fileBase64: string; fileName: string; mimeType: string } | null> {
+const SMART_IMPORT_ACCEPT =
+  "image/jpeg,image/png,image/webp,application/pdf,text/plain,text/csv,.csv,.xlsx,.xls,.docx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+export function pickFile(kind: "photo" | "document" | "smartImport"): Promise<{ fileBase64: string; fileName: string; mimeType: string } | null> {
   return new Promise((resolve) => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = kind === "photo" ? "image/jpeg,image/png" : "image/jpeg,image/png,application/pdf";
+    input.accept = kind === "photo" ? "image/jpeg,image/png" : kind === "document" ? "image/jpeg,image/png,application/pdf" : SMART_IMPORT_ACCEPT;
     input.onchange = () => {
       const file = input.files?.[0];
       if (!file) {
@@ -52,7 +55,7 @@ export function FileUploadButton({
   disabled,
   className,
 }: {
-  kind: "photo" | "document";
+  kind: "photo" | "document" | "smartImport";
   onFile: (file: { fileBase64: string; fileName: string; mimeType: string }) => void;
   label?: string;
   disabled?: boolean;

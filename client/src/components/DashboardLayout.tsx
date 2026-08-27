@@ -19,7 +19,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -34,11 +33,11 @@ import {
   LayoutDashboard,
   LogOut,
   MapPin,
-  PanelLeft,
   FileBarChart,
   GraduationCap,
   Search,
   Settings,
+  Sparkles,
   Users,
   UserCog,
 } from "lucide-react";
@@ -60,6 +59,7 @@ export const NAV_ITEMS = [
   { icon: CreditCard, label: "Licenses", path: "/licenses" },
   { icon: CalendarDays, label: "Calendar", path: "/calendar" },
   { icon: FileBarChart, label: "Reports", path: "/reports" },
+  { icon: Sparkles, label: "Smart Import", path: "/smart-import" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
@@ -131,7 +131,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
   const searchString = useSearch();
-  const { state, toggleSidebar } = useSidebar();
+  const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -168,24 +168,14 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
           className="border-r-0 glass-sidebar"
           disableTransition={isResizing}
         >
-          <SidebarHeader className="h-20 justify-center">
-            <div className="flex items-center gap-3 px-2 transition-all w-full">
-              <button
-                onClick={toggleSidebar}
-                className="h-10 w-10 flex items-center justify-center hover:bg-accent rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
-                aria-label="Toggle navigation"
-              >
-                <PanelLeft className="h-5 w-5 text-muted-foreground" />
-              </button>
+          <SidebarHeader className={cn("justify-center", !isCollapsed ? "py-6" : "h-24")}>
+            <div className="flex items-center justify-center px-2 transition-all w-full">
               {!isCollapsed ? (
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <img
-                    src="/branding/spmc-nephro-cluster.jpg"
-                    alt="SPMC Department of Nephrology Nursing"
-                    className="h-13 w-13 object-contain rounded-full bg-white shrink-0 shadow-sm"
-                  />
-                  <span className="font-bold text-xl tracking-tight truncate">NurseTrack</span>
-                </div>
+                <img
+                  src="/branding/spmc-nephro-cluster.jpg"
+                  alt="SPMC Department of Nephrology Nursing"
+                  className="h-40 w-40 object-contain rounded-full bg-white shrink-0 shadow-sm mx-auto"
+                />
               ) : (
                 <img
                   src="/branding/spmc-nephro-cluster.jpg"
@@ -264,7 +254,6 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
       <SidebarInset className="nurse-track-inset">
         <div className="flex border-b h-20 items-center justify-between glass-panel px-3 md:px-6 sticky top-0 z-40">
           <div className="flex items-center gap-3 min-w-0">
-            <SidebarTrigger className="h-10 w-10 rounded-lg bg-background shrink-0" />
             <div className="flex flex-col gap-0.5 min-w-0">
               <span className="font-bold text-foreground text-lg md:text-2xl tracking-tight truncate">
                 {activeMenuItem?.label ?? "SKTI NurseTrack"}

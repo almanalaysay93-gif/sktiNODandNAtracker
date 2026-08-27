@@ -18,6 +18,8 @@ import SettingsPage from "./pages/Settings";
 import Trainings from "./pages/Trainings";
 import Seminars from "./pages/Seminars";
 import SeminarDetail from "./pages/SeminarDetail";
+import StaffSelfServicePage from "./pages/StaffSelfServicePage";
+import SmartImportPage from "./pages/SmartImport";
 
 function Protected({ children }: { children: React.ReactNode }) {
   return <DashboardLayout>{children}</DashboardLayout>;
@@ -28,6 +30,9 @@ function Router() {
     <Switch>
       <Route path="/">
         <Redirect to="/dashboard" />
+      </Route>
+      <Route path="/staff/profile">
+        <StaffSelfServicePage />
       </Route>
       <Route path="/dashboard">
         <Protected>
@@ -87,6 +92,11 @@ function Router() {
       <Route path="/reports">
         <Protected>
           <Reports />
+        </Protected>
+      </Route>
+      <Route path="/smart-import">
+        <Protected>
+          <SmartImportPage />
         </Protected>
       </Route>
       <Route path="/settings">
