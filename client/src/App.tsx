@@ -21,7 +21,6 @@ import SettingsPage from "./pages/Settings";
 import Trainings from "./pages/Trainings";
 import Seminars from "./pages/Seminars";
 import SeminarDetail from "./pages/SeminarDetail";
-import StaffSelfServicePage from "./pages/StaffSelfServicePage";
 import SmartImportPage from "./pages/SmartImport";
 
 // Admin/supervisor routes. Signed-in non-admin (staff) accounts are bounced
@@ -49,9 +48,6 @@ function Router() {
       </Route>
       <Route path="/me">
         <MyProfilePage />
-      </Route>
-      <Route path="/staff/profile">
-        <StaffSelfServicePage />
       </Route>
       <Route path="/dashboard">
         <Protected>
