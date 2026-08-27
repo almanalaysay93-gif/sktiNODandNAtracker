@@ -52,8 +52,8 @@ import { ScrollArea } from "./ui/scroll-area";
 export const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: MapPin, label: "Areas of Assignment", path: "/areas" },
-  { icon: Users, label: "Nurses", path: "/nurses" },
-  { icon: UserCog, label: "Nursing Attendants", path: "/nurses?type=Nursing%20Attendant" },
+  { icon: Users, label: "Registered Nurses (NOD)", path: "/nurses?type=Registered%20Nurse" },
+  { icon: UserCog, label: "Nursing Attendants (NA)", path: "/nurses?type=Nursing%20Attendant" },
   { icon: ClipboardList, label: "Trainings", path: "/trainings" },
   { icon: GraduationCap, label: "Seminars & LDI", path: "/seminars" },
   { icon: CreditCard, label: "Licenses", path: "/licenses" },
@@ -143,10 +143,11 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
       if (itemPath.includes("?")) {
         const [itemBase, itemQuery] = itemPath.split("?");
         const itemType = new URLSearchParams(itemQuery).get("type");
-        return location === itemBase && typeParam === itemType;
-      }
-      if (itemPath === "/nurses") {
-        return location === "/nurses" && !typeParam;
+        if (location === itemBase) {
+          if (!typeParam && itemType === "Registered Nurse") return true;
+          return typeParam === itemType;
+        }
+        return false;
       }
       return location === itemPath;
     };

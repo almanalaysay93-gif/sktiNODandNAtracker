@@ -1,6 +1,7 @@
 import { AreaSelect } from "@/components/nursetrack/AreaSelect";
 import { NurseAvatar } from "@/components/nursetrack/NurseAvatar";
 import { EmploymentStatusBadge, LicenseStatusBadge } from "@/components/nursetrack/StatusBadge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -26,7 +27,7 @@ import {
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { nurseFullName, nurseIdLabel, EMPLOYMENT_STATUSES, STAFF_TYPES, formatDate as sharedFormatDate } from "../../../shared/nursetrack";
-import { Archive, LayoutGrid, MapPin, Pencil, Plus, Search, Table2 } from "lucide-react";
+import { Archive, LayoutGrid, MapPin, Pencil, Plus, Search, Table2, UserCheck, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useLocation, useSearch } from "wouter";
@@ -43,11 +44,21 @@ export default function Nurses() {
   const [empFilter, setEmpFilter] = useState("all");
   const [licFilter, setLicFilter] = useState("all");
   const search_ = useSearch();
-  const [staffTypeFilter, setStaffTypeFilter] = useState("all");
+  const [staffTypeFilter, setStaffTypeFilter] = useState<string>("Registered Nurse");
+  const [, navigate] = useLocation();
+
   useEffect(() => {
-    const type = new URLSearchParams(search_).get("type");
-    setStaffTypeFilter(type && (STAFF_TYPES as readonly string[]).includes(type) ? type : "all");
+    const params = new URLSearchParams(search_);
+    const type = params.get("type");
+    if (type === "all") {
+      setStaffTypeFilter("all");
+    } else if (type && (STAFF_TYPES as readonly string[]).includes(type)) {
+      setStaffTypeFilter(type);
+    } else {
+      setStaffTypeFilter("Registered Nurse");
+    }
   }, [search_]);
+
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [createOpen, setCreateOpen] = useState(false);
   const [createStaffType, setCreateStaffType] = useState<(typeof STAFF_TYPES)[number]>("Registered Nurse");
@@ -55,7 +66,6 @@ export default function Nurses() {
   const { data: initial, isLoading } = trpc.nurses.initial.useQuery();
   const nurses = initial?.nurses;
   const areas = initial?.areas;
-  const [, navigate] = useLocation();
 
   const filtered = useMemo(() => {
     let rows = (nurses ?? []).filter((n) => !n.archivedAt);
@@ -95,22 +105,51 @@ export default function Nurses() {
     );
   }
 
+  const counts = useMemo(() => {
+    const all = (nurses ?? []).filter((n) => !n.archivedAt);
+    const rn = all.filter((n) => n.staffType === "Registered Nurse").length;
+    const na = all.filter((n) => n.staffType === "Nursing Attendant").length;
+    return { all: all.length, rn, na };
+  }, [nurses]);
+
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {staffTypeFilter === "Nursing Attendant"
-              ? "Nursing Attendants"
-              : staffTypeFilter === "Registered Nurse"
-              ? "Registered Nurses"
-              : "Nurses"}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {filtered.length} of {(nurses ?? []).length}{" "}
-            {staffTypeFilter === "Nursing Attendant" ? "nursing attendants" : "nurses & personnel"}
-          </p>
-        </div>
+      {/* Primary Category Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-4">
+        <Tabs
+          value={staffTypeFilter}
+          onValueChange={(val) => {
+            setStaffTypeFilter(val);
+            if (val === "Registered Nurse") navigate("/nurses?type=Registered%20Nurse");
+            else if (val === "Nursing Attendant") navigate("/nurses?type=Nursing%20Attendant");
+            else navigate("/nurses?type=all");
+          }}
+          className="w-full sm:w-auto"
+        >
+          <TabsList className="h-11 p-1 bg-muted/70">
+            <TabsTrigger value="Registered Nurse" className="px-4 py-2 text-sm font-semibold gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              <span>Registered Nurses (NOD)</span>
+              <Badge variant="secondary" className="px-1.5 py-0.5 text-xs font-mono">
+                {counts.rn}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="Nursing Attendant" className="px-4 py-2 text-sm font-semibold gap-2">
+              <UserCheck className="h-4 w-4 text-amber-500" />
+              <span>Nursing Attendants (NA)</span>
+              <Badge variant="secondary" className="px-1.5 py-0.5 text-xs font-mono">
+                {counts.na}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="all" className="px-4 py-2 text-sm font-semibold gap-2">
+              <span>All Personnel</span>
+              <Badge variant="secondary" className="px-1.5 py-0.5 text-xs font-mono">
+                {counts.all}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         <div className="flex items-center gap-2">
           <Tabs value={view} onValueChange={(v) => setView(v as View)}>
             <TabsList>
@@ -118,14 +157,33 @@ export default function Nurses() {
               <TabsTrigger value="table" aria-label="Table view"><Table2 className="h-4 w-4" /></TabsTrigger>
             </TabsList>
           </Tabs>
-          <Button onClick={() => { setCreateStaffType("Registered Nurse"); setCreateOpen(true); }}>
-            <Plus className="h-4 w-4 mr-1" />
-            Add Nurse
-          </Button>
-          <Button variant="outline" onClick={() => { setCreateStaffType("Nursing Attendant"); setCreateOpen(true); }}>
-            <Plus className="h-4 w-4 mr-1" />
-            Add Nursing Attendant
-          </Button>
+          {staffTypeFilter === "Nursing Attendant" ? (
+            <Button onClick={() => { setCreateStaffType("Nursing Attendant"); setCreateOpen(true); }}>
+              <Plus className="h-4 w-4 mr-1" />
+              Add Nursing Attendant
+            </Button>
+          ) : (
+            <Button onClick={() => { setCreateStaffType("Registered Nurse"); setCreateOpen(true); }}>
+              <Plus className="h-4 w-4 mr-1" />
+              Add Nurse
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {staffTypeFilter === "Nursing Attendant"
+              ? "Nursing Attendants (NA)"
+              : staffTypeFilter === "Registered Nurse"
+              ? "Registered Nurses (NOD)"
+              : "All Personnel Roster"}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Showing {filtered.length} of {staffTypeFilter === "Nursing Attendant" ? counts.na : staffTypeFilter === "Registered Nurse" ? counts.rn : counts.all}{" "}
+            {staffTypeFilter === "Nursing Attendant" ? "nursing attendants" : staffTypeFilter === "Registered Nurse" ? "registered nurses" : "staff members"}
+          </p>
         </div>
       </div>
 
@@ -140,13 +198,6 @@ export default function Nurses() {
           />
         </div>
         <AreaSelect value={areaFilter} onValueChange={setAreaFilter} placeholder="All areas" className="w-44" />
-        <Select value={staffTypeFilter} onValueChange={setStaffTypeFilter}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="Staff type" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Staff type</SelectItem>
-            {STAFF_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-          </SelectContent>
-        </Select>
         <Select value={empFilter} onValueChange={setEmpFilter}>
           <SelectTrigger className="w-40"><SelectValue placeholder="Employment status" /></SelectTrigger>
           <SelectContent>
@@ -175,8 +226,8 @@ export default function Nurses() {
       {filtered.length === 0 ? (
         <Card className="glass-card">
           <CardContent className="py-12 text-center">
-            <p className="text-sm text-muted-foreground mb-3">No nurses match your filters.</p>
-            <Button variant="outline" onClick={() => { setSearch(""); setAreaFilter(""); setEmpFilter("all"); setLicFilter("all"); setStaffTypeFilter("all"); }}>
+            <p className="text-sm text-muted-foreground mb-3">No staff members match your filters.</p>
+            <Button variant="outline" onClick={() => { setSearch(""); setAreaFilter(""); setEmpFilter("all"); setLicFilter("all"); }}>
               Clear filters
             </Button>
           </CardContent>
@@ -194,6 +245,7 @@ export default function Nurses() {
                     <TableHeader>
                       <TableRow className="border-b-2">
                         <TableHead className="text-sm font-bold uppercase tracking-wider py-4">Nurse / Staff</TableHead>
+                        <TableHead className="text-sm font-bold uppercase tracking-wider py-4">Staff Type</TableHead>
                         <TableHead className="text-sm font-bold uppercase tracking-wider py-4">License / ID Number</TableHead>
                         <TableHead className="text-sm font-bold uppercase tracking-wider py-4">Position</TableHead>
                         <TableHead className="text-sm font-bold uppercase tracking-wider py-4">Current Area</TableHead>
@@ -217,6 +269,17 @@ export default function Nurses() {
                                 {n.suffix && <p className="text-xs text-muted-foreground">{n.suffix}</p>}
                               </div>
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            {n.staffType === "Nursing Attendant" ? (
+                              <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-medium">
+                                NA
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20 font-medium">
+                                RN (NOD)
+                              </Badge>
+                            )}
                           </TableCell>
                           <TableCell className="font-mono text-sm font-semibold">{nurseIdLabel(n)}</TableCell>
                           <TableCell className="text-base font-medium text-foreground/90">{n.position ?? "—"}</TableCell>
@@ -247,6 +310,7 @@ function NurseCard({
     middleName?: string | null;
     lastName: string;
     suffix?: string | null;
+    staffType?: string | null;
     employeeId: string;
     licenseNumber?: string | null;
     position?: string | null;
@@ -304,9 +368,20 @@ function NurseCard({
             </Button>
           </div>
         </div>
-        <div className="mt-4 flex items-center gap-2 text-sm font-medium text-foreground/85">
-          <MapPin className="h-4 w-4 text-primary shrink-0" />
-          <span className="truncate">{nurse.currentArea?.name ?? "Unassigned"}</span>
+        <div className="mt-4 flex items-center justify-between gap-2 text-sm font-medium text-foreground/85">
+          <div className="flex items-center gap-2 truncate">
+            <MapPin className="h-4 w-4 text-primary shrink-0" />
+            <span className="truncate">{nurse.currentArea?.name ?? "Unassigned"}</span>
+          </div>
+          {nurse.staffType === "Nursing Attendant" ? (
+            <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 shrink-0 font-semibold">
+              NA
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20 shrink-0 font-semibold">
+              RN (NOD)
+            </Badge>
+          )}
         </div>
         <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between">
           <EmploymentStatusBadge status={nurse.employmentStatus ?? "Active"} />
