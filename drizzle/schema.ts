@@ -75,6 +75,11 @@ export const nurses = mysqlTable(
       .notNull(),
     currentAreaId: int("currentAreaId"),
     profilePhotoKey: text("profilePhotoKey"),
+    contactNumber: varchar("contactNumber", { length: 32 }),
+    /** Google account email used to self-link this nurse's staff self-service login. Not the HR record of truth — just the login identity. */
+    accountEmail: varchar("accountEmail", { length: 320 }),
+    /** users.id of the linked Google account, once the staff member has linked (via supervisor pre-fill or self-link by PRC number + name). Null = not linked yet. */
+    linkedUserId: int("linkedUserId"),
     archivedAt: timestamp("archivedAt"),
     createdAt: timestamp("createdAt").defaultNow().notNull(),
     updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -83,6 +88,7 @@ export const nurses = mysqlTable(
     idxEmployee: uniqueIndex("idx_nurses_employee").on(t.employeeId),
     idxLastName: index("idx_nurses_lastname").on(t.lastName),
     idxArea: index("idx_nurses_area").on(t.currentAreaId),
+    idxLinkedUser: uniqueIndex("idx_nurses_linked_user").on(t.linkedUserId),
   }),
 );
 export type Nurse = typeof nurses.$inferSelect;

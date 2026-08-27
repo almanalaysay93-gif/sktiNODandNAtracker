@@ -1,6 +1,6 @@
 import { asc, and, desc, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, router } from "../_core/trpc";
 import { getDb, activeNurseCondition } from "../db";
 import {
   activityLog,
@@ -18,7 +18,7 @@ export const dashboardRouter = router({
   // Single round-trip initial load: merges the five section queries into one
   // network hop, which matters because each tRPC call costs ~seconds on the
   // hosting layer due to OAuth round-trips.
-  initial: protectedProcedure.query(async () => {
+  initial: adminProcedure.query(async () => {
     const db = await getDb();
     if (!db) {
       return getLocalDashboardInitial();
@@ -293,7 +293,7 @@ export const dashboardRouter = router({
     return { summary, actionCenter, areaSnapshots, activityFeed, upcoming };
   }),
 
-  summary: protectedProcedure.query(async () => {
+  summary: adminProcedure.query(async () => {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
     const today = todayDate();
@@ -347,7 +347,7 @@ export const dashboardRouter = router({
     };
   }),
 
-  areaSnapshots: protectedProcedure.query(async () => {
+  areaSnapshots: adminProcedure.query(async () => {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
     const today = todayDate();
@@ -417,7 +417,7 @@ export const dashboardRouter = router({
     }));
   }),
 
-  actionCenter: protectedProcedure.query(async () => {
+  actionCenter: adminProcedure.query(async () => {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
     const today = todayDate();
@@ -558,7 +558,7 @@ export const dashboardRouter = router({
     };
   }),
 
-  activityFeed: protectedProcedure
+  activityFeed: adminProcedure
     .input(z.object({ limit: z.number().min(1).max(100).optional() }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -578,7 +578,7 @@ export const dashboardRouter = router({
       }));
     }),
 
-  upcoming: protectedProcedure.query(async () => {
+  upcoming: adminProcedure.query(async () => {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
     const today = todayDate();

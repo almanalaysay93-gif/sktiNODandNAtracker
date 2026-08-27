@@ -105,7 +105,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             size="lg"
             className="w-full text-base py-6 shadow-lg hover:shadow-xl transition-all"
           >
-            Sign in
+            Sign in with Google
           </Button>
         </div>
       </div>

@@ -12,7 +12,7 @@ import { areasRouter } from "./routers/areas";
 import { reportsRouter } from "./routers/reports";
 import { settingsRouter } from "./routers/settings";
 import { seminarsRouter } from "./routers/seminars";
-import { staffSelfServiceRouter } from "./routers/staffSelfService";
+import { staffAccountRouter } from "./routers/staffAccount";
 import { smartImportRouter } from "./routers/smartImport";
 
 export const appRouter = router({
@@ -37,7 +37,7 @@ export const appRouter = router({
   reports: reportsRouter,
   settings: settingsRouter,
   seminars: seminarsRouter,
-  staffSelf: staffSelfServiceRouter,
+  staffAccount: staffAccountRouter,
   smartImport: smartImportRouter,
 });
 

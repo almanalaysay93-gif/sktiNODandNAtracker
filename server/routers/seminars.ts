@@ -16,7 +16,7 @@ import {
   STAFF_TYPES,
   TARGET_STAFF_TYPES,
 } from "../../shared/nursetrack";
-import { adminProcedure, protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, router } from "../_core/trpc";
 import { getDb, logActivity } from "../db";
 import {
   getLocalSeminarsList,
@@ -50,7 +50,7 @@ function validateRange(startDate: Date, endDate: Date) {
 }
 
 export const seminarsRouter = router({
-  list: protectedProcedure
+  list: adminProcedure
     .input(z.object({ from: optionalDateInput, to: optionalDateInput }).optional())
     .query(async ({ input }) => {
       const db = await getDb();
@@ -119,7 +119,7 @@ export const seminarsRouter = router({
       return { id };
     }),
 
-  detail: protectedProcedure
+  detail: adminProcedure
     .input(z.object({ eventId: z.number().int().positive() }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -253,7 +253,7 @@ export const seminarsRouter = router({
       });
     }),
 
-  matrix: protectedProcedure
+  matrix: adminProcedure
     .input(z.object({
       from: optionalDateInput,
       to: optionalDateInput,
@@ -288,7 +288,7 @@ export const seminarsRouter = router({
       };
     }),
 
-  monthlySummary: protectedProcedure
+  monthlySummary: adminProcedure
     .input(z.object({ year: z.number().int().min(2000).max(2100) }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -310,7 +310,7 @@ export const seminarsRouter = router({
       });
     }),
 
-  quarterlyLedger: protectedProcedure
+  quarterlyLedger: adminProcedure
     .input(z.object({ year: z.number().int().min(2000).max(2100), quarter: z.number().int().min(1).max(4) }))
     .query(async ({ input }) => {
       const db = await getDb();

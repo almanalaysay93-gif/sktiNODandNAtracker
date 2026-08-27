@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { deriveLicenseStatus, daysUntilExpiry, todayDate, parseLocalDate, dateKey } from "../../shared/nursetrack";
 
@@ -11,7 +11,7 @@ function dateIso(d: Date | string | null | undefined): string {
 const nullableDateInput = z.union([z.date(), z.string().datetime(), z.null()]).transform((d) => (d === null ? null : d instanceof Date ? d : new Date(d))).optional();
 
 export const calendarRouter = router({
-  listEvents: protectedProcedure
+  listEvents: adminProcedure
     .input(
       z.object({
         from: z.date().optional(),
@@ -180,7 +180,7 @@ export const calendarRouter = router({
       return events;
     }),
 
-  createCustomEvent: protectedProcedure
+  createCustomEvent: adminProcedure
     .input(
       z.object({
         title: z.string().min(1).max(256),
@@ -205,7 +205,7 @@ export const calendarRouter = router({
       return { id };
     }),
 
-  updateCustomEvent: protectedProcedure
+  updateCustomEvent: adminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -225,7 +225,7 @@ export const calendarRouter = router({
       return { success: true } as const;
     }),
 
-  deleteCustomEvent: protectedProcedure
+  deleteCustomEvent: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       await db.deleteCustomEvent(input.id);

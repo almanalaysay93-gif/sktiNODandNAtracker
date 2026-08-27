@@ -227,6 +227,97 @@ export async function getNurseByEmployeeId(employeeId: string) {
   return sqlite.prepare("SELECT * FROM nurses WHERE employeeId = ?").get(employeeId) as any;
 }
 
+/** The nurse record a given Google account (users.id) is linked to, if any. */
+export async function getNurseByLinkedUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(nurses).where(eq(nurses.linkedUserId, userId)).limit(1);
+  return rows[0];
+}
+
+const normalizeForMatch = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+/** All nurseIds carrying a credential whose licenseNumber matches (normalized). */
+async function findNurseIdsByLicenseNumber(licenseNumber: string): Promise<number[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const normPrc = normalizeForMatch(licenseNumber);
+  const credRows = await db
+    .select({ nurseId: nurseCredentials.nurseId, licenseNumber: nurseCredentials.licenseNumber })
+    .from(nurseCredentials)
+    .where(isNotNull(nurseCredentials.licenseNumber));
+  return credRows.filter((r) => r.licenseNumber && normalizeForMatch(r.licenseNumber) === normPrc).map((r) => r.nurseId);
+}
+
+/**
+ * Self-service link: a signed-in staff member proves who they are with their
+ * PRC/license number + full name, and we link their Google account (userId)
+ * to the matching, not-yet-linked nurse record.
+ */
+export async function linkNurseByPrcAndName(
+  prcNumber: string,
+  fullName: string,
+  userId: number
+): Promise<{ ok: true; nurse: typeof nurses.$inferSelect } | { ok: false; reason: "not_found" | "already_linked" }> {
+  const db = await getDb();
+  if (!db) return { ok: false, reason: "not_found" };
+
+  const normName = normalizeForMatch(fullName);
+  const nurseIds = await findNurseIdsByLicenseNumber(prcNumber);
+  if (nurseIds.length === 0) return { ok: false, reason: "not_found" };
+
+  const candidates = await db.select().from(nurses).where(inArray(nurses.id, nurseIds));
+  const match = candidates.find((n) => {
+    const candidateName = `${n.firstName} ${n.middleName ?? ""} ${n.lastName} ${n.suffix ?? ""}`;
+    return normalizeForMatch(candidateName) === normName || normalizeForMatch(`${n.firstName} ${n.lastName}`) === normName;
+  });
+  if (!match) return { ok: false, reason: "not_found" };
+  if (match.linkedUserId) return { ok: false, reason: "already_linked" };
+
+  await db.update(nurses).set({ linkedUserId: userId }).where(eq(nurses.id, match.id));
+  return { ok: true, nurse: { ...match, linkedUserId: userId } };
+}
+
+/**
+ * Bulk-populate nurses.accountEmail from an HR spreadsheet, matched by
+ * license/PRC number. Skips license numbers matching zero or multiple
+ * nurses (ambiguous). Does not set linkedUserId — that only happens when the
+ * person actually signs in with that Google account (see autoLinkNurseByEmail).
+ */
+export async function bulkSetAccountEmailsByLicense(
+  rows: Array<{ licenseNumber: string; email: string }>
+): Promise<{ matched: number; ambiguous: number; notFound: number }> {
+  const db = await getDb();
+  if (!db) return { matched: 0, ambiguous: 0, notFound: 0 };
+  let matched = 0, ambiguous = 0, notFound = 0;
+  for (const row of rows) {
+    if (!row.licenseNumber || !row.email) continue;
+    const nurseIds = await findNurseIdsByLicenseNumber(row.licenseNumber);
+    if (nurseIds.length === 0) { notFound++; continue; }
+    if (nurseIds.length > 1) { ambiguous++; continue; }
+    await db.update(nurses).set({ accountEmail: row.email }).where(eq(nurses.id, nurseIds[0]));
+    matched++;
+  }
+  return { matched, ambiguous, notFound };
+}
+
+/**
+ * Called right after a Google login resolves. If this account's email
+ * matches a nurse's pre-filled accountEmail and that nurse isn't linked to
+ * anyone yet, link them automatically — no PRC/name prompt needed.
+ */
+export async function autoLinkNurseByEmail(userId: number, email: string | null | undefined): Promise<void> {
+  if (!email) return;
+  const db = await getDb();
+  if (!db) return;
+  const existing = await db.select().from(nurses).where(eq(nurses.linkedUserId, userId)).limit(1);
+  if (existing.length > 0) return; // already linked to someone
+  const rows = await db.select().from(nurses).where(eq(nurses.accountEmail, email)).limit(1);
+  const candidate = rows[0];
+  if (!candidate || candidate.linkedUserId) return;
+  await db.update(nurses).set({ linkedUserId: userId }).where(eq(nurses.id, candidate.id));
+}
+
 function deriveLicenseStatusFromCred(cred: { renewalStatus: string; expiryDate: string | Date }): string {
   if (cred.renewalStatus === "Renewed") return "Valid";
   const days = Math.floor((parseLocalDate(cred.expiryDate).getTime() - parseLocalDate(todayDate()).getTime()) / 86400000);

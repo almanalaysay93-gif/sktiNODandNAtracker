@@ -44,9 +44,14 @@ export function registerOAuthRoutes(app: Express) {
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,
-        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
+        loginMethod: userInfo.loginMethod ?? null,
         lastSignedIn: new Date(),
       });
+
+      const user = await db.getUserByOpenId(userInfo.openId);
+      if (user) {
+        await db.autoLinkNurseByEmail(user.id, userInfo.email);
+      }
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",

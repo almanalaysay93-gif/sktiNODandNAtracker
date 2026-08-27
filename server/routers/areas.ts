@@ -1,16 +1,16 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNull, not, sql } from "drizzle-orm";
-import { protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, router } from "../_core/trpc";
 import { getDb, getAssignmentsForArea, listAreas, listNurses, listCredentials, getAreaById, getNurseLicenseInfo, activeNurseCondition } from "../db";
 import { areas } from "../../drizzle/schema";
 import { areaAssignments, nurses, nurseCredentials, nurseTrainings } from "../../drizzle/schema";
 import { daysBetween, todayDate, deriveLicenseStatus, daysUntilExpiry, dateKey, INACTIVE_EMPLOYMENT_STATUSES } from "../../shared/nursetrack";
 
 export const areasRouter = router({
-  list: protectedProcedure.query(() => listAreasWithCounts()),
+  list: adminProcedure.query(() => listAreasWithCounts()),
 
-  get: protectedProcedure
+  get: adminProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -27,7 +27,7 @@ export const areasRouter = router({
       return { ...area, staff };
     }),
 
-  create: protectedProcedure
+  create: adminProcedure
     .input(
       z.object({
         code: z.string().min(1).max(64),
@@ -49,7 +49,7 @@ export const areasRouter = router({
       return { id: id[0].insertId };
     }),
 
-  update: protectedProcedure
+  update: adminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -72,7 +72,7 @@ export const areasRouter = router({
       return { success: true } as const;
     }),
 
-  deactivate: protectedProcedure
+  deactivate: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -85,7 +85,7 @@ export const areasRouter = router({
       return { success: true } as const;
     }),
 
-  areaDashboard: protectedProcedure
+  areaDashboard: adminProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const today = todayDate();

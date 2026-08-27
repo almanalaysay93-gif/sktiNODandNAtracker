@@ -3,8 +3,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Redirect, Switch } from "wouter";
 import DashboardLayout from "./components/DashboardLayout";
+import { DashboardLayoutSkeleton } from "./components/DashboardLayoutSkeleton";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { useAuth } from "./_core/hooks/useAuth";
 import AreaDetail from "./pages/AreaDetail";
 import Areas from "./pages/Areas";
 import CalendarPage from "./pages/Calendar";
@@ -13,6 +15,7 @@ import Licenses from "./pages/Licenses";
 import NurseProfile from "./pages/NurseProfile";
 import { NurseEditPage } from "./pages/NurseEditPage";
 import Nurses from "./pages/Nurses";
+import MyProfilePage from "./pages/MyProfilePage";
 import Reports from "./pages/Reports";
 import SettingsPage from "./pages/Settings";
 import Trainings from "./pages/Trainings";
@@ -21,15 +24,31 @@ import SeminarDetail from "./pages/SeminarDetail";
 import StaffSelfServicePage from "./pages/StaffSelfServicePage";
 import SmartImportPage from "./pages/SmartImport";
 
+// Admin/supervisor routes. Signed-in non-admin (staff) accounts are bounced
+// to /me — they only ever get their own profile, never the full dashboard.
 function Protected({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (!loading && user && user.role !== "admin") {
+    return <Redirect to="/me" />;
+  }
   return <DashboardLayout>{children}</DashboardLayout>;
+}
+
+function RootRedirect() {
+  const { user, loading } = useAuth();
+  if (loading) return <DashboardLayoutSkeleton />;
+  if (!user) return <Redirect to="/dashboard" />;
+  return <Redirect to={user.role === "admin" ? "/dashboard" : "/me"} />;
 }
 
 function Router() {
   return (
     <Switch>
       <Route path="/">
-        <Redirect to="/dashboard" />
+        <RootRedirect />
+      </Route>
+      <Route path="/me">
+        <MyProfilePage />
       </Route>
       <Route path="/staff/profile">
         <StaffSelfServicePage />

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { ASSIGNMENT_TYPES, EMPLOYMENT_STATUSES, STAFF_TYPES, storageKey, validateMime, nurseFullName, dateKey } from "../../shared/nursetrack";
 import { sanitizeFilename } from "../../shared/nursetrack";
@@ -11,7 +11,7 @@ const nullableDateInput = z.union([z.date(), z.string().datetime(), z.null()]).t
 
 export const nursesRouter = router({
   // Single round-trip initial load: nurses with areas in one call.
-  initial: protectedProcedure.query(async () => {
+  initial: adminProcedure.query(async () => {
     const [rows, areaRows] = await Promise.all([db.listNurses(), db.listAreas(false)]);
     const areaById = new Map(areaRows.map((a) => [a.id, a]));
     const nurses = await Promise.all(rows.map(async (n) => {
@@ -26,7 +26,7 @@ export const nursesRouter = router({
     return { nurses, areas: areaRows };
   }),
 
-  list: protectedProcedure
+  list: adminProcedure
     .input(z.object({ archived: z.boolean().optional(), areaId: z.number().optional() }).optional())
     .query(async ({ input }) => {
       const rows = await db.listNurses({ archived: input?.archived, areaId: input?.areaId });
@@ -43,7 +43,7 @@ export const nursesRouter = router({
       }));
     }),
 
-  search: protectedProcedure
+  search: adminProcedure
     .input(z.object({ query: z.string().min(1).max(128) }))
     .query(async ({ input }) => {
       const rows = await db.searchNurses(input.query);
@@ -60,7 +60,7 @@ export const nursesRouter = router({
       }));
     }),
 
-  get: protectedProcedure
+  get: adminProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const nurse = await db.getNurseById(input.id);
@@ -71,7 +71,7 @@ export const nursesRouter = router({
       return { ...nurse, currentArea: nurse.currentAreaId ? areaById.get(nurse.currentAreaId) ?? null : null, licenseStatus: status, licenseNumber };
     }),
 
-  create: protectedProcedure
+  create: adminProcedure
     .input(
       z.object({
         employeeId: z.string().min(1).max(64),
@@ -111,7 +111,7 @@ export const nursesRouter = router({
       return { id };
     }),
 
-  update: protectedProcedure
+  update: adminProcedure
     .input(
       z.object({
         id: z.number(),
@@ -147,7 +147,7 @@ export const nursesRouter = router({
       return { success: true } as const;
     }),
 
-  archive: protectedProcedure
+  archive: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const nurse = await db.getNurseById(input.id);
@@ -166,7 +166,7 @@ export const nursesRouter = router({
       return { success: true } as const;
     }),
 
-  restore: protectedProcedure
+  restore: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const nurse = await db.getNurseById(input.id);
@@ -184,7 +184,7 @@ export const nursesRouter = router({
       return { success: true } as const;
     }),
 
-  uploadPhoto: protectedProcedure
+  uploadPhoto: adminProcedure
     .input(
       z.object({
         nurseId: z.number(),
@@ -214,7 +214,7 @@ export const nursesRouter = router({
       return { url };
     }),
 
-  getAssignments: protectedProcedure
+  getAssignments: adminProcedure
     .input(z.object({ nurseId: z.number() }))
     .query(async ({ input }) => {
       const rows = await db.listAssignmentsForNurse(input.nurseId);
@@ -223,7 +223,7 @@ export const nursesRouter = router({
       return rows.map((a) => ({ ...a, area: areaById.get(a.areaId) ?? null }));
     }),
 
-  changeArea: protectedProcedure
+  changeArea: adminProcedure
     .input(
       z.object({
         nurseId: z.number(),
@@ -285,7 +285,7 @@ export const nursesRouter = router({
       return { success: true } as const;
     }),
 
-  backfillAssignment: protectedProcedure
+  backfillAssignment: adminProcedure
     .input(
       z.object({
         nurseId: z.number(),
@@ -318,7 +318,7 @@ export const nursesRouter = router({
       return { success: true } as const;
     }),
 
-  getEmployeeById: protectedProcedure
+  getEmployeeById: adminProcedure
     .input(z.object({ employeeId: z.string().min(1).max(64) }))
     .query(async ({ input }) => {
       return await db.getNurseByEmployeeId(input.employeeId);

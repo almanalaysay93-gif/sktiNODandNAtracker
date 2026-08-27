@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { eq, isNull, sql } from "drizzle-orm";
-import { protectedProcedure, router } from "../_core/trpc";
+import { adminProcedure, router } from "../_core/trpc";
 import { getDb, getNurseByEmployeeId, createNurse, createAssignment, logActivity } from "../db";
 import { areas, nurseCredentials, nurseTrainings, areaAssignments, appSettings, nurses } from "../../drizzle/schema";
 import { EMPLOYMENT_STATUSES, nurseFullName } from "../../shared/nursetrack";
@@ -17,7 +17,7 @@ const settingKey = z.enum([
 ]);
 
 export const settingsRouter = router({
-  get: protectedProcedure
+  get: adminProcedure
     .input(z.object({ key: settingKey }))
     .query(async ({ input }) => {
       const db = await getDb();
@@ -26,7 +26,7 @@ export const settingsRouter = router({
       return { key: input.key, value: rows[0]?.value ?? null };
     }),
 
-  getAll: protectedProcedure.query(async () => {
+  getAll: adminProcedure.query(async () => {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
     const rows = await db.select().from(appSettings);
@@ -39,7 +39,7 @@ export const settingsRouter = router({
     };
   }),
 
-  update: protectedProcedure
+  update: adminProcedure
     .input(z.object({ key: settingKey, value: z.string().max(5000).nullable() }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -59,7 +59,7 @@ export const settingsRouter = router({
       return { success: true } as const;
     }),
 
-  runRemindersNow: protectedProcedure.mutation(async () => {
+  runRemindersNow: adminProcedure.mutation(async () => {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
     const rows = await db.select().from(appSettings).where(eq(appSettings.key, "reminderThresholdDays"));
@@ -72,7 +72,7 @@ export const settingsRouter = router({
     return results;
   }),
 
-  syncExcelDatabase: protectedProcedure.mutation(async ({ ctx }) => {
+  syncExcelDatabase: adminProcedure.mutation(async ({ ctx }) => {
     const db = await getDb();
     if (!db) throw new Error("Database unavailable");
     const results = await seedExcelDatabase();
@@ -84,7 +84,7 @@ export const settingsRouter = router({
     return results;
   }),
 
-  previewCsvImport: protectedProcedure
+  previewCsvImport: adminProcedure
     .input(z.object({ csv: z.string().max(500000) }))
     .mutation(async ({ input }) => {
       const db = await getDb();
@@ -146,7 +146,7 @@ export const settingsRouter = router({
       return { totalRows: dataRows.length, validRows: preview.filter((p) => p.valid).length, issues: issues.slice(0, 50), preview: preview.slice(0, 200) };
     }),
 
-  executeCsvImport: protectedProcedure
+  executeCsvImport: adminProcedure
     .input(z.object({ csv: z.string().max(500000), skipInvalid: z.boolean().optional() }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -195,7 +195,7 @@ export const settingsRouter = router({
       return results;
     }),
 
-  exportData: protectedProcedure
+  exportData: adminProcedure
     .input(z.object({ entity: z.enum(["nurses", "credentials", "trainings", "assignments", "all"]) }))
     .query(async ({ input }) => {
       const db = await getDb();

@@ -1,35 +1,38 @@
-import type { Request, Response } from "express";
-import { sdk } from "./_core/sdk";
 import { runDailyReminders } from "./reminders";
 import { todayDate } from "../shared/nursetrack";
 
-/**
- * Daily license renewal reminder job.
- * Called by the Manus Heartbeat cron at /api/scheduled/dailyReminders.
- * Idempotent: safe to retry; deduplication enforced by DB unique constraint.
- */
-export async function dailyRemindersHandler(req: Request, res: Response) {
-  try {
-    let user;
-    try {
-      user = await sdk.authenticateRequest(req);
-    } catch {
-      return res.status(403).json({ error: "not-authenticated" });
-    }
-    if (!user.isCron || !user.taskUid) {
-      return res.status(403).json({ error: "cron-only" });
-    }
+const DAILY_RUN_HOUR = 8; // 08:00 server local time, matching the original cron intent
 
+function msUntilNextRun(): number {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), DAILY_RUN_HOUR, 0, 0, 0);
+  if (next.getTime() <= now.getTime()) {
+    next.setDate(next.getDate() + 1);
+  }
+  return next.getTime() - now.getTime();
+}
+
+async function runOnce() {
+  try {
     const today = todayDate();
     const results = await runDailyReminders(today);
-    res.json({ ok: true, today, results });
+    console.log(`[DailyReminders] ran for ${today}:`, results);
   } catch (error) {
     console.error("[DailyReminders] failed:", error);
-    res.status(500).json({
-      error: String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-      context: { url: req.originalUrl },
-      timestamp: new Date().toISOString(),
-    });
   }
+}
+
+/**
+ * Runs the license-reminder pass once a day at DAILY_RUN_HOUR. Idempotent —
+ * duplicate runs (restarts, missed days caught up) are safe by DB constraint.
+ * Replaces the Manus Heartbeat cron that isn't available off Manus hosting.
+ */
+export function startDailyReminderScheduler() {
+  const scheduleNext = () => {
+    setTimeout(async () => {
+      await runOnce();
+      scheduleNext();
+    }, msUntilNextRun());
+  };
+  scheduleNext();
 }

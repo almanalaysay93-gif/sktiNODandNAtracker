@@ -6,7 +6,11 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
-import { dailyRemindersHandler } from "../scheduled";
+import { startDailyReminderScheduler } from "../scheduled";
+import { importStaffEmailsHandler } from "../importStaffEmails";
+import { importStaffRosterHandler } from "../importStaffRoster";
+import { importStaffAreasHandler } from "../importStaffAreas";
+import { importStaffTrainingsHandler } from "../importStaffTrainings";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 
@@ -51,7 +55,10 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
-  app.post("/api/scheduled/dailyReminders", dailyRemindersHandler);
+  app.post("/api/admin/import-staff-emails", importStaffEmailsHandler);
+  app.post("/api/admin/import-staff-roster", importStaffRosterHandler);
+  app.post("/api/admin/import-staff-areas", importStaffAreasHandler);
+  app.post("/api/admin/import-staff-trainings", importStaffTrainingsHandler);
   // tRPC API
   app.use(
     "/api/trpc",
@@ -77,6 +84,10 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+
+  if (process.env.NODE_ENV === "production") {
+    startDailyReminderScheduler();
+  }
 }
 
 startServer().catch(console.error);
