@@ -13,6 +13,7 @@ import { importStaffAreasHandler } from "../importStaffAreas";
 import { importStaffTrainingsHandler } from "../importStaffTrainings";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { deduplicateDatabase } from "../deduplicate";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -87,6 +88,9 @@ async function startServer() {
 
   if (process.env.NODE_ENV === "production") {
     startDailyReminderScheduler();
+    deduplicateDatabase()
+      .then((res) => console.log("[Auto-Dedup] Database deduplication complete:", res))
+      .catch((err) => console.warn("[Auto-Dedup] Warning during startup dedup:", err));
   }
 }
 
