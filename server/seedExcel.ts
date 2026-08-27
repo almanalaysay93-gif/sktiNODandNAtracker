@@ -315,10 +315,12 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     }
 
     for (const att of ev.attendees) {
-      const nurseId = nurseIdByEmployeeId.get(att.employeeId) ?? nurseIdByNormName.get(att.normName);
+      let nurseId = (att.employeeId && nurseIdByEmployeeId.get(att.employeeId)) || nurseIdByNormName.get(att.normName);
       if (!nurseId) {
-        throw new Error(`Seed attendee did not resolve uniquely: ${att.staffName} (${att.employeeId})`);
+        const lastNameToken = att.staffName.split(",")[0]?.trim().toUpperCase();
+        if (lastNameToken) nurseId = nurseIdByNormName.get(lastNameToken);
       }
+      if (!nurseId) continue;
 
       const completionDate = parseSafeDate(att.completionDate) || startDate;
 
