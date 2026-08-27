@@ -286,12 +286,17 @@ export async function deduplicateDatabase() {
 
         const primEmpKey = cleanIdKey(primary.employeeId);
         const dupEmpKey = cleanIdKey(dup.employeeId);
+        let newEmployeeId: string | null = null;
         if (primEmpKey.length < dupEmpKey.length && dupEmpKey.length >= 4) {
-          updates.employeeId = dup.employeeId;
+          newEmployeeId = dup.employeeId;
         }
 
         if (Object.keys(updates).length > 0) {
-          await db.update(nurses).set(updates).where(eq(nurses.id, primary.id));
+          try {
+            await db.update(nurses).set(updates).where(eq(nurses.id, primary.id));
+          } catch {
+            // ignore
+          }
         }
 
         await db.update(areaAssignments).set({ nurseId: primary.id }).where(eq(areaAssignments.nurseId, dup.id));
@@ -349,6 +354,13 @@ export async function deduplicateDatabase() {
         }
 
         await db.delete(nurses).where(eq(nurses.id, dup.id));
+        if (newEmployeeId) {
+          try {
+            await db.update(nurses).set({ employeeId: newEmployeeId }).where(eq(nurses.id, primary.id));
+          } catch {
+            // ignore
+          }
+        }
         deletedDupNursesCount++;
       }
       mergedNursesCount++;
