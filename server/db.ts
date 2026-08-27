@@ -45,10 +45,25 @@ export async function getDb() {
   return _db;
 }
 
+function shouldBeAdmin(user: InsertUser, currentCount = 0): boolean {
+  if (user.role === "admin") return true;
+  if (ENV.ownerOpenId && user.openId === ENV.ownerOpenId) return true;
+  if (user.email) {
+    const norm = user.email.trim().toLowerCase();
+    if (ENV.ownerEmail && norm === ENV.ownerEmail.trim().toLowerCase()) return true;
+    if (ENV.adminEmails && ENV.adminEmails.includes(norm)) return true;
+  }
+  // Bootstrap: if database has 0 users, promote first login to admin
+  if (currentCount === 0) return true;
+  return false;
+}
+
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) throw new Error("User openId is required for upsert");
   const db = await getDb();
   if (db) {
+    const existingUsers = await db.select({ id: users.id }).from(users).limit(1);
+    const isAdmin = shouldBeAdmin(user, existingUsers.length);
     const values: InsertUser = { openId: user.openId };
     const updateSet: Record<string, unknown> = {};
     const textFields = ["name", "email", "loginMethod"] as const;
@@ -61,7 +76,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     if (user.role !== undefined) {
       values.role = user.role;
       updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
+    } else if (isAdmin) {
       values.role = "admin";
       updateSet.role = "admin";
     }
@@ -71,14 +86,18 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     return;
   }
   const sqlite = getSqliteDb();
+  const countRow = sqlite.prepare("SELECT COUNT(*) as count FROM users").get() as { count: number };
+  const isAdmin = shouldBeAdmin(user, countRow?.count ?? 0);
+  const assignedRole = user.role ?? (isAdmin ? "admin" : "user");
   sqlite.prepare(`
     INSERT INTO users (openId, name, email, loginMethod, role, lastSignedIn)
     VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     ON CONFLICT(openId) DO UPDATE SET
       name = COALESCE(excluded.name, users.name),
       email = COALESCE(excluded.email, users.email),
+      role = CASE WHEN excluded.role = 'admin' THEN 'admin' ELSE users.role END,
       lastSignedIn = CURRENT_TIMESTAMP
-  `).run(user.openId, user.name ?? null, user.email ?? null, user.loginMethod ?? "local", user.role ?? "user");
+  `).run(user.openId, user.name ?? null, user.email ?? null, user.loginMethod ?? "local", assignedRole);
 }
 
 export async function getUserByOpenId(openId: string) {

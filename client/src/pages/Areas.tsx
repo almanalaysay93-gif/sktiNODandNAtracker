@@ -60,6 +60,7 @@ export default function Areas() {
           <h1 className="text-2xl font-semibold tracking-tight">Areas of Assignment</h1>
           <p className="text-sm text-muted-foreground">The fixed assignment areas in SKTI</p>
         </div>
+        <Button onClick={() => setOpen(true)}>+ Add Area</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

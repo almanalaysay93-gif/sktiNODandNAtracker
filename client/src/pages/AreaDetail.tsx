@@ -34,6 +34,8 @@ export default function AreaDetail() {
 
   const { data: area, isLoading } = trpc.areas.get.useQuery({ id }, { enabled: !Number.isNaN(id) });
   const { data: requirements } = trpc.trainings.getAreaRequirements.useQuery({ areaId: id }, { enabled: !Number.isNaN(id) });
+  const { data: catalog } = trpc.trainings.listCatalog.useQuery();
+  const catalogMap = useMemo(() => new Map(catalog?.map((c) => [c.id, c.name]) ?? []), [catalog]);
   const [backfillOpen, setBackfillOpen] = useState(false);
   const [backfillNurseId, setBackfillNurseId] = useState<number | null>(null);
   const [backfillStart, setBackfillStart] = useState("");
@@ -135,7 +137,9 @@ export default function AreaDetail() {
           ) : (
             <div className="flex flex-wrap gap-2">
               {(requirements as number[]).map((tid) => (
-                <span key={tid} className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full">Training #{tid}</span>
+                <span key={tid} className="text-xs bg-accent text-accent-foreground px-2 py-1 rounded-full">
+                  {catalogMap.get(tid) ?? `Training #${tid}`}
+                </span>
               ))}
             </div>
           )}

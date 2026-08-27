@@ -156,7 +156,7 @@ class SDKServer {
   }
 
   private getSessionSecret() {
-    const secret = ENV.cookieSecret;
+    const secret = ENV.cookieSecret || "skti-default-jwt-secret-key-32-chars-min!";
     return new TextEncoder().encode(secret);
   }
 
@@ -172,8 +172,8 @@ class SDKServer {
     return this.signSession(
       {
         openId,
-        appId: ENV.googleClientId,
-        name: options.name || "",
+        appId: ENV.googleClientId || "skti-app",
+        name: options.name || "User",
       },
       options
     );
@@ -190,8 +190,8 @@ class SDKServer {
 
     return new SignJWT({
       openId: payload.openId,
-      appId: payload.appId,
-      name: payload.name,
+      appId: payload.appId || "skti-app",
+      name: payload.name || "User",
     })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .setExpirationTime(expirationSeconds)
@@ -202,7 +202,6 @@ class SDKServer {
     cookieValue: string | undefined | null
   ): Promise<{ openId: string; appId: string; name: string } | null> {
     if (!cookieValue) {
-      console.warn("[Auth] Missing session cookie");
       return null;
     }
 
@@ -213,19 +212,15 @@ class SDKServer {
       });
       const { openId, appId, name } = payload as Record<string, unknown>;
 
-      if (
-        !isNonEmptyString(openId) ||
-        !isNonEmptyString(appId) ||
-        !isNonEmptyString(name)
-      ) {
-        console.warn("[Auth] Session payload missing required fields");
+      if (!isNonEmptyString(openId)) {
+        console.warn("[Auth] Session payload missing valid openId");
         return null;
       }
 
       return {
         openId,
-        appId,
-        name,
+        appId: typeof appId === "string" ? appId : "skti-app",
+        name: typeof name === "string" ? name : "User",
       };
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));

@@ -132,6 +132,7 @@ export function NurseFormDialog({
       employmentStatus,
       dateHired: dateHired ? new Date(dateHired) : undefined,
       contactNumber: contactNumber.trim() || undefined,
+      currentAreaId: areaId ? Number(areaId) : undefined,
     };
     let id = nurse?.id;
     if (nurse) {

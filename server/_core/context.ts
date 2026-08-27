@@ -1,3 +1,4 @@
+import { COOKIE_NAME } from "@shared/const";
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import type { User } from "../../drizzle/schema";
 import { sdk } from "./sdk";
@@ -34,15 +35,19 @@ export async function createContext(
 ): Promise<TrpcContext> {
   let user: User | null = null;
 
-  if (!ENV.isProduction) {
-    return { req: opts.req, res: opts.res, user: localAdminUser() };
-  }
-
   try {
     user = await sdk.authenticateRequest(opts.req);
   } catch (error) {
     // Authentication is optional for public procedures.
     user = null;
+  }
+
+  // In local dev, if no session cookie exists, provide localAdminUser fallback
+  if (!user && !ENV.isProduction) {
+    const cookies = opts.req.headers.cookie ?? "";
+    if (!cookies.includes(COOKIE_NAME)) {
+      user = localAdminUser();
+    }
   }
 
   return {

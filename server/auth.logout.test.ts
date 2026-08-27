@@ -60,3 +60,28 @@ describe("auth.logout", () => {
     });
   });
 });
+
+describe("sdk session token handling", () => {
+  it("creates and verifies session even with empty name or missing optional fields", async () => {
+    const { sdk } = await import("./_core/sdk");
+    const token = await sdk.createSessionToken("google-sub-12345", { name: "" });
+    expect(token).toBeTruthy();
+
+    const verified = await sdk.verifySession(token);
+    expect(verified).not.toBeNull();
+    expect(verified?.openId).toBe("google-sub-12345");
+    expect(verified?.name).toBe("User");
+  });
+
+  it("decodes valid and invalid oauth state safely without crashing", async () => {
+    const { decodeOAuthState, encodeOAuthState } = await import("../shared/const");
+    const encoded = encodeOAuthState({ redirectUri: "https://example.com/callback", nonce: "test-nonce-123" });
+    const decoded = decodeOAuthState(encoded);
+    expect(decoded.redirectUri).toBe("https://example.com/callback");
+    expect(decoded.nonce).toBe("test-nonce-123");
+
+    const garbage = decodeOAuthState("not-valid-base64-%%%");
+    expect(garbage.redirectUri).toBe("");
+    expect(garbage.nonce).toBeUndefined();
+  });
+});

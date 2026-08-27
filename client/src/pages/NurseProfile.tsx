@@ -219,6 +219,7 @@ export default function NurseProfile() {
                         <th className="px-3 py-2.5 font-medium">Type</th>
                         <th className="px-3 py-2.5 font-medium">Start</th>
                         <th className="px-3 py-2.5 font-medium">End</th>
+                        <th className="px-3 py-2.5 font-medium">Duration</th>
                         <th className="px-3 py-2.5 font-medium">Remarks</th>
                       </tr>
                     </thead>

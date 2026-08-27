@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-25T04:25:23.114Z",
+  "timestamp": "2026-08-27T06:27:56.817Z",
   "projectRoot": "E:\\ai\\claude\\ALAi\\skti-nursetrack",
   "structure": {
     "hasPackageJson": true,
@@ -7,5 +7,5 @@
     "hasClaudeConfig": true,
     "hasClaudeFlow": true
   },
-  "scannedAt": 1787631923114
+  "scannedAt": 1787812076817
 }

@@ -39,10 +39,14 @@ export function getSessionCookieOptions(
   //       ? hostname
   //       : undefined;
 
+  // `SameSite=None` is only valid paired with `Secure` — browsers silently drop the
+  // cookie otherwise (no error, just never stored). Fall back to `Lax` over plain
+  // HTTP (local dev), which still allows the top-level OAuth-redirect GET through.
+  const secure = isSecureRequest(req);
   return {
     httpOnly: true,
     path: "/",
-    sameSite: "none",
-    secure: isSecureRequest(req),
+    sameSite: secure ? "none" : "lax",
+    secure,
   };
 }

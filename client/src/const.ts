@@ -1,23 +1,27 @@
-import { OAUTH_STATE_COOKIE, encodeOAuthState } from "@shared/const";
+import { OAUTH_STATE_COOKIE, OAUTH_STATE_COOKIE_PLAIN, encodeOAuthState } from "@shared/const";
+import { toast } from "sonner";
 
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
 // Start the Google OAuth login. Call this from an event handler or effect at
 // the moment you want to navigate, e.g. `onClick={() => startLogin()}`.
-//
-// It has SIDE EFFECTS — it mints a one-time nonce, writes the __Host- state
-// cookie, and navigates immediately — so the cookie nonce always matches the
-// `state` it sends. Do NOT call it during render (no `href={startLogin()}` /
-// `loginUrl={...}`): each call overwrites the cookie, so a stray render-phase
-// call would desync it from an in-flight login and the callback would reject it
-// with "invalid oauth state". It returns void by design, so there is no URL to
-// stash across renders.
 export const startLogin = () => {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    console.error("[OAuth] VITE_GOOGLE_CLIENT_ID is not configured.");
+    toast.error("Google Client ID is not configured. Please check .env settings.");
+    return;
+  }
+
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
+  const isHttps = window.location.protocol === "https:";
+  const cookieName = isHttps ? OAUTH_STATE_COOKIE : OAUTH_STATE_COOKIE_PLAIN;
+  const cookieAttrs = isHttps
+    ? "Path=/; Max-Age=600; SameSite=None; Secure"
+    : "Path=/; Max-Age=600; SameSite=Lax";
 
   const nonce = crypto.randomUUID();
-  document.cookie = `${OAUTH_STATE_COOKIE}=${nonce}; Path=/; Max-Age=600; SameSite=None; Secure`;
+  document.cookie = `${cookieName}=${nonce}; ${cookieAttrs}`;
   const state = encodeOAuthState({ redirectUri, nonce });
 
   const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
