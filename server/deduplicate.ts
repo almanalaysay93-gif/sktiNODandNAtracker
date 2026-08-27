@@ -379,6 +379,35 @@ export async function deduplicateDatabase() {
         seenTrainings.add(key);
       }
     }
+
+    // 3. Global pass: Deduplicate nurseCredentials within individual nurses
+    const allCredsAfterMerge = await db.select().from(nurseCredentials);
+    const credsByNurseAndType = new Map<string, typeof allCredsAfterMerge>();
+    for (const c of allCredsAfterMerge) {
+      const key = `${c.nurseId}-${c.credentialTypeId}`;
+      if (!credsByNurseAndType.has(key)) credsByNurseAndType.set(key, []);
+      credsByNurseAndType.get(key)!.push(c);
+    }
+
+    const credGroups = Array.from(credsByNurseAndType.values());
+    for (const group of credGroups) {
+      if (group.length > 1) {
+        group.sort((a: (typeof allCredsAfterMerge)[0], b: (typeof allCredsAfterMerge)[0]) => {
+          const aExp = a.expiryDate ? new Date(a.expiryDate).getTime() : 0;
+          const bExp = b.expiryDate ? new Date(b.expiryDate).getTime() : 0;
+          return bExp - aExp || b.id - a.id;
+        });
+        const primaryCred = group[0];
+        const dups = group.slice(1);
+        for (const dc of dups) {
+          if (!primaryCred.licenseNumber && dc.licenseNumber) {
+            await db.update(nurseCredentials).set({ licenseNumber: dc.licenseNumber }).where(eq(nurseCredentials.id, primaryCred.id));
+          }
+          await db.delete(nurseCredentials).where(eq(nurseCredentials.id, dc.id));
+          deduplicatedCredentialsCount++;
+        }
+      }
+    }
   } else {
     // SQLite local fallback
     const sqlite = getSqliteDb();

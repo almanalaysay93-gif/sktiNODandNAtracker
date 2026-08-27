@@ -32,17 +32,21 @@ export const credentialsRouter = router({
       db.listNurses(),
       db.listCredentialTypes(),
     ]);
+    const activeNurses = nurses.filter((n) => !n.archivedAt);
+    const activeNurseIds = new Set(activeNurses.map((n) => n.id));
+    const activeCreds = credentials.filter((c) => activeNurseIds.has(c.nurseId));
     const nurseById = new Map(nurses.map((n) => [n.id, n]));
     const typeById = new Map(types.map((t) => [t.id, t]));
+
     return {
-      credentials: credentials.map((c) => ({
+      credentials: activeCreds.map((c) => ({
         ...c,
         nurse: nurseById.get(c.nurseId),
         typeName: typeById.get(c.credentialTypeId)?.name ?? "Unknown",
         derivedStatus: deriveLicenseStatus(dateKey(c.expiryDate)),
         daysRemaining: Math.floor((parseForDays(c.expiryDate) - parseForDays(dateKey(new Date()))) / 86400000),
       })),
-      nurses,
+      nurses: activeNurses,
       types,
     };
   }),
