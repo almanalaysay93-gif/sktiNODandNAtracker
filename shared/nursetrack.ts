@@ -30,10 +30,16 @@ export function todayDate(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-export function parseLocalDate(value: string | Date): Date {
-  if (value instanceof Date) return value;
-  const [y, m, d] = value.split("-").map(Number);
-  return new Date(y, m - 1, d);
+export function parseLocalDate(value: string | Date | null | undefined): Date {
+  if (!value) return new Date(NaN);
+  if (value instanceof Date) return isNaN(value.getTime()) ? new Date(NaN) : value;
+  if (typeof value === "string") {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+  }
+  return new Date(value);
 }
 
 /**

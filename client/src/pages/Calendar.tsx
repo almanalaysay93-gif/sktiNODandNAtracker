@@ -66,6 +66,21 @@ const SEVERITY_META: Record<string, { cls: string; dot: string; label: string }>
     dot: "bg-emerald-500",
     label: "Completed",
   },
+  healthy: {
+    cls: "bg-emerald-50 border-emerald-200 text-emerald-800",
+    dot: "bg-emerald-500",
+    label: "Completed",
+  },
+  informational: {
+    cls: "bg-[#E4F4F8] border-[#A8DEEB] text-[#0E6E85]",
+    dot: "bg-[#0FA4C7]",
+    label: "Scheduled",
+  },
+  neutral: {
+    cls: "bg-muted border-border text-foreground",
+    dot: "bg-muted-foreground",
+    label: "Information",
+  },
   info: {
     cls: "bg-muted border-border text-foreground",
     dot: "bg-muted-foreground",
@@ -100,7 +115,7 @@ export default function Calendar() {
   // Group by month
   const groups: Record<string, (typeof filtered)[number][]> = {};
   for (const e of filtered) {
-    const key = e.date.slice(0, 7);
+    const key = safeDateKey(e.date).slice(0, 7) || "Other";
     if (!groups[key]) groups[key] = [];
     groups[key].push(e);
   }

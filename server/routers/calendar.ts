@@ -4,8 +4,7 @@ import * as db from "../db";
 import { deriveLicenseStatus, daysUntilExpiry, todayDate, parseLocalDate, dateKey } from "../../shared/nursetrack";
 
 function dateIso(d: Date | string | null | undefined): string {
-  if (!d) return "";
-  return parseLocalDate(d).toLocaleDateString("en-CA");
+  return dateKey(d);
 }
 
 const nullableDateInput = z.union([z.date(), z.string().datetime(), z.null()]).transform((d) => (d === null ? null : d instanceof Date ? d : new Date(d))).optional();
@@ -22,6 +21,9 @@ export const calendarRouter = router({
     .query(async ({ input }) => {
       const from = input.from ?? new Date("2020-01-01");
       const to = input.to ?? new Date(Date.now() + 365 * 86400000);
+      const fromStr = dateKey(from) || "2020-01-01";
+      const toStr = dateKey(to) || "2099-12-31";
+      const inRange = (d: string) => Boolean(d && d >= fromStr && d <= toStr);
       const includeTypes = new Set(input.includeTypes ?? ["license", "training", "areaChange", "custom"]);
       const today = todayDate();
 
@@ -48,8 +50,6 @@ export const calendarRouter = router({
       const nurseById = new Map(nurses.map((n) => [n.id, n]));
       const areaRows = await db.listAreas();
       const areaById = new Map(areaRows.map((a) => [a.id, a]));
-
-      const inRange = (d: string) => d >= from.toISOString().slice(0, 10) && d <= to.toISOString().slice(0, 10);
       // License milestone events (1-year, 6-month, expiry) for non-archived nurses.
       if (includeTypes.has("license")) {
         const creds = await db.listCredentials();
