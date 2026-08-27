@@ -2,14 +2,60 @@ import { eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "./db";
 import { getSqliteDb } from "./localDb";
 import {
+  areas,
+  areaAssignments,
+  areaTrainingRequirements,
   nurses,
   nurseCredentials,
   nurseTrainings,
-  areaAssignments,
   customCalendarEvents,
   notifications,
   type Nurse,
 } from "../drizzle/schema";
+
+export const CANONICAL_AREAS = [
+  { code: "NEPHRO-OFFICE", name: "Nephrology Office", description: "Nephrology Nursing Office & Administrative Center", sortOrder: 1 },
+  { code: "PD", name: "Peritoneal Dialysis", description: "Peritoneal Dialysis Unit & Outpatient CAPD/APD", sortOrder: 2 },
+  { code: "OTSU-SHARE", name: "OTSU / SHARE", description: "Organ Transplant Specialty Unit & SHARE Programs", sortOrder: 3 },
+  { code: "RDU-MAIN", name: "RDU Main", description: "Renal Dialysis Unit - Main Building (Station 1-28)", sortOrder: 4 },
+  { code: "RDU-ANNEX", name: "RDU Annex", description: "Renal Dialysis Unit - Annex Center", sortOrder: 5 },
+  { code: "SKTI-WARD", name: "SKTI Service Ward", description: "Southern Philippines Kidney Transplant Institute - Inpatient Ward", sortOrder: 6 },
+  { code: "SKTI-PAY", name: "SKTI Payward", description: "SKTI Pay Patients Inpatient Unit", sortOrder: 7 },
+  { code: "SKTI-ICU", name: "SKTI ICU", description: "SKTI Intensive Care Unit", sortOrder: 8 },
+  { code: "TRIAGE", name: "Triage & Receiving", description: "Nephrology Triage and Outpatient Receiving", sortOrder: 9 },
+] as const;
+
+export function canonicalAreaInfo(rawName: string): { code: string; name: string } | null {
+  const s = rawName.trim().toUpperCase();
+  if (s.includes("MAIN") || s.includes("RDU-MAIN") || s.includes("DU MAIN")) {
+    return { code: "RDU-MAIN", name: "RDU Main" };
+  }
+  if (s.includes("ANNEX") || s.includes("RDU-ANNEX") || s.includes("DU ANNEX")) {
+    return { code: "RDU-ANNEX", name: "RDU Annex" };
+  }
+  if (s.includes("OTSU") || s.includes("SHARE")) {
+    return { code: "OTSU-SHARE", name: "OTSU / SHARE" };
+  }
+  if (s.includes("PERITONEAL") || s === "PD" || s.startsWith("PD ") || s.includes("CAPD")) {
+    return { code: "PD", name: "Peritoneal Dialysis" };
+  }
+  if (s.includes("ICU")) {
+    return { code: "SKTI-ICU", name: "SKTI ICU" };
+  }
+  if (s.includes("PAY")) {
+    return { code: "SKTI-PAY", name: "SKTI Payward" };
+  }
+  if (s.includes("WARD") || s.includes("SERVICE")) {
+    return { code: "SKTI-WARD", name: "SKTI Service Ward" };
+  }
+  if (s.includes("OFFICE") || s.includes("ADMIN")) {
+    return { code: "NEPHRO-OFFICE", name: "Nephrology Office" };
+  }
+  if (s.includes("TRIAGE") || s.includes("RECEIVING")) {
+    return { code: "TRIAGE", name: "Triage & Receiving" };
+  }
+  return null;
+}
 
 class DisjointSet {
   private parent = new Map<number, number>();
@@ -38,7 +84,7 @@ function nameTokens(fullName: string): string[] {
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
-    .filter((t) => t.length > 1) // Strip single letters (e.g. 'm', 'p', 'y', 'c')
+    .filter((t) => t.length > 1)
     .sort();
 }
 
@@ -56,7 +102,6 @@ function shortNameKey(first: string, last: string): string {
 
 function cleanIdKey(idStr: string | null | undefined): string {
   if (!idStr) return "";
-  // Strip non-alphanumeric and strip leading zeros if purely numeric
   const clean = idStr.trim().replace(/[^a-zA-Z0-9]/g, "");
   if (/^\d+$/.test(clean)) {
     return clean.replace(/^0+/, "");
@@ -70,8 +115,58 @@ export async function deduplicateDatabase() {
   let deletedDupNursesCount = 0;
   let deduplicatedTrainingsCount = 0;
   let deduplicatedCredentialsCount = 0;
+  let cleanedAreasCount = 0;
 
   if (db) {
+    // 0. Ensure Canonical Areas exist and consolidate non-standard areas (e.g. "DU MAIN NURSES" -> "RDU Main", "DU ANNEX NURSES" -> "RDU Annex")
+    for (const ca of CANONICAL_AREAS) {
+      await db.insert(areas).values({
+        code: ca.code,
+        name: ca.name,
+        description: ca.description,
+        sortOrder: ca.sortOrder,
+        active: true,
+      }).onDuplicateKeyUpdate({
+        set: {
+          name: ca.name,
+          description: ca.description,
+          sortOrder: ca.sortOrder,
+          active: true,
+        },
+      });
+    }
+
+    const allDbAreas = await db.select().from(areas);
+    const canonicalByCode = new Map(
+      allDbAreas
+        .filter((a) => CANONICAL_AREAS.some((c) => c.code === a.code || c.name.toLowerCase() === a.name.toLowerCase()))
+        .map((a) => [a.code, a])
+    );
+    const canonicalByName = new Map(
+      allDbAreas
+        .filter((a) => CANONICAL_AREAS.some((c) => c.code === a.code || c.name.toLowerCase() === a.name.toLowerCase()))
+        .map((a) => [a.name.toLowerCase(), a])
+    );
+
+    for (const a of allDbAreas) {
+      const canonicalMatch = canonicalAreaInfo(a.name) || canonicalAreaInfo(a.code);
+      if (canonicalMatch) {
+        const canonicalArea = canonicalByCode.get(canonicalMatch.code) ?? canonicalByName.get(canonicalMatch.name.toLowerCase());
+        if (canonicalArea && canonicalArea.id !== a.id) {
+          // Reassign nurses to the canonical area
+          await db.update(nurses).set({ currentAreaId: canonicalArea.id }).where(eq(nurses.currentAreaId, a.id));
+          await db.update(areaAssignments).set({ areaId: canonicalArea.id }).where(eq(areaAssignments.areaId, a.id));
+          try {
+            await db.update(areaTrainingRequirements).set({ areaId: canonicalArea.id }).where(eq(areaTrainingRequirements.areaId, a.id));
+          } catch {
+            // ignore duplicate requirement conflicts
+          }
+          await db.delete(areas).where(eq(areas.id, a.id));
+          cleanedAreasCount++;
+        }
+      }
+    }
+
     // 1. Fetch all nurses & credentials
     const allNurses = await db.select().from(nurses);
     const allCreds = await db.select().from(nurseCredentials);
@@ -82,8 +177,6 @@ export async function deduplicateDatabase() {
     }
 
     const ds = new DisjointSet();
-
-    // Mapping indexes to find matches
     const byEmpId = new Map<string, number>();
     const byTokenName = new Map<string, number>();
     const byShortName = new Map<string, number>();
@@ -94,7 +187,7 @@ export async function deduplicateDatabase() {
       const nurseId = n.id;
       ds.find(nurseId);
 
-      // 1. Match by clean employeeId
+      // Match by clean employeeId
       const empKey = cleanIdKey(n.employeeId);
       if (empKey.length >= 3) {
         if (byEmpId.has(empKey)) {
@@ -104,7 +197,7 @@ export async function deduplicateDatabase() {
         }
       }
 
-      // 2. Match by full tokenized name (ignoring middle initials and case)
+      // Match by full tokenized name (ignoring middle initials and case)
       const tokenKey = nameTokenKey(n.firstName, n.lastName, n.middleName);
       if (tokenKey.length > 3) {
         if (byTokenName.has(tokenKey)) {
@@ -114,7 +207,7 @@ export async function deduplicateDatabase() {
         }
       }
 
-      // 3. Match by short name (first token of first name + last name)
+      // Match by short name (first token of first name + last name)
       const sKey = shortNameKey(n.firstName, n.lastName);
       if (sKey.length > 4) {
         if (byShortName.has(sKey)) {
@@ -124,7 +217,7 @@ export async function deduplicateDatabase() {
         }
       }
 
-      // 4. Match by email
+      // Match by email
       if (n.accountEmail && n.accountEmail.trim().length > 3) {
         const emKey = n.accountEmail.trim().toLowerCase();
         if (byEmail.has(emKey)) {
@@ -134,7 +227,7 @@ export async function deduplicateDatabase() {
         }
       }
 
-      // 5. Match by license numbers in credentials
+      // Match by license numbers in credentials
       const nurseCredList = credsByNurseId.get(nurseId) ?? [];
       for (const cred of nurseCredList) {
         const licKey = cleanIdKey(cred.licenseNumber);
@@ -162,7 +255,6 @@ export async function deduplicateDatabase() {
       const group = clusterEntries[i];
       if (group.length <= 1) continue;
 
-      // Score each nurse to determine authoritative primary
       const score = (n: Nurse) => {
         let s = 0;
         if (n.linkedUserId) s += 1000;
@@ -171,9 +263,7 @@ export async function deduplicateDatabase() {
         if (n.dateHired) s += 30;
         if (n.contactNumber) s += 20;
         if (n.middleName) s += 10;
-        // Prefer more specific employee ID (numeric PRC over auto-generated)
         if (cleanIdKey(n.employeeId).length >= 5) s += 15;
-        // tie-breaker: lower ID
         s -= n.id * 0.001;
         return s;
       };
@@ -183,7 +273,6 @@ export async function deduplicateDatabase() {
       const duplicates = group.filter((n) => n.id !== primary.id);
 
       for (const dup of duplicates) {
-        // Merge missing fields to primary
         const updates: Record<string, unknown> = {};
         if (!primary.accountEmail && dup.accountEmail) updates.accountEmail = dup.accountEmail;
         if (!primary.currentAreaId && dup.currentAreaId) updates.currentAreaId = dup.currentAreaId;
@@ -195,7 +284,6 @@ export async function deduplicateDatabase() {
         if (!primary.middleName && dup.middleName) updates.middleName = dup.middleName;
         if (!primary.suffix && dup.suffix) updates.suffix = dup.suffix;
 
-        // If duplicate has proper employeeId and primary has generic, update employeeId
         const primEmpKey = cleanIdKey(primary.employeeId);
         const dupEmpKey = cleanIdKey(dup.employeeId);
         if (primEmpKey.length < dupEmpKey.length && dupEmpKey.length >= 4) {
@@ -206,16 +294,10 @@ export async function deduplicateDatabase() {
           await db.update(nurses).set(updates).where(eq(nurses.id, primary.id));
         }
 
-        // Reassign area assignments
         await db.update(areaAssignments).set({ nurseId: primary.id }).where(eq(areaAssignments.nurseId, dup.id));
-
-        // Reassign custom calendar events
         await db.update(customCalendarEvents).set({ nurseId: primary.id }).where(eq(customCalendarEvents.nurseId, dup.id));
-
-        // Reassign notifications
         await db.update(notifications).set({ nurseId: primary.id }).where(eq(notifications.nurseId, dup.id));
 
-        // Reassign credentials
         const dupCreds = await db.select().from(nurseCredentials).where(eq(nurseCredentials.nurseId, dup.id));
         const primCreds = await db.select().from(nurseCredentials).where(eq(nurseCredentials.nurseId, primary.id));
 
@@ -226,7 +308,6 @@ export async function deduplicateDatabase() {
           );
 
           if (match) {
-            // Keep the better expiry date and fuller license number
             const dcExpiry = dc.expiryDate ? new Date(dc.expiryDate).getTime() : 0;
             const matchExpiry = match.expiryDate ? new Date(match.expiryDate).getTime() : 0;
             const credUpdates: Record<string, unknown> = {};
@@ -249,7 +330,6 @@ export async function deduplicateDatabase() {
           }
         }
 
-        // Reassign trainings
         const dupTrainings = await db.select().from(nurseTrainings).where(eq(nurseTrainings.nurseId, dup.id));
         const primTrainings = await db.select().from(nurseTrainings).where(eq(nurseTrainings.nurseId, primary.id));
 
@@ -268,7 +348,6 @@ export async function deduplicateDatabase() {
           }
         }
 
-        // Delete duplicate nurse record
         await db.delete(nurses).where(eq(nurses.id, dup.id));
         deletedDupNursesCount++;
       }
@@ -350,5 +429,6 @@ export async function deduplicateDatabase() {
     deletedDuplicateNurses: deletedDupNursesCount,
     deduplicatedTrainings: deduplicatedTrainingsCount,
     deduplicatedCredentials: deduplicatedCredentialsCount,
+    cleanedAreasCount,
   };
 }

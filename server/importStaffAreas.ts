@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { sdk } from "./_core/sdk";
 import * as db from "./db";
+import { canonicalAreaInfo } from "./deduplicate";
 
 const rowSchema = z.object({ fullName: z.string().min(1).max(256), areaName: z.string().min(1).max(128) });
 const bodySchema = z.object({ rows: z.array(rowSchema).max(500) });
@@ -80,10 +81,14 @@ export async function importStaffAreasHandler(req: Request, res: Response) {
     const ambiguous: string[] = [];
 
     for (const row of parsed.data.rows) {
-      let areaId = areaIdByName.get(row.areaName);
+      const canonical = canonicalAreaInfo(row.areaName);
+      const targetAreaName = canonical ? canonical.name : row.areaName;
+      const targetAreaCode = canonical ? canonical.code : areaCode(row.areaName);
+
+      let areaId = areaIdByName.get(targetAreaName);
       if (!areaId) {
-        areaId = await db.createArea({ code: areaCode(row.areaName), name: row.areaName });
-        areaIdByName.set(row.areaName, areaId);
+        areaId = await db.createArea({ code: targetAreaCode, name: targetAreaName });
+        areaIdByName.set(targetAreaName, areaId);
       }
 
       const fullKey = normTokenSet(row.fullName);

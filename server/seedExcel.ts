@@ -51,6 +51,7 @@ interface TrainingCatalogSeed {
 interface AttendeeSeed {
   staffName: string;
   normName: string;
+  employeeId: string;
   role: "Participant" | "Speaker" | "Facilitator" | "Preceptor";
   completionDate: string;
 }
@@ -157,6 +158,7 @@ export async function seedExcelDatabase(dataFilePath?: string) {
   // 4. Seed Staff (Nurses & Attendants)
   console.log(`[Seed] Seeding ${data.staff.length} staff members...`);
   const nurseIdByNormName = new Map<string, number>();
+  const nurseIdByEmployeeId = new Map<string, number>();
   const allExistingNurses = await db.select().from(nurses);
   const nurseByName = new Map(
     allExistingNurses.map((n) => [`${n.lastName.trim()} ${n.firstName.trim()}`.toLowerCase().replace(/[^a-z0-9]/g, ""), n])
@@ -196,6 +198,7 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     }
 
     const normKey = `${person.nameInfo.lastName.toUpperCase()}, ${person.nameInfo.firstName.toUpperCase()}`;
+    nurseIdByEmployeeId.set(person.employeeId, nurseId);
     nurseIdByNormName.set(normKey, nurseId);
     nurseIdByNormName.set(person.nameInfo.lastName.toUpperCase(), nurseId);
 
@@ -280,12 +283,10 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     }
 
     for (const att of ev.attendees) {
-      let nurseId = nurseIdByNormName.get(att.normName);
+      let nurseId = nurseIdByEmployeeId.get(att.employeeId) ?? nurseIdByNormName.get(att.normName);
       if (!nurseId) {
-        const lastName = att.normName.split(",")[0].trim();
-        nurseId = nurseIdByNormName.get(lastName);
+        throw new Error(`Seed attendee did not resolve uniquely: ${att.staffName} (${att.employeeId})`);
       }
-      if (!nurseId) continue;
 
       const completionDate = new Date(`${att.completionDate}T00:00:00`);
 

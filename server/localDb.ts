@@ -275,6 +275,7 @@ export function seedFromSeedJson(db: Database.Database) {
   `);
 
   const nurseIdByNormName = new Map<string, number>();
+  const nurseIdByEmployeeId = new Map<string, number>();
 
   const insertStaffTx = db.transaction((staffList: any[]) => {
     for (const person of staffList) {
@@ -294,6 +295,7 @@ export function seedFromSeedJson(db: Database.Database) {
       const nurseId = Number(res.lastInsertRowid);
 
       const normKey = `${person.nameInfo.lastName.toUpperCase()}, ${person.nameInfo.firstName.toUpperCase()}`;
+      nurseIdByEmployeeId.set(person.employeeId, nurseId);
       nurseIdByNormName.set(normKey, nurseId);
       nurseIdByNormName.set(person.nameInfo.lastName.toUpperCase(), nurseId);
 
@@ -355,12 +357,10 @@ export function seedFromSeedJson(db: Database.Database) {
       const eventId = Number(evRes.lastInsertRowid);
 
       for (const att of ev.attendees) {
-        let nurseId = nurseIdByNormName.get(att.normName);
+        let nurseId = nurseIdByEmployeeId.get(att.employeeId) ?? nurseIdByNormName.get(att.normName);
         if (!nurseId) {
-          const lastName = att.normName.split(",")[0].trim();
-          nurseId = nurseIdByNormName.get(lastName);
+          throw new Error(`Seed attendee did not resolve uniquely: ${att.staffName} (${att.employeeId})`);
         }
-        if (!nurseId) continue;
 
         insAttend.run(
           nurseId,
