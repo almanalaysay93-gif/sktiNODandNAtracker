@@ -533,7 +533,42 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "Neurological Determination of Death in Newborns & Children\nCore Concepts in Hemodialysis\nUsbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026\nRenal Nursing In Focus\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operationstraining",
+      "name": "Neurological Determination of Death in Newborns & Children",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Core Concepts in Hemodialysis",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Usbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Renal Nursing In Focus",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Dialysis Center Technician Course -Self-Paced E-Learning",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Water Treatment System Operationstraining",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -547,14 +582,42 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop\nWebinar On Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes\nSkills Enhancement In Infusion Therapy\nRenal Nursing In Focus\nPgs Basics For Nursing Division",
+      "name": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Basic Skills Enhancement: Cleaning And Disinfection\nB Braun Machine Training",
+      "name": "Webinar On Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Skills Enhancement In Infusion Therapy",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Pgs Basics For Nursing Division",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Basic Skills Enhancement: Cleaning And Disinfection",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "B Braun Machine Training",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -568,28 +631,42 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "The Shifting Shadows: Navigating Emerging and Re-emerging Threats\nLenten Retreat",
+      "name": "The Shifting Shadows: Navigating Emerging and Re-emerging Threats",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Webinar on Surveillance Orientation\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Lenten Retreat",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Enterprise Resource Planning System Purchase Request Module Orientation\nPotential Multiple Organ Donor (Pmod) Management And Training Course",
+      "name": "Webinar on Surveillance Orientation",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Nursing Documentation, Reporting, and Recording\nSkills Enhancement In Infusion Therapy",
+      "name": "Enterprise Resource Planning System Purchase Request Module Orientation",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Potential Multiple Organ Donor (Pmod) Management And Training Course",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Nursing Documentation, Reporting, and Recording",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -603,14 +680,21 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "In-Hospital Cardiac Arrest Care Workshop\nHemodialysis Training For Nurses – Self-Paced E-Learning\nOrientation To Icu",
+      "name": "In-Hospital Cardiac Arrest Care Workshop",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Orientation To Icu",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -624,42 +708,56 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "Dialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operationstraining",
+      "name": "Pain: Beyond What We Already Know",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Pain: Beyond What We Already Know\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Championing Excellence: CQI Refresher Course for Nursing Leaders",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Nursing Documentation, Reporting, and Recording\nChampioning Excellence: CQI Refresher Course for Nursing Leaders\nSeeing Beyond Symptoms\nPerformance Governance System",
+      "name": "Seeing Beyond Symptoms",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Advances in Sepsis and Septic Shock Management\nEmpowering Nurses in Heart Disease Prevention and Patient Care\nCare Essentials: Medication Safety And Error-Reduction Practices",
+      "name": "Performance Governance System",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "The Shifting Shadows: Navigating Emerging and Re-emerging Threats\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Advances in Sepsis and Septic Shock Management",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "CDP in Hemodialysis \nB Braun Machine Training",
+      "name": "Empowering Nurses in Heart Disease Prevention and Patient Care",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Care Essentials: Medication Safety And Error-Reduction Practices",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "CDP in Hemodialysis",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -680,21 +778,42 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "Character in Action: Nurturing Values for Meaningful Service\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "ERP Module Orientation",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "ERP Module Orientation\nSUMMARY ON NURSING DOCUMENTATION, REPORTING AND RECORDING\nICU LIBERATION BUNDLES - Improving Patient Outcomes and Experience\n2026 CCNAPI Annual Conference: Promoting Critical Care Excellence\nA Lecture on Neurodiverse Children: Implications in Nursing\nRenal Nursing In Focus\nPGS Basics For Allied Health Professional Services",
+      "name": "SUMMARY ON NURSING DOCUMENTATION, REPORTING AND RECORDING",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "CDP IN Hemodialysis\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operations training",
+      "name": "ICU LIBERATION BUNDLES - Improving Patient Outcomes and Experience",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "2026 CCNAPI Annual Conference: Promoting Critical Care Excellence",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "A Lecture on Neurodiverse Children: Implications in Nursing",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "PGS Basics For Allied Health Professional Services",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -708,42 +827,56 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "Championing Excellence: CQI Refresher Course for Nursing Leaders\nSeeing Beyond Symptoms: Enhancing Clinical Assessments Skills For Better Outcomes",
+      "name": "Seeing Beyond Symptoms: Enhancing Clinical Assessments Skills For Better Outcomes",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "CDP IN Hemodialysis\nEnd User’s Training Hd/Hdf Dialysis Machine",
+      "name": "End User’s Training Hd/Hdf Dialysis Machine",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Hearing Aids for Children\nImplantable Hearing Devices\nAdvancements in the Management of Cardiogenic Shock and the Use of Mechanical Circulatory Support\nWebinar on Surveillance Orientation\nTuberculosis Updates: Strengthening Nursing Knowledge And Practice",
+      "name": "Hearing Aids for Children",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Lenten Webinar: AI in Holistic Healthcare\nCDP IN HEMODIALYSIS\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Implantable Hearing Devices",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Advances in Sepsis and Septic Shock Management\nLecture On Notifiable Diseases: Pertussis",
+      "name": "Advancements in the Management of Cardiogenic Shock and the Use of Mechanical Circulatory Support",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Tuberculosis Updates: Strengthening Nursing Knowledge And Practice",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Lenten Webinar: AI in Holistic Healthcare",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -757,7 +890,7 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "CDP in Hemodialysis\nRenal Nursing In Focuse (Speaker)",
+      "name": "Renal Nursing In Focuse (Speaker)",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -771,266 +904,49 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "Seminar on the Shifting Shadows: Navigating Emerging and Re-Emerging Threats\nB Braun Machine Training",
+      "name": "Seminar on the Shifting Shadows: Navigating Emerging and Re-Emerging Threats",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Usbong sa Bag-ong Tuig: A Lecture on Neurodiverse Children: Implications in Nursing\nB Braun Machine Training",
+      "name": "Learning Lounge: Rabies: Updates In Prevention, Care And Nursing Practice",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care\nHemodialysis Training For Nurses – Self-Paced E-Learning\nLearning Lounge: Rabies: Updates In Prevention, Care And Nursing Practice",
+      "name": "Reorientation On Ntp Mop",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "B Braun Machine Training",
+      "name": "Bantay Salakay: A Webinar On Rabies Prevention And Control",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Webinar on Surveillance Orientation\nReorientation On Ntp Mop\nBantay Salakay: A Webinar On Rabies Prevention And Control",
+      "name": "Care Essentials: Safe Transfusion, Safe Patients",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Care Essentials: Safe Transfusion, Safe Patients\nPain: Beyond What We Already Know",
+      "name": "Standard First Aid Training",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Standard First Aid Training\nIncident Reporting",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Basic Skills Enhancement: VS Taking & Recording \nBasic Skills Enhancement: Body Mechanics and Safe Patient Transport",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Usbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026\nSeeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "IN-HOSPITAL CARDIAC ARREST CARE Workshop\n2026 CCNAPI Annual Conference: Promoting Critical Care Excellence\nStandard First Aid Training",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Gynecologic Cancer Genetics\nCore Concepts in Hemodialysis Nursing\nB Braun Machine Training",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "B Braun Machine Training \nWater Treatment System Operations training",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Incident Reporting\nEmpowering Nurses in Heart Disease Prevention and Patient Care",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Enterprise Resource Planning System Purchase Request Module Orientation\nRenal Nursing In Focus\nHemodialysis Training For Nurses – Self-Paced E-Learning\nWater Treatment System Operations training",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care\nThe Shifting Shadows: Navigating Emerging And Re-Emerging Threats\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Hemodialysis Training For Nurses – Self-Paced E-Learning\nLearning Lounge: Tuberculosis Update: Strengthening Nursing Knowledge And Practice",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Hemodialysis Training For Nurses – Self-Paced E-Learning\nLearning Lounge: Rabies: Updates In Prevention, Care And Nursing Practice",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Enhancing Clinical Assessment Skills For Better Outcomes",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Empowering Nurses in Heart Disease Prevention and Patient Care\nRabies Updates In Prevention, Care And Nursing Practice",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Basics of ECG Interpretation\nRenal Nursing In Focus\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Skills Enhancement In Infusion Therapy",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Basic Skills Enhancement: Body Mechanics and Safe Patient Transport\nBasic Skills Enhancement: Cleaning And Disinfection",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Basic Skills Enhancement: Vital Signs Taking and Recording\nLecture On Notifiable Diseases: Pertussis\nBasic Skills Enhancement: Body Mechanics And Safe Patient Transport",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "PHEx Hearing Disorder Screening Guidelines\nCore Concepts in Hemodialysis Nursing\nB Braun Machine Training",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Pain: Beyond What We Already Know",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Nipah Virus 101: Facts, Risks, Prevention\nUsbong sa Bag-ong Tuig: A Lecture on Neurodiverse Children: Implications in Nursing\nUsbong Sa Bag-Ong Tuig: A Lecture On Neurodiverse Children: Implications In Nursing\nPgs Basics For Allied Health Professionals",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop\nSkills Enhancement In Infusion Therapy\nIncident Reporting",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Core Concepts in Hemodialysis\nRenal Nursing In Focus\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Implantable Hearing Devices\nLenten Webinar: AI in Holistic Healthcare\nEnhancing Clinical Assessment Skills For Better Outcomes",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care\nPotential Multiple Organ Donor (Pmod) Management And Training Course",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Core Concepts in Hemodialysis",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop\nSeminar On Character In Action:Nurturing Values For Meaningful Service\nSeminar On Care Essentials:Medication Safety And Error-Reduction Practices",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Advances in Sepsis & Septic Shock Management\nWebinar on Surveillance Orientation\nHemodialysis Training For Nurses – Self-Paced E-Learning\nLearning Lounge: Tuberculosis Update: Strengthening Nursing Knowledge And Practice",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "CDP IN HEMODIALYSIS\nWater Treatment System Operations Training\nRenal Nursing in Focus\nThe Human Side Of Leadership: Connection Before Direction Batch 2",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Webinar on Surveillance Orientation\nHemodialysis Training For Nurses – Self-Paced E-Learning\nWater Treatment System Operationstraining",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Speech Therapy for Hearing Impaired Children\nImplantable Hearing Devices\nIn-Hospital Cardiac Arrest Care Workshop\nB Braun Machine Training",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Potential Multiple Organ Donor (Pmod) Management And Training Course\nSeminar On Renal Nursing In Focus\nLegacy to Lifeline: The Bold Return of the Philippine Heart Transplant Program\nTract it System Job Order Request Orientation",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "In-Hospital Cardiac Arrest Care Workshop\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Basic Skills Enhancement: VS Taking & Recording",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -1044,14 +960,112 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "CDP IN HEMODIALYSIS",
+      "name": "Gynecologic Cancer Genetics",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Webinar on Surveillance Orientation",
+      "name": "Core Concepts in Hemodialysis Nursing",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Enhancing Clinical Assessment Skills For Better Outcomes",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Rabies Updates In Prevention, Care And Nursing Practice",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Basics of ECG Interpretation",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Basic Skills Enhancement: Vital Signs Taking and Recording",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "PHEx Hearing Disorder Screening Guidelines",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Nipah Virus 101: Facts, Risks, Prevention",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Pgs Basics For Allied Health Professionals",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Seminar On Character In Action:Nurturing Values For Meaningful Service",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Seminar On Care Essentials:Medication Safety And Error-Reduction Practices",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Advances in Sepsis & Septic Shock Management",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "The Human Side Of Leadership: Connection Before Direction Batch 2",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Speech Therapy for Hearing Impaired Children",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Legacy to Lifeline: The Bold Return of the Philippine Heart Transplant Program",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "Tract it System Job Order Request Orientation",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -1065,175 +1079,98 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "Core Concepts in Hemodialysis Nursing\nRenal Nursing In Focus",
+      "name": "Cornerstone of Patient Safety & Shared Responsibility of All",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Cornerstone of Patient Safety & Shared Responsibility of All\nLenten Retreat\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Regional Anesthesia & Pain Medication: Equity, Access, & Recovery",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Care Essentials: Safe Transfusion, Safe Patients\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "LEARNING THE BASICS OF PERITONEAL DIALYSIS AS SPEAKER",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Advances in Sepsis & Septic Shock Management\nRegional Anesthesia & Pain Medication: Equity, Access, & Recovery\nIn-Hospital Cardiac Arrest Care Workshop\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Skills Enhancement In Infusion Therapy As Resource Speaker",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "LEARNING THE BASICS OF PERITONEAL DIALYSIS AS SPEAKER\nSkills Enhancement In Infusion Therapy As Resource Speaker",
+      "name": "BASIC ECG INTERPRETATION",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Webinar on Surveillance Orientation\nCore Concepts in Hemodialysis Nursing\nRenal Nursing In Focus\nB Braun Machine Training",
+      "name": "Bbraun Hemodialysis Didactics",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Basic Skills Enhancement: Vital Signs Taking and Recording\nBasic Skills Enhancement: Body Mechanics And Safe Patient Transport",
+      "name": "A Webinar In Rabies Prevention And Control",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Advances in Sepsis and Septic Shock Management\nB Braun Machine Training",
+      "name": "Foundations Of Lifestyle Medicine: Living Well Made Simple",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Hemodialysis Training For Nurses – Self-Paced E-Learning\nBASIC ECG INTERPRETATION\n2026 CCNAPI Annual Conference: Promoting Critical Care Excellence\nBbraun Hemodialysis Didactics",
+      "name": "CDP IN HEMODIALYSIS as preceptor",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Learning Lounge: Rabies: Updates In Prevention, Care And Nursing Practice\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Basic Life Support Training for Nurses",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Hearing Aids for Children\nWebinar on Surveillance Orientation\nHemodialysis Training For Nurses – Self-Paced E-Learning\nA Webinar In Rabies Prevention And Control",
+      "name": "Tara Istorya Ta – Voices Of Compassion: Transforming How We Connect",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Foundations Of Lifestyle Medicine: Living Well Made Simple\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "name": "Vital Signs Taking and Recording",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Usbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operations Training",
+      "name": "Body Mechanics and Safe Patient Transport",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes\nPotential Multiple Organ Donor (Pmod) Management And Training Course",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "CDP IN HEMODIALYSIS as preceptor\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Character in Action: Nurturing Values for Meaningful Service\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operationstraining",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Usbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operationstraining",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Basic Life Support Training for Nurses\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Basic Life Support Training for Nurses\nRenal Nursing In Focus\nHemodialysis Training For Nurses – Self-Paced E-Learning\nWater Treatment System Operationstraining",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Advances in Sepsis & Septic Shock Management\nThe Shifting Shadows: Navigating Emerging And Re-Emerging Threats\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Tara Istorya Ta – Voices Of Compassion: Transforming How We Connect\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Empowering Nurses In Heart Disease Prevention And Patient Care",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop\nStandard First Aid Training",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Vital Signs Taking and Recording\nBody Mechanics and Safe Patient Transport\nBasic Skills Enhancement: Cleaning And Disinfection\nBasic Skills Enhancement: Body Mechanics And Safe",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "Potential Multiple Organ Donor (Pmod) Management And Training Course\nLegacy to Lifeline: The Bold Return of the Philippine Heart Transplant Program",
+      "name": "Basic Skills Enhancement: Body Mechanics And Safe",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -1262,13 +1199,6 @@
     },
     {
       "name": "BRAUN HEMODIALYSIS AND HEMODIAFILTRATION HANDS-ON TRAINING",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "FUNDAMENTALS OF PERITONEAL DIALYSIS: A HANDS- ON WORKSHOP",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -1352,14 +1282,14 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "PATIENT SAFETY IN HEMODIALYSIS: GLUCOSE MANAGEMENT,\nMEDICATION SAFETY, INFECTION CONTROL, AND NURSING LAW",
+      "name": "PATIENT SAFETY IN HEMODIALYSIS: GLUCOSE MANAGEMENT,",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
       "defaultValidityMonths": null
     },
     {
-      "name": "POTENTIAL MULTIPLE ORGAN DONOR (PMOD) MANAGEMENT AND TRAINING COURSE",
+      "name": "MEDICATION SAFETY, INFECTION CONTROL, AND NURSING LAW",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -1374,13 +1304,6 @@
     },
     {
       "name": "DECEASED ORGAN DONATION SUMMIT: “A MULTISECTORAL DISCUSSION AND CONSENSUS”",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "RENAL NURSING IN FOCUS",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -1471,7 +1394,7 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "10TH PNA SUMMER CONFERENCE - CLARK, PAMPANGA\nRENAL NURSING IN FOCUS",
+      "name": "10TH PNA SUMMER CONFERENCE - CLARK, PAMPANGA",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -1618,13 +1541,6 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "BASICS OF ECG INTERPRETATION",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
       "name": "B. BRAUN MACHINE TRAINING",
       "category": "Clinical Specialization",
       "kind": "Seminar",
@@ -1674,13 +1590,6 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "CARE ESSENTIALS: MEDICATION SAFETY AND ERROR-REDUCTION PRACTICES",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
       "name": "CVC CARE ESSENTIALS PREVENTING INFECTION COMPLICATION",
       "category": "Clinical Specialization",
       "kind": "Seminar",
@@ -1689,13 +1598,6 @@
     },
     {
       "name": "LIVE WELL, STAY WELL: YOUR GUIDE TO BODY AND MIND WELLNESS",
-      "category": "Clinical Specialization",
-      "kind": "Seminar",
-      "renewalRequired": false,
-      "defaultValidityMonths": null
-    },
-    {
-      "name": "IN-HOSPITAL CARDIAC ARREST CARE WORKSHOP",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -1849,7 +1751,14 @@
       "defaultValidityMonths": null
     },
     {
-      "name": "INDICATIONS FOR GENETIC \nEVALUATION AND THE LATEST ADVANCES IN GENETIC DIAGNOSTICS",
+      "name": "INDICATIONS FOR GENETIC",
+      "category": "Clinical Specialization",
+      "kind": "Seminar",
+      "renewalRequired": false,
+      "defaultValidityMonths": null
+    },
+    {
+      "name": "EVALUATION AND THE LATEST ADVANCES IN GENETIC DIAGNOSTICS",
       "category": "Clinical Specialization",
       "kind": "Seminar",
       "renewalRequired": false,
@@ -5602,11 +5511,23 @@
           "normName": "ABEAR, CATHERINE VILLAMIL",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "CUARTERO, JOSE MARIE ROMUALDO",
+          "normName": "CUARTERO, JOSE MARIE ROMUALDO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "LIMSIACO, JUNICO",
+          "normName": "LIMSIACO, JUNICO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Neurological Determination of Death in Newborns & Children\nCore Concepts in Hemodialysis\nUsbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026\nRenal Nursing In Focus\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operationstraining",
+      "title": "Neurological Determination of Death in Newborns & Children",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -5617,6 +5538,327 @@
           "normName": "ABUCEJO, PAULITA",
           "role": "Participant",
           "completionDate": "2026-01-15"
+        }
+      ]
+    },
+    {
+      "title": "Core Concepts in Hemodialysis",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ABUCEJO, PAULITA",
+          "normName": "ABUCEJO, PAULITA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MAGNO, MARIE CHRIS",
+          "normName": "MAGNO, MARIE CHRIS",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MANGURAY, CHRISTIE C.",
+          "normName": "MANGURAY, CHRISTIE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TRIPOLI, GILCYN",
+          "normName": "TRIPOLI, GILCYN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Usbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ABUCEJO, PAULITA",
+          "normName": "ABUCEJO, PAULITA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "EJEM, JUNETH JEAN",
+          "normName": "EJEM, JUNETH JEAN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SANCHEZ, FLOR",
+          "normName": "SANCHEZ, FLOR",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SUERTE, GENELYN",
+          "normName": "SUERTE, GENELYN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "VALERIO, MARILOU",
+          "normName": "VALERIO, MARILOU",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Renal Nursing In Focus",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ABUCEJO, PAULITA",
+          "normName": "ABUCEJO, PAULITA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ALFANTE, QUINNEN P.",
+          "normName": "ALFANTE, QUINNEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "CACHERO, John Carlo A.",
+          "normName": "CACHERO, JOHN CARLO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GILLESANIA, EMYLEN",
+          "normName": "GILLESANIA, EMYLEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "JORDAN, STEVE",
+          "normName": "JORDAN, STEVE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "JORDAN, STEVE",
+          "normName": "JORDAN, STEVE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MAGNO, MARIE CHRIS",
+          "normName": "MAGNO, MARIE CHRIS",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PANGAWAS, SHIELA MAE PANTILLO",
+          "normName": "PANGAWAS, SHIELA MAE PANTILLO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PIATOS, NINA ROSELLE SENCIO",
+          "normName": "PIATOS, NINA ROSELLE SENCIO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TAKEDA, HIROMI",
+          "normName": "TAKEDA, HIROMI",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TRIPOLI, GILCYN",
+          "normName": "TRIPOLI, GILCYN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Dialysis Center Technician Course -Self-Paced E-Learning",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ABUCEJO, PAULITA",
+          "normName": "ABUCEJO, PAULITA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "BALILI, ELLA MARIE",
+          "normName": "BALILI, ELLA MARIE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "CAÑON, ALVIN",
+          "normName": "CAÑON, ALVIN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MACPAO, REYMUNDO",
+          "normName": "MACPAO, REYMUNDO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MORDENO, WILLEN LABATA",
+          "normName": "MORDENO, WILLEN LABATA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MUTOC, ROQUELINE",
+          "normName": "MUTOC, ROQUELINE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ORBUDA, ANGELITO",
+          "normName": "ORBUDA, ANGELITO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PACAÑA, NEL JEAN",
+          "normName": "PACAÑA, NEL JEAN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PASAJERO, RODALIE",
+          "normName": "PASAJERO, RODALIE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SANCHEZ, FLOR",
+          "normName": "SANCHEZ, FLOR",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SOTTO, MARY GRACE",
+          "normName": "SOTTO, MARY GRACE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SUERTE, GENELYN",
+          "normName": "SUERTE, GENELYN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "VALERIO, MARILOU",
+          "normName": "VALERIO, MARILOU",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Water Treatment System Operationstraining",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ABUCEJO, PAULITA",
+          "normName": "ABUCEJO, PAULITA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "BALILI, ELLA MARIE",
+          "normName": "BALILI, ELLA MARIE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MACPAO, REYMUNDO",
+          "normName": "MACPAO, REYMUNDO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MEDIALDEA, MELISSA MAE",
+          "normName": "MEDIALDEA, MELISSA MAE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MORDENO, WILLEN LABATA",
+          "normName": "MORDENO, WILLEN LABATA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MUTOC, ROQUELINE",
+          "normName": "MUTOC, ROQUELINE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ORBUDA, ANGELITO",
+          "normName": "ORBUDA, ANGELITO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PACAÑA, NEL JEAN",
+          "normName": "PACAÑA, NEL JEAN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PASAJERO, RODALIE",
+          "normName": "PASAJERO, RODALIE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SOTTO, MARY GRACE",
+          "normName": "SOTTO, MARY GRACE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SUERTE, GENELYN",
+          "normName": "SUERTE, GENELYN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TAKEDA, HIROMI",
+          "normName": "TAKEDA, HIROMI",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "VALERIO, MARILOU",
+          "normName": "VALERIO, MARILOU",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
@@ -5636,7 +5878,7 @@
       ]
     },
     {
-      "title": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop\nWebinar On Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes\nSkills Enhancement In Infusion Therapy\nRenal Nursing In Focus\nPgs Basics For Nursing Division",
+      "title": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -5647,11 +5889,98 @@
           "normName": "ALFANTE, QUINNEN",
           "role": "Participant",
           "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "MAGLALANG, JEMIMA KEREN G.",
+          "normName": "MAGLALANG, JEMIMA KEREN",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "MANON-OG, MARIE ANTONIETTE M.",
+          "normName": "MANON-OG, MARIE ANTONIETTE",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "UGDANG, CYNTHIA CLAIRE C.",
+          "normName": "UGDANG, CYNTHIA CLAIRE",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
         }
       ]
     },
     {
-      "title": "Basic Skills Enhancement: Cleaning And Disinfection\nB Braun Machine Training",
+      "title": "Webinar On Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ALFANTE, QUINNEN P.",
+          "normName": "ALFANTE, QUINNEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Skills Enhancement In Infusion Therapy",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ALFANTE, QUINNEN P.",
+          "normName": "ALFANTE, QUINNEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ANINO, MONIQUE IRVI",
+          "normName": "ANINO, MONIQUE IRVI",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "FLAUTA, GENESIS IRA",
+          "normName": "FLAUTA, GENESIS IRA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "KAHAL, ALAYSA P.",
+          "normName": "KAHAL, ALAYSA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MAGLALANG, JEMIMA KEREN G.",
+          "normName": "MAGLALANG, JEMIMA KEREN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Pgs Basics For Nursing Division",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ALFANTE, QUINNEN P.",
+          "normName": "ALFANTE, QUINNEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Basic Skills Enhancement: Cleaning And Disinfection",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -5660,6 +5989,129 @@
         {
           "staffName": "ALMANON, ERECA TAGALOG",
           "normName": "ALMANON, ERECA TAGALOG",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "LAINGO, JOYCE",
+          "normName": "LAINGO, JOYCE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SAURO, ERICA E.",
+          "normName": "SAURO, ERICA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "VILLAMOR, Arnold A.",
+          "normName": "VILLAMOR, ARNOLD",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "B Braun Machine Training",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ALMANON, ERECA TAGALOG",
+          "normName": "ALMANON, ERECA TAGALOG",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "BENAVENTE, ALBERT CUTIN",
+          "normName": "BENAVENTE, ALBERT CUTIN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "DE LOS REYES, GLENN ESEO",
+          "normName": "DE LOS REYES, GLENN ESEO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "DELAPUZ, IRENE JOY IRENEA",
+          "normName": "DELAPUZ, IRENE JOY IRENEA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "DELIMA, ROSE ANGELIE ROMA",
+          "normName": "DELIMA, ROSE ANGELIE ROMA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "EUPEÑA, RUBEN VILLAREAL",
+          "normName": "EUPEÑA, RUBEN VILLAREAL",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "FERNANDEZ, EDFER JHAMAL MANRIQUEZ",
+          "normName": "FERNANDEZ, EDFER JHAMAL MANRIQUEZ",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GASCON, ANGELY P.",
+          "normName": "GASCON, ANGELY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "LOPEZ, JOHN KIER MONTESCLAROS",
+          "normName": "LOPEZ, JOHN KIER MONTESCLAROS",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MARTINEZ, JERAMAE VICENTE",
+          "normName": "MARTINEZ, JERAMAE VICENTE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MONTEFALCON, NASHREINE DARUNDAY",
+          "normName": "MONTEFALCON, NASHREINE DARUNDAY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ORQUILLAS, CHRISTAL MAY BONTOR",
+          "normName": "ORQUILLAS, CHRISTAL MAY BONTOR",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PAYOT, JOHN REY PORIO",
+          "normName": "PAYOT, JOHN REY PORIO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PIATOS, NINA ROSELLE SENCIO",
+          "normName": "PIATOS, NINA ROSELLE SENCIO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "RESNERA, MICHELLE CAGAS",
+          "normName": "RESNERA, MICHELLE CAGAS",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "RODICOL, ANTHONY PORRAS",
+          "normName": "RODICOL, ANTHONY PORRAS",
           "role": "Participant",
           "completionDate": "2026-03-15"
         }
@@ -5679,6 +6131,42 @@
           "completionDate": "2026-03-15"
         },
         {
+          "staffName": "ANG, SOPHIA MARIE",
+          "normName": "ANG, SOPHIA MARIE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ARNAIZ, ROJULENE",
+          "normName": "ARNAIZ, ROJULENE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "BADONG, MARK ANTHONY",
+          "normName": "BADONG, MARK ANTHONY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "BARBARONA, NINA BEATRIZ",
+          "normName": "BARBARONA, NINA BEATRIZ",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "BARRERA, MIKKA JOY",
+          "normName": "BARRERA, MIKKA JOY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "CABAÑOG, HERMELYN CHARISH",
+          "normName": "CABAÑOG, HERMELYN CHARISH",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
           "staffName": "CAIN, LOREN",
           "normName": "CAIN, LOREN",
           "role": "Participant",
@@ -5687,6 +6175,24 @@
         {
           "staffName": "CATAYLO, BUBBLES",
           "normName": "CATAYLO, BUBBLES",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "CONCEPTION, DANDREB RYAN",
+          "normName": "CONCEPTION, DANDREB RYAN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "CRUZ, ALBERT JOHN",
+          "normName": "CRUZ, ALBERT JOHN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "DELFIN, RYAN JAY",
+          "normName": "DELFIN, RYAN JAY",
           "role": "Participant",
           "completionDate": "2026-03-15"
         },
@@ -5703,8 +6209,56 @@
           "completionDate": "2026-03-15"
         },
         {
+          "staffName": "EJEM, JUNETH JEAN",
+          "normName": "EJEM, JUNETH JEAN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GALORIO, KATELEE",
+          "normName": "GALORIO, KATELEE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
           "staffName": "GEMOTO, RANIA",
           "normName": "GEMOTO, RANIA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GILLESANIA, EMYLEN",
+          "normName": "GILLESANIA, EMYLEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GUEVARA, IRENE",
+          "normName": "GUEVARA, IRENE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GUILLANO, ANDY BON",
+          "normName": "GUILLANO, ANDY BON",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GUNGON, MARLON",
+          "normName": "GUNGON, MARLON",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "JORDAN, STEVE",
+          "normName": "JORDAN, STEVE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "JORDAN, STEVE",
+          "normName": "JORDAN, STEVE",
           "role": "Participant",
           "completionDate": "2026-03-15"
         },
@@ -5721,14 +6275,134 @@
           "completionDate": "2026-03-15"
         },
         {
+          "staffName": "LAMBERTE, CHARMINE",
+          "normName": "LAMBERTE, CHARMINE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
           "staffName": "LANURIAS, FS CRESTINE",
           "normName": "LANURIAS, FS CRESTINE",
           "role": "Participant",
           "completionDate": "2026-03-15"
         },
         {
+          "staffName": "MAGNO, MARIE CHRIS",
+          "normName": "MAGNO, MARIE CHRIS",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MANTEZA, AILEEN ANNE",
+          "normName": "MANTEZA, AILEEN ANNE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MEDIALDEA, MELISSA MAE",
+          "normName": "MEDIALDEA, MELISSA MAE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "NAHIAL, ELLA JANINA",
+          "normName": "NAHIAL, ELLA JANINA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PANTONIAL, DOLL JOY",
+          "normName": "PANTONIAL, DOLL JOY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PEREZ, MIKKO JIROL",
+          "normName": "PEREZ, MIKKO JIROL",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PEROCHO, KRIS MAE",
+          "normName": "PEROCHO, KRIS MAE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PILAPIL, RAQUEL",
+          "normName": "PILAPIL, RAQUEL",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
           "staffName": "RANAIN, MARIAM",
           "normName": "RANAIN, MARIAM",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "REYES, JOSHUA M.",
+          "normName": "REYES, JOSHUA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ROA, LOUELYIEL",
+          "normName": "ROA, LOUELYIEL",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ROCHA, CLAIRE",
+          "normName": "ROCHA, CLAIRE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "RODRIGUEZ, MARIELLA Nicole",
+          "normName": "RODRIGUEZ, MARIELLA NICOLE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SARAUSA, ARLEN",
+          "normName": "SARAUSA, ARLEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SUYMAN, JOYCE",
+          "normName": "SUYMAN, JOYCE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TAKEDA, HIROMI",
+          "normName": "TAKEDA, HIROMI",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TE HUY, VAN",
+          "normName": "TE HUY, VAN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TENDERO, IMEE",
+          "normName": "TENDERO, IMEE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TRIPOLI, GILCYN",
+          "normName": "TRIPOLI, GILCYN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TUBALLA, TRISHA GWEN",
+          "normName": "TUBALLA, TRISHA GWEN",
           "role": "Participant",
           "completionDate": "2026-03-15"
         },
@@ -5741,7 +6415,7 @@
       ]
     },
     {
-      "title": "The Shifting Shadows: Navigating Emerging and Re-emerging Threats\nLenten Retreat",
+      "title": "The Shifting Shadows: Navigating Emerging and Re-emerging Threats",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -5752,11 +6426,38 @@
           "normName": "AMISOLA, LOVING LEI",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "BARRERA, MIKKA JOY",
+          "normName": "BARRERA, MIKKA JOY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Webinar on Surveillance Orientation\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Lenten Retreat",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "AMISOLA, LOVING LEI",
+          "normName": "AMISOLA, LOVING LEI",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PANTONIAL, DOLL JOY",
+          "normName": "PANTONIAL, DOLL JOY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Webinar on Surveillance Orientation",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -5773,11 +6474,35 @@
           "normName": "LAMBERTE, CHARMINE",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MANTEZA, AILEEN ANNE",
+          "normName": "MANTEZA, AILEEN ANNE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MEDIALDEA, MELISSA MAE",
+          "normName": "MEDIALDEA, MELISSA MAE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PALER, ARNEL LYNN",
+          "normName": "PALER, ARNEL LYNN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ROCHA, CLAIRE",
+          "normName": "ROCHA, CLAIRE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Enterprise Resource Planning System Purchase Request Module Orientation\nPotential Multiple Organ Donor (Pmod) Management And Training Course",
+      "title": "Enterprise Resource Planning System Purchase Request Module Orientation",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -5792,7 +6517,46 @@
       ]
     },
     {
-      "title": "Nursing Documentation, Reporting, and Recording\nSkills Enhancement In Infusion Therapy",
+      "title": "Potential Multiple Organ Donor (Pmod) Management And Training Course",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ANGSINCO, GARRI O. RN",
+          "normName": "ANGSINCO, GARRI",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MANALAYSAY, AL JOHN P.",
+          "normName": "MANALAYSAY, AL JOHN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MOSQUEDA, DIANNE VI B. RN",
+          "normName": "MOSQUEDA, DIANNE VI",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SAPSAL, MARY MAY",
+          "normName": "SAPSAL, MARY MAY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "Ysulat, Ayla Angelica Carreon",
+          "normName": "YSULAT, AYLA ANGELICA CARREON",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Nursing Documentation, Reporting, and Recording",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -5801,6 +6565,12 @@
         {
           "staffName": "ANINO, MONIQUE IRVI",
           "normName": "ANINO, MONIQUE IRVI",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "BARCINAS, MARIE FAYE G.",
+          "normName": "BARCINAS, MARIE FAYE",
           "role": "Participant",
           "completionDate": "2026-02-15"
         },
@@ -5828,7 +6598,7 @@
       ]
     },
     {
-      "title": "Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -5839,11 +6609,50 @@
           "normName": "ARNAIZ, ROJULENE",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "EJEM, JUNETH JEAN",
+          "normName": "EJEM, JUNETH JEAN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SAPSAL, MARY MAY",
+          "normName": "SAPSAL, MARY MAY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "In-Hospital Cardiac Arrest Care Workshop\nHemodialysis Training For Nurses – Self-Paced E-Learning\nOrientation To Icu",
+      "title": "In-Hospital Cardiac Arrest Care Workshop",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "BADONG, MARK ANTHONY",
+          "normName": "BADONG, MARK ANTHONY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "NAHIAL, ELLA JANINA",
+          "normName": "NAHIAL, ELLA JANINA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PEROCHO, KRIS MAE",
+          "normName": "PEROCHO, KRIS MAE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Orientation To Icu",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -5951,58 +6760,7 @@
       ]
     },
     {
-      "title": "Dialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operationstraining",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "BALILI, ELLA MARIE",
-          "normName": "BALILI, ELLA MARIE",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "MACPAO, REYMUNDO",
-          "normName": "MACPAO, REYMUNDO",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "MORDENO, WILLEN LABATA",
-          "normName": "MORDENO, WILLEN LABATA",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "MUTOC, ROQUELINE",
-          "normName": "MUTOC, ROQUELINE",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "ORBUDA, ANGELITO",
-          "normName": "ORBUDA, ANGELITO",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "PACAÑA, NEL JEAN",
-          "normName": "PACAÑA, NEL JEAN",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "PASAJERO, RODALIE",
-          "normName": "PASAJERO, RODALIE",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Pain: Beyond What We Already Know\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Pain: Beyond What We Already Know",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -6015,15 +6773,27 @@
           "completionDate": "2026-03-15"
         },
         {
+          "staffName": "DOCE, MIKHAELA ANGELA CAMILET",
+          "normName": "DOCE, MIKHAELA ANGELA CAMILET",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
           "staffName": "GALORIO, KATELEE",
           "normName": "GALORIO, KATELEE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "LU, DENNIS MARK POTENCIANO",
+          "normName": "LU, DENNIS MARK POTENCIANO",
           "role": "Participant",
           "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Nursing Documentation, Reporting, and Recording\nChampioning Excellence: CQI Refresher Course for Nursing Leaders\nSeeing Beyond Symptoms\nPerformance Governance System",
+      "title": "Championing Excellence: CQI Refresher Course for Nursing Leaders",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6034,11 +6804,47 @@
           "normName": "BARCINAS, MARIE FAYE",
           "role": "Participant",
           "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "CATOTO, GENEVIEVE U.",
+          "normName": "CATOTO, GENEVIEVE",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
         }
       ]
     },
     {
-      "title": "Advances in Sepsis and Septic Shock Management\nEmpowering Nurses in Heart Disease Prevention and Patient Care\nCare Essentials: Medication Safety And Error-Reduction Practices",
+      "title": "Seeing Beyond Symptoms",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "BARCINAS, MARIE FAYE G.",
+          "normName": "BARCINAS, MARIE FAYE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Performance Governance System",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "BARCINAS, MARIE FAYE G.",
+          "normName": "BARCINAS, MARIE FAYE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Advances in Sepsis and Septic Shock Management",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -6049,26 +6855,65 @@
           "normName": "BARNABAL, JILLAN CHLOIE GARCIA",
           "role": "Participant",
           "completionDate": "2026-01-15"
+        },
+        {
+          "staffName": "CUARTERO, JOSE MARIE ROMUALDO",
+          "normName": "CUARTERO, JOSE MARIE ROMUALDO",
+          "role": "Participant",
+          "completionDate": "2026-01-15"
+        },
+        {
+          "staffName": "RESNERA, MICHELLE CAGAS",
+          "normName": "RESNERA, MICHELLE CAGAS",
+          "role": "Participant",
+          "completionDate": "2026-01-15"
         }
       ]
     },
     {
-      "title": "The Shifting Shadows: Navigating Emerging and Re-emerging Threats\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Empowering Nurses in Heart Disease Prevention and Patient Care",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "BARNABAL, JILLAN CHLOIE GARCIA",
+          "normName": "BARNABAL, JILLAN CHLOIE GARCIA",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "GASTON, MIGUEL ANGELO BUSTILLOS",
+          "normName": "GASTON, MIGUEL ANGELO BUSTILLOS",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "JORDAN, JANICE GESIM",
+          "normName": "JORDAN, JANICE GESIM",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "Care Essentials: Medication Safety And Error-Reduction Practices",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
         {
-          "staffName": "BARRERA, MIKKA JOY",
-          "normName": "BARRERA, MIKKA JOY",
+          "staffName": "BARNABAL, JILLAN CHLOIE GARCIA",
+          "normName": "BARNABAL, JILLAN CHLOIE GARCIA",
           "role": "Participant",
           "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "CDP in Hemodialysis \nB Braun Machine Training",
+      "title": "CDP in Hemodialysis",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6077,6 +6922,12 @@
         {
           "staffName": "BENAVENTE, ALBERT CUTIN",
           "normName": "BENAVENTE, ALBERT CUTIN",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "DATULAYTA, MICHAEL ALCARIA",
+          "normName": "DATULAYTA, MICHAEL ALCARIA",
           "role": "Participant",
           "completionDate": "2026-02-15"
         },
@@ -6100,6 +6951,18 @@
           "normName": "BORINAGA, LAVILLA",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GUILLANO, ANDY BON",
+          "normName": "GUILLANO, ANDY BON",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MANTEZA, AILEEN ANNE",
+          "normName": "MANTEZA, AILEEN ANNE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
@@ -6119,7 +6982,7 @@
       ]
     },
     {
-      "title": "Character in Action: Nurturing Values for Meaningful Service\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Character in Action: Nurturing Values for Meaningful Service",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -6130,11 +6993,17 @@
           "normName": "CABAÑOG, HERMELYN CHARISH",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SOTTO, MARY GRACE",
+          "normName": "SOTTO, MARY GRACE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "ERP Module Orientation\nSUMMARY ON NURSING DOCUMENTATION, REPORTING AND RECORDING\nICU LIBERATION BUNDLES - Improving Patient Outcomes and Experience\n2026 CCNAPI Annual Conference: Promoting Critical Care Excellence\nA Lecture on Neurodiverse Children: Implications in Nursing\nRenal Nursing In Focus\nPGS Basics For Allied Health Professional Services",
+      "title": "ERP Module Orientation",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6149,7 +7018,94 @@
       ]
     },
     {
-      "title": "CDP IN Hemodialysis\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operations training",
+      "title": "SUMMARY ON NURSING DOCUMENTATION, REPORTING AND RECORDING",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CACHERO, John Carlo A.",
+          "normName": "CACHERO, JOHN CARLO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "ICU LIBERATION BUNDLES - Improving Patient Outcomes and Experience",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CACHERO, John Carlo A.",
+          "normName": "CACHERO, JOHN CARLO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "2026 CCNAPI Annual Conference: Promoting Critical Care Excellence",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CACHERO, John Carlo A.",
+          "normName": "CACHERO, JOHN CARLO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "ESPINA, JOAN L.",
+          "normName": "ESPINA, JOAN",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "REYES, JOSHUA M.",
+          "normName": "REYES, JOSHUA",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "A Lecture on Neurodiverse Children: Implications in Nursing",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CACHERO, John Carlo A.",
+          "normName": "CACHERO, JOHN CARLO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "PGS Basics For Allied Health Professional Services",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CACHERO, John Carlo A.",
+          "normName": "CACHERO, JOHN CARLO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "CDP IN Hemodialysis",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6160,6 +7116,39 @@
           "normName": "CAÑON, ALVIN",
           "role": "Participant",
           "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "COLOBONG, RONALD L.",
+          "normName": "COLOBONG, RONALD",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "Water Treatment System Operations training",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CAÑON, ALVIN",
+          "normName": "CAÑON, ALVIN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GASCON, ANGELY P.",
+          "normName": "GASCON, ANGELY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GILLESANIA, EMYLEN",
+          "normName": "GILLESANIA, EMYLEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
@@ -6179,9 +7168,9 @@
       ]
     },
     {
-      "title": "Championing Excellence: CQI Refresher Course for Nursing Leaders\nSeeing Beyond Symptoms: Enhancing Clinical Assessments Skills For Better Outcomes",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
+      "title": "Seeing Beyond Symptoms: Enhancing Clinical Assessments Skills For Better Outcomes",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
@@ -6189,14 +7178,14 @@
           "staffName": "CATOTO, GENEVIEVE U.",
           "normName": "CATOTO, GENEVIEVE",
           "role": "Participant",
-          "completionDate": "2026-02-15"
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "CDP IN Hemodialysis\nEnd User’s Training Hd/Hdf Dialysis Machine",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
+      "title": "End User’s Training Hd/Hdf Dialysis Machine",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
@@ -6204,12 +7193,12 @@
           "staffName": "COLOBONG, RONALD L.",
           "normName": "COLOBONG, RONALD",
           "role": "Participant",
-          "completionDate": "2026-02-15"
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -6220,11 +7209,23 @@
           "normName": "CONCEPTION, DANDREB RYAN",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "DELFIN, RYAN JAY",
+          "normName": "DELFIN, RYAN JAY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GUEVARA, IRENE",
+          "normName": "GUEVARA, IRENE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Hearing Aids for Children\nImplantable Hearing Devices\nAdvancements in the Management of Cardiogenic Shock and the Use of Mechanical Circulatory Support\nWebinar on Surveillance Orientation\nTuberculosis Updates: Strengthening Nursing Knowledge And Practice",
+      "title": "Hearing Aids for Children",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -6235,11 +7236,116 @@
           "normName": "CRETA, ANNIE JANE CASTRO",
           "role": "Participant",
           "completionDate": "2026-01-15"
+        },
+        {
+          "staffName": "ROCHA, CLAIRE",
+          "normName": "ROCHA, CLAIRE",
+          "role": "Participant",
+          "completionDate": "2026-01-15"
         }
       ]
     },
     {
-      "title": "Lenten Webinar: AI in Holistic Healthcare\nCDP IN HEMODIALYSIS\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Implantable Hearing Devices",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CRETA, ANNIE JANE CASTRO",
+          "normName": "CRETA, ANNIE JANE CASTRO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "MAITUM, PROSPERADOR JR. CASANGYAO",
+          "normName": "MAITUM, PROSPERADOR . CASANGYAO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "MONTEFALCON, NASHREINE DARUNDAY",
+          "normName": "MONTEFALCON, NASHREINE DARUNDAY",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "Advancements in the Management of Cardiogenic Shock and the Use of Mechanical Circulatory Support",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CRETA, ANNIE JANE CASTRO",
+          "normName": "CRETA, ANNIE JANE CASTRO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "Webinar on Surveillance Orientation",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CRETA, ANNIE JANE CASTRO",
+          "normName": "CRETA, ANNIE JANE CASTRO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "DELOS SANTOS, MENSHE REMOLLO",
+          "normName": "DELOS SANTOS, MENSHE REMOLLO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "PIATOS, NINA ROSELLE SENCIO",
+          "normName": "PIATOS, NINA ROSELLE SENCIO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "Tuberculosis Updates: Strengthening Nursing Knowledge And Practice",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CRETA, ANNIE JANE CASTRO",
+          "normName": "CRETA, ANNIE JANE CASTRO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Lenten Webinar: AI in Holistic Healthcare",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "CRUZ, ALBERT JOHN",
+          "normName": "CRUZ, ALBERT JOHN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "CDP IN HEMODIALYSIS",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6250,21 +7356,12 @@
           "normName": "CRUZ, ALBERT JOHN",
           "role": "Participant",
           "completionDate": "2026-02-15"
-        }
-      ]
-    },
-    {
-      "title": "Advances in Sepsis and Septic Shock Management\nLecture On Notifiable Diseases: Pertussis",
-      "startDate": "2026-01-15",
-      "endDate": "2026-01-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
+        },
         {
-          "staffName": "CUARTERO, JOSE MARIE ROMUALDO",
-          "normName": "CUARTERO, JOSE MARIE ROMUALDO",
+          "staffName": "MARTEL, JANIE BIB J.",
+          "normName": "MARTEL, JANIE BIB",
           "role": "Participant",
-          "completionDate": "2026-01-15"
+          "completionDate": "2026-02-15"
         }
       ]
     },
@@ -6280,13 +7377,25 @@
           "normName": "DALAGONAN, PATRICIA LAINE SARABILLO",
           "role": "Participant",
           "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "DELAPUZ, IRENE JOY IRENEA",
+          "normName": "DELAPUZ, IRENE JOY IRENEA",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "MACHITAR, RAINIER GEM ADALIN",
+          "normName": "MACHITAR, RAINIER GEM ADALIN",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
         }
       ]
     },
     {
-      "title": "CDP in Hemodialysis\nRenal Nursing In Focuse (Speaker)",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
+      "title": "Renal Nursing In Focuse (Speaker)",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
@@ -6294,7 +7403,7 @@
           "staffName": "DATULAYTA, MICHAEL ALCARIA",
           "normName": "DATULAYTA, MICHAEL ALCARIA",
           "role": "Participant",
-          "completionDate": "2026-02-15"
+          "completionDate": "2026-03-15"
         }
       ]
     },
@@ -6310,11 +7419,17 @@
           "normName": "DAYUPAY, JASON",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MOSQUEDA, DIANNE VI B. RN",
+          "normName": "MOSQUEDA, DIANNE VI",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Seminar on the Shifting Shadows: Navigating Emerging and Re-Emerging Threats\nB Braun Machine Training",
+      "title": "Seminar on the Shifting Shadows: Navigating Emerging and Re-Emerging Threats",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6329,22 +7444,7 @@
       ]
     },
     {
-      "title": "Usbong sa Bag-ong Tuig: A Lecture on Neurodiverse Children: Implications in Nursing\nB Braun Machine Training",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "DELAPUZ, IRENE JOY IRENEA",
-          "normName": "DELAPUZ, IRENE JOY IRENEA",
-          "role": "Participant",
-          "completionDate": "2026-02-15"
-        }
-      ]
-    },
-    {
-      "title": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care\nHemodialysis Training For Nurses – Self-Paced E-Learning\nLearning Lounge: Rabies: Updates In Prevention, Care And Nursing Practice",
+      "title": "Learning Lounge: Rabies: Updates In Prevention, Care And Nursing Practice",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -6355,52 +7455,25 @@
           "normName": "DELFIN, RYAN JAY",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GUNGON, MARLON",
+          "normName": "GUNGON, MARLON",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ROA, LOUELYIEL",
+          "normName": "ROA, LOUELYIEL",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "B Braun Machine Training",
+      "title": "Reorientation On Ntp Mop",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "DELIMA, ROSE ANGELIE ROMA",
-          "normName": "DELIMA, ROSE ANGELIE ROMA",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "FERNANDEZ, EDFER JHAMAL MANRIQUEZ",
-          "normName": "FERNANDEZ, EDFER JHAMAL MANRIQUEZ",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "MARTINEZ, JERAMAE VICENTE",
-          "normName": "MARTINEZ, JERAMAE VICENTE",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "ORQUILLAS, CHRISTAL MAY BONTOR",
-          "normName": "ORQUILLAS, CHRISTAL MAY BONTOR",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "RODICOL, ANTHONY PORRAS",
-          "normName": "RODICOL, ANTHONY PORRAS",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Webinar on Surveillance Orientation\nReorientation On Ntp Mop\nBantay Salakay: A Webinar On Rabies Prevention And Control",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
@@ -6408,12 +7481,27 @@
           "staffName": "DELOS SANTOS, MENSHE REMOLLO",
           "normName": "DELOS SANTOS, MENSHE REMOLLO",
           "role": "Participant",
-          "completionDate": "2026-02-15"
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Care Essentials: Safe Transfusion, Safe Patients\nPain: Beyond What We Already Know",
+      "title": "Bantay Salakay: A Webinar On Rabies Prevention And Control",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "DELOS SANTOS, MENSHE REMOLLO",
+          "normName": "DELOS SANTOS, MENSHE REMOLLO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Care Essentials: Safe Transfusion, Safe Patients",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6428,7 +7516,34 @@
       ]
     },
     {
-      "title": "Standard First Aid Training\nIncident Reporting",
+      "title": "Standard First Aid Training",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "DUROPAN, RUTH JANE",
+          "normName": "DUROPAN, RUTH JANE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ESPINA, JOAN L.",
+          "normName": "ESPINA, JOAN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "UGDANG, CYNTHIA CLAIRE C.",
+          "normName": "UGDANG, CYNTHIA CLAIRE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Incident Reporting",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -6439,11 +7554,23 @@
           "normName": "DUROPAN, RUTH JANE",
           "role": "Participant",
           "completionDate": "2026-01-15"
+        },
+        {
+          "staffName": "GASTON, MIGUEL ANGELO BUSTILLOS",
+          "normName": "GASTON, MIGUEL ANGELO BUSTILLOS",
+          "role": "Participant",
+          "completionDate": "2026-01-15"
+        },
+        {
+          "staffName": "MAGLALANG, JEMIMA KEREN G.",
+          "normName": "MAGLALANG, JEMIMA KEREN",
+          "role": "Participant",
+          "completionDate": "2026-01-15"
         }
       ]
     },
     {
-      "title": "Basic Skills Enhancement: VS Taking & Recording \nBasic Skills Enhancement: Body Mechanics and Safe Patient Transport",
+      "title": "Basic Skills Enhancement: VS Taking & Recording",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6458,22 +7585,40 @@
       ]
     },
     {
-      "title": "Usbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026\nSeeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
+      "title": "Basic Skills Enhancement: Body Mechanics and Safe Patient Transport",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
         {
-          "staffName": "EJEM, JUNETH JEAN",
-          "normName": "EJEM, JUNETH JEAN",
+          "staffName": "ECOBE, REYSAN S.",
+          "normName": "ECOBE, REYSAN",
           "role": "Participant",
-          "completionDate": "2026-03-15"
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "LAINGO, JOYCE",
+          "normName": "LAINGO, JOYCE",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "OSABEL, JERELYN R.",
+          "normName": "OSABEL, JERELYN",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "SAURO, ERICA E.",
+          "normName": "SAURO, ERICA",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
         }
       ]
     },
     {
-      "title": "IN-HOSPITAL CARDIAC ARREST CARE Workshop\n2026 CCNAPI Annual Conference: Promoting Critical Care Excellence\nStandard First Aid Training",
+      "title": "IN-HOSPITAL CARDIAC ARREST CARE Workshop",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6488,7 +7633,7 @@
       ]
     },
     {
-      "title": "Gynecologic Cancer Genetics\nCore Concepts in Hemodialysis Nursing\nB Braun Machine Training",
+      "title": "Gynecologic Cancer Genetics",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -6503,37 +7648,40 @@
       ]
     },
     {
-      "title": "B Braun Machine Training \nWater Treatment System Operations training",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
+      "title": "Core Concepts in Hemodialysis Nursing",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
         {
-          "staffName": "GASCON, ANGELY P.",
-          "normName": "GASCON, ANGELY",
+          "staffName": "EUPEÑA, RUBEN VILLAREAL",
+          "normName": "EUPEÑA, RUBEN VILLAREAL",
           "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Incident Reporting\nEmpowering Nurses in Heart Disease Prevention and Patient Care",
-      "startDate": "2026-01-15",
-      "endDate": "2026-01-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
+          "completionDate": "2026-02-15"
+        },
         {
-          "staffName": "GASTON, MIGUEL ANGELO BUSTILLOS",
-          "normName": "GASTON, MIGUEL ANGELO BUSTILLOS",
+          "staffName": "LOPEZ, JOHN KIER MONTESCLAROS",
+          "normName": "LOPEZ, JOHN KIER MONTESCLAROS",
           "role": "Participant",
-          "completionDate": "2026-01-15"
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "PANGAWAS, SHIELA MAE PANTILLO",
+          "normName": "PANGAWAS, SHIELA MAE PANTILLO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "PIATOS, NINA ROSELLE SENCIO",
+          "normName": "PIATOS, NINA ROSELLE SENCIO",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
         }
       ]
     },
     {
-      "title": "Enterprise Resource Planning System Purchase Request Module Orientation\nRenal Nursing In Focus\nHemodialysis Training For Nurses – Self-Paced E-Learning\nWater Treatment System Operations training",
+      "title": "Enterprise Resource Planning System Purchase Request Module Orientation",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -6548,7 +7696,7 @@
       ]
     },
     {
-      "title": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care\nThe Shifting Shadows: Navigating Emerging And Re-Emerging Threats\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "The Shifting Shadows: Navigating Emerging And Re-Emerging Threats",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -6559,34 +7707,10 @@
           "normName": "GUEVARA, IRENE",
           "role": "Participant",
           "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Hemodialysis Training For Nurses – Self-Paced E-Learning\nLearning Lounge: Tuberculosis Update: Strengthening Nursing Knowledge And Practice",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
+        },
         {
-          "staffName": "GUILLANO, ANDY BON",
-          "normName": "GUILLANO, ANDY BON",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Hemodialysis Training For Nurses – Self-Paced E-Learning\nLearning Lounge: Rabies: Updates In Prevention, Care And Nursing Practice",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "GUNGON, MARLON",
-          "normName": "GUNGON, MARLON",
+          "staffName": "TE HUY, VAN",
+          "normName": "TE HUY, VAN",
           "role": "Participant",
           "completionDate": "2026-03-15"
         }
@@ -6610,11 +7734,17 @@
           "normName": "LINTERNA, MARY GRACE DUCE",
           "role": "Participant",
           "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MAITUM, PROSPERADOR JR. CASANGYAO",
+          "normName": "MAITUM, PROSPERADOR . CASANGYAO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Empowering Nurses in Heart Disease Prevention and Patient Care\nRabies Updates In Prevention, Care And Nursing Practice",
+      "title": "Rabies Updates In Prevention, Care And Nursing Practice",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6629,7 +7759,7 @@
       ]
     },
     {
-      "title": "Empowering Nurses in Heart Disease Prevention and Patient Care\nRabies Updates In Prevention, Care And Nursing Practice",
+      "title": "Empowering Nurses in Heart Disease Prevention and Patient Care",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -6644,7 +7774,22 @@
       ]
     },
     {
-      "title": "Basics of ECG Interpretation\nRenal Nursing In Focus\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Rabies Updates In Prevention, Care And Nursing Practice",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "JORDAN, JANICE GESIM",
+          "normName": "JORDAN, JANICE GESIM",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Basics of ECG Interpretation",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -6661,42 +7806,6 @@
           "normName": "JORDAN, STEVE",
           "role": "Participant",
           "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Skills Enhancement In Infusion Therapy",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "KAHAL, ALAYSA P.",
-          "normName": "KAHAL, ALAYSA",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Basic Skills Enhancement: Body Mechanics and Safe Patient Transport\nBasic Skills Enhancement: Cleaning And Disinfection",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "LAINGO, JOYCE",
-          "normName": "LAINGO, JOYCE",
-          "role": "Participant",
-          "completionDate": "2026-02-15"
-        },
-        {
-          "staffName": "SAURO, ERICA E.",
-          "normName": "SAURO, ERICA",
-          "role": "Participant",
-          "completionDate": "2026-02-15"
         }
       ]
     },
@@ -6716,7 +7825,7 @@
       ]
     },
     {
-      "title": "Basic Skills Enhancement: Vital Signs Taking and Recording\nLecture On Notifiable Diseases: Pertussis\nBasic Skills Enhancement: Body Mechanics And Safe Patient Transport",
+      "title": "Basic Skills Enhancement: Vital Signs Taking and Recording",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6727,11 +7836,38 @@
           "normName": "LIMSIACO, JUNICO",
           "role": "Participant",
           "completionDate": "2026-02-15"
+        },
+        {
+          "staffName": "RAMIREZ, SHIELA",
+          "normName": "RAMIREZ, SHIELA",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
         }
       ]
     },
     {
-      "title": "PHEx Hearing Disorder Screening Guidelines\nCore Concepts in Hemodialysis Nursing\nB Braun Machine Training",
+      "title": "Basic Skills Enhancement: Body Mechanics And Safe Patient Transport",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "LIMSIACO, JUNICO",
+          "normName": "LIMSIACO, JUNICO",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "RAMIREZ, SHIELA",
+          "normName": "RAMIREZ, SHIELA",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "PHEx Hearing Disorder Screening Guidelines",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -6746,22 +7882,7 @@
       ]
     },
     {
-      "title": "Pain: Beyond What We Already Know",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "LU, DENNIS MARK POTENCIANO",
-          "normName": "LU, DENNIS MARK POTENCIANO",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Nipah Virus 101: Facts, Risks, Prevention\nUsbong sa Bag-ong Tuig: A Lecture on Neurodiverse Children: Implications in Nursing\nUsbong Sa Bag-Ong Tuig: A Lecture On Neurodiverse Children: Implications In Nursing\nPgs Basics For Allied Health Professionals",
+      "title": "Nipah Virus 101: Facts, Risks, Prevention",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6776,43 +7897,37 @@
       ]
     },
     {
-      "title": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop\nSkills Enhancement In Infusion Therapy\nIncident Reporting",
-      "startDate": "2026-01-15",
-      "endDate": "2026-01-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "MAGLALANG, JEMIMA KEREN G.",
-          "normName": "MAGLALANG, JEMIMA KEREN",
-          "role": "Participant",
-          "completionDate": "2026-01-15"
-        }
-      ]
-    },
-    {
-      "title": "Core Concepts in Hemodialysis\nRenal Nursing In Focus\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Usbong Sa Bag-Ong Tuig: A Lecture On Neurodiverse Children: Implications In Nursing",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
         {
-          "staffName": "MAGNO, MARIE CHRIS",
-          "normName": "MAGNO, MARIE CHRIS",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "TRIPOLI, GILCYN",
-          "normName": "TRIPOLI, GILCYN",
+          "staffName": "MACHITAR, RAINIER GEM ADALIN",
+          "normName": "MACHITAR, RAINIER GEM ADALIN",
           "role": "Participant",
           "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Implantable Hearing Devices\nLenten Webinar: AI in Holistic Healthcare\nEnhancing Clinical Assessment Skills For Better Outcomes",
+      "title": "Pgs Basics For Allied Health Professionals",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "MACHITAR, RAINIER GEM ADALIN",
+          "normName": "MACHITAR, RAINIER GEM ADALIN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Lenten Webinar: AI in Holistic Healthcare",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6827,7 +7942,7 @@
       ]
     },
     {
-      "title": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care\nPotential Multiple Organ Donor (Pmod) Management And Training Course",
+      "title": "Learning Lounge: Empowering Nurses in Heart Disease Prevention and Patient Care",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -6842,24 +7957,9 @@
       ]
     },
     {
-      "title": "Core Concepts in Hemodialysis",
+      "title": "Seminar On Character In Action:Nurturing Values For Meaningful Service",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "MANGURAY, CHRISTIE C.",
-          "normName": "MANGURAY, CHRISTIE",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop\nSeminar On Character In Action:Nurturing Values For Meaningful Service\nSeminar On Care Essentials:Medication Safety And Error-Reduction Practices",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
@@ -6867,12 +7967,27 @@
           "staffName": "MANON-OG, MARIE ANTONIETTE M.",
           "normName": "MANON-OG, MARIE ANTONIETTE",
           "role": "Participant",
-          "completionDate": "2026-02-15"
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Advances in Sepsis & Septic Shock Management\nWebinar on Surveillance Orientation\nHemodialysis Training For Nurses – Self-Paced E-Learning\nLearning Lounge: Tuberculosis Update: Strengthening Nursing Knowledge And Practice",
+      "title": "Seminar On Care Essentials:Medication Safety And Error-Reduction Practices",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "MANON-OG, MARIE ANTONIETTE M.",
+          "normName": "MANON-OG, MARIE ANTONIETTE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Advances in Sepsis & Septic Shock Management",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -6883,13 +7998,25 @@
           "normName": "MANTEZA, AILEEN ANNE",
           "role": "Participant",
           "completionDate": "2026-01-15"
+        },
+        {
+          "staffName": "PEROCHO, KRIS MAE",
+          "normName": "PEROCHO, KRIS MAE",
+          "role": "Participant",
+          "completionDate": "2026-01-15"
+        },
+        {
+          "staffName": "TE HUY, VAN",
+          "normName": "TE HUY, VAN",
+          "role": "Participant",
+          "completionDate": "2026-01-15"
         }
       ]
     },
     {
-      "title": "CDP IN HEMODIALYSIS\nWater Treatment System Operations Training\nRenal Nursing in Focus\nThe Human Side Of Leadership: Connection Before Direction Batch 2",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
+      "title": "Water Treatment System Operations Training",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
@@ -6897,27 +8024,48 @@
           "staffName": "MARTEL, JANIE BIB J.",
           "normName": "MARTEL, JANIE BIB",
           "role": "Participant",
-          "completionDate": "2026-02-15"
-        }
-      ]
-    },
-    {
-      "title": "Webinar on Surveillance Orientation\nHemodialysis Training For Nurses – Self-Paced E-Learning\nWater Treatment System Operationstraining",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
+          "completionDate": "2026-03-15"
+        },
         {
-          "staffName": "MEDIALDEA, MELISSA MAE",
-          "normName": "MEDIALDEA, MELISSA MAE",
+          "staffName": "SANCHEZ, FLOR",
+          "normName": "SANCHEZ, FLOR",
           "role": "Participant",
           "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Speech Therapy for Hearing Impaired Children\nImplantable Hearing Devices\nIn-Hospital Cardiac Arrest Care Workshop\nB Braun Machine Training",
+      "title": "Renal Nursing in Focus",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "MARTEL, JANIE BIB J.",
+          "normName": "MARTEL, JANIE BIB",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "The Human Side Of Leadership: Connection Before Direction Batch 2",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "MARTEL, JANIE BIB J.",
+          "normName": "MARTEL, JANIE BIB",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
+      "title": "Speech Therapy for Hearing Impaired Children",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -6932,7 +8080,22 @@
       ]
     },
     {
-      "title": "Potential Multiple Organ Donor (Pmod) Management And Training Course\nSeminar On Renal Nursing In Focus\nLegacy to Lifeline: The Bold Return of the Philippine Heart Transplant Program\nTract it System Job Order Request Orientation",
+      "title": "In-Hospital Cardiac Arrest Care Workshop",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "MONTEFALCON, NASHREINE DARUNDAY",
+          "normName": "MONTEFALCON, NASHREINE DARUNDAY",
+          "role": "Participant",
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "Legacy to Lifeline: The Bold Return of the Philippine Heart Transplant Program",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -6943,36 +8106,27 @@
           "normName": "MOSQUEDA, DIANNE VI",
           "role": "Participant",
           "completionDate": "2026-01-15"
+        },
+        {
+          "staffName": "Ysulat, Ayla Angelica Carreon",
+          "normName": "YSULAT, AYLA ANGELICA CARREON",
+          "role": "Participant",
+          "completionDate": "2026-01-15"
         }
       ]
     },
     {
-      "title": "In-Hospital Cardiac Arrest Care Workshop\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
+      "title": "Tract it System Job Order Request Orientation",
+      "startDate": "2026-01-15",
+      "endDate": "2026-01-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
         {
-          "staffName": "NAHIAL, ELLA JANINA",
-          "normName": "NAHIAL, ELLA JANINA",
+          "staffName": "MOSQUEDA, DIANNE VI B. RN",
+          "normName": "MOSQUEDA, DIANNE VI",
           "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Basic Skills Enhancement: Body Mechanics and Safe Patient Transport",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "OSABEL, JERELYN R.",
-          "normName": "OSABEL, JERELYN",
-          "role": "Participant",
-          "completionDate": "2026-02-15"
+          "completionDate": "2026-01-15"
         }
       ]
     },
@@ -6992,21 +8146,6 @@
       ]
     },
     {
-      "title": "Webinar on Surveillance Orientation",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "PALER, ARNEL LYNN",
-          "normName": "PALER, ARNEL LYNN",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
       "title": "Basic Life Support",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
@@ -7022,22 +8161,7 @@
       ]
     },
     {
-      "title": "Core Concepts in Hemodialysis Nursing\nRenal Nursing In Focus",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "PANGAWAS, SHIELA MAE PANTILLO",
-          "normName": "PANGAWAS, SHIELA MAE PANTILLO",
-          "role": "Participant",
-          "completionDate": "2026-02-15"
-        }
-      ]
-    },
-    {
-      "title": "Cornerstone of Patient Safety & Shared Responsibility of All\nLenten Retreat\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Cornerstone of Patient Safety & Shared Responsibility of All",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -7052,7 +8176,7 @@
       ]
     },
     {
-      "title": "Care Essentials: Safe Transfusion, Safe Patients\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Care Essentials: Safe Transfusion, Safe Patients",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -7073,7 +8197,7 @@
       ]
     },
     {
-      "title": "Advances in Sepsis & Septic Shock Management\nRegional Anesthesia & Pain Medication: Equity, Access, & Recovery\nIn-Hospital Cardiac Arrest Care Workshop\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Regional Anesthesia & Pain Medication: Equity, Access, & Recovery",
       "startDate": "2026-01-15",
       "endDate": "2026-01-15",
       "provider": "SPMC",
@@ -7088,7 +8212,7 @@
       ]
     },
     {
-      "title": "LEARNING THE BASICS OF PERITONEAL DIALYSIS AS SPEAKER\nSkills Enhancement In Infusion Therapy As Resource Speaker",
+      "title": "LEARNING THE BASICS OF PERITONEAL DIALYSIS AS SPEAKER",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -7103,52 +8227,22 @@
       ]
     },
     {
-      "title": "Webinar on Surveillance Orientation\nCore Concepts in Hemodialysis Nursing\nRenal Nursing In Focus\nB Braun Machine Training",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
+      "title": "Skills Enhancement In Infusion Therapy As Resource Speaker",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
         {
-          "staffName": "PIATOS, NINA ROSELLE SENCIO",
-          "normName": "PIATOS, NINA ROSELLE SENCIO",
+          "staffName": "PIALA, MARIA CARINA L.",
+          "normName": "PIALA, MARIA CARINA",
           "role": "Participant",
-          "completionDate": "2026-02-15"
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Basic Skills Enhancement: Vital Signs Taking and Recording\nBasic Skills Enhancement: Body Mechanics And Safe Patient Transport",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "RAMIREZ, SHIELA",
-          "normName": "RAMIREZ, SHIELA",
-          "role": "Participant",
-          "completionDate": "2026-02-15"
-        }
-      ]
-    },
-    {
-      "title": "Advances in Sepsis and Septic Shock Management\nB Braun Machine Training",
-      "startDate": "2026-01-15",
-      "endDate": "2026-01-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "RESNERA, MICHELLE CAGAS",
-          "normName": "RESNERA, MICHELLE CAGAS",
-          "role": "Participant",
-          "completionDate": "2026-01-15"
-        }
-      ]
-    },
-    {
-      "title": "Hemodialysis Training For Nurses – Self-Paced E-Learning\nBASIC ECG INTERPRETATION\n2026 CCNAPI Annual Conference: Promoting Critical Care Excellence\nBbraun Hemodialysis Didactics",
+      "title": "BASIC ECG INTERPRETATION",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -7163,24 +8257,24 @@
       ]
     },
     {
-      "title": "Learning Lounge: Rabies: Updates In Prevention, Care And Nursing Practice\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Bbraun Hemodialysis Didactics",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
         {
-          "staffName": "ROA, LOUELYIEL",
-          "normName": "ROA, LOUELYIEL",
+          "staffName": "REYES, JOSHUA M.",
+          "normName": "REYES, JOSHUA",
           "role": "Participant",
           "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Hearing Aids for Children\nWebinar on Surveillance Orientation\nHemodialysis Training For Nurses – Self-Paced E-Learning\nA Webinar In Rabies Prevention And Control",
-      "startDate": "2026-01-15",
-      "endDate": "2026-01-15",
+      "title": "A Webinar In Rabies Prevention And Control",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
@@ -7188,12 +8282,12 @@
           "staffName": "ROCHA, CLAIRE",
           "normName": "ROCHA, CLAIRE",
           "role": "Participant",
-          "completionDate": "2026-01-15"
+          "completionDate": "2026-03-15"
         }
       ]
     },
     {
-      "title": "Foundations Of Lifestyle Medicine: Living Well Made Simple\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Foundations Of Lifestyle Medicine: Living Well Made Simple",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -7208,37 +8302,7 @@
       ]
     },
     {
-      "title": "Usbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operations Training",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "SANCHEZ, FLOR",
-          "normName": "SANCHEZ, FLOR",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Seeing Beyond Symptoms: Enhancing Clinical Assessment Skills For Better Outcomes\nPotential Multiple Organ Donor (Pmod) Management And Training Course",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "SAPSAL, MARY MAY",
-          "normName": "SAPSAL, MARY MAY",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "CDP IN HEMODIALYSIS as preceptor\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "CDP IN HEMODIALYSIS as preceptor",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -7253,43 +8317,7 @@
       ]
     },
     {
-      "title": "Character in Action: Nurturing Values for Meaningful Service\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operationstraining",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "SOTTO, MARY GRACE",
-          "normName": "SOTTO, MARY GRACE",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Usbong sa Bagong Tuig: Lecture on Neurodiverse Children: Implications in Nursing and PNA-Davao General Assembly 2026\nDialysis Center Technician Course -Self-Paced E-Learning\nWater Treatment System Operationstraining",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "SUERTE, GENELYN",
-          "normName": "SUERTE, GENELYN",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        },
-        {
-          "staffName": "VALERIO, MARILOU",
-          "normName": "VALERIO, MARILOU",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Basic Life Support Training for Nurses\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Basic Life Support Training for Nurses",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -7302,6 +8330,12 @@
           "completionDate": "2026-03-15"
         },
         {
+          "staffName": "TAKEDA, HIROMI",
+          "normName": "TAKEDA, HIROMI",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
           "staffName": "TENDERO, IMEE",
           "normName": "TENDERO, IMEE",
           "role": "Participant",
@@ -7310,37 +8344,7 @@
       ]
     },
     {
-      "title": "Basic Life Support Training for Nurses\nRenal Nursing In Focus\nHemodialysis Training For Nurses – Self-Paced E-Learning\nWater Treatment System Operationstraining",
-      "startDate": "2026-03-15",
-      "endDate": "2026-03-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "TAKEDA, HIROMI",
-          "normName": "TAKEDA, HIROMI",
-          "role": "Participant",
-          "completionDate": "2026-03-15"
-        }
-      ]
-    },
-    {
-      "title": "Advances in Sepsis & Septic Shock Management\nThe Shifting Shadows: Navigating Emerging And Re-Emerging Threats\nHemodialysis Training For Nurses – Self-Paced E-Learning",
-      "startDate": "2026-01-15",
-      "endDate": "2026-01-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "TE HUY, VAN",
-          "normName": "TE HUY, VAN",
-          "role": "Participant",
-          "completionDate": "2026-01-15"
-        }
-      ]
-    },
-    {
-      "title": "Tara Istorya Ta – Voices Of Compassion: Transforming How We Connect\nHemodialysis Training For Nurses – Self-Paced E-Learning",
+      "title": "Tara Istorya Ta – Voices Of Compassion: Transforming How We Connect",
       "startDate": "2026-03-15",
       "endDate": "2026-03-15",
       "provider": "SPMC",
@@ -7370,22 +8374,7 @@
       ]
     },
     {
-      "title": "Fundamentals of Peritoneal Dialysis: A Hands- on Workshop\nStandard First Aid Training",
-      "startDate": "2026-02-15",
-      "endDate": "2026-02-15",
-      "provider": "SPMC",
-      "venue": "SPMC / Online",
-      "attendees": [
-        {
-          "staffName": "UGDANG, CYNTHIA CLAIRE C.",
-          "normName": "UGDANG, CYNTHIA CLAIRE",
-          "role": "Participant",
-          "completionDate": "2026-02-15"
-        }
-      ]
-    },
-    {
-      "title": "Vital Signs Taking and Recording\nBody Mechanics and Safe Patient Transport\nBasic Skills Enhancement: Cleaning And Disinfection\nBasic Skills Enhancement: Body Mechanics And Safe",
+      "title": "Vital Signs Taking and Recording",
       "startDate": "2026-02-15",
       "endDate": "2026-02-15",
       "provider": "SPMC",
@@ -7400,17 +8389,32 @@
       ]
     },
     {
-      "title": "Potential Multiple Organ Donor (Pmod) Management And Training Course\nLegacy to Lifeline: The Bold Return of the Philippine Heart Transplant Program",
-      "startDate": "2026-01-15",
-      "endDate": "2026-01-15",
+      "title": "Body Mechanics and Safe Patient Transport",
+      "startDate": "2026-02-15",
+      "endDate": "2026-02-15",
       "provider": "SPMC",
       "venue": "SPMC / Online",
       "attendees": [
         {
-          "staffName": "Ysulat, Ayla Angelica Carreon",
-          "normName": "YSULAT, AYLA ANGELICA CARREON",
+          "staffName": "VILLAMOR, Arnold A.",
+          "normName": "VILLAMOR, ARNOLD",
           "role": "Participant",
-          "completionDate": "2026-01-15"
+          "completionDate": "2026-02-15"
+        }
+      ]
+    },
+    {
+      "title": "Basic Skills Enhancement: Body Mechanics And Safe",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "VILLAMOR, Arnold A.",
+          "normName": "VILLAMOR, ARNOLD",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
         }
       ]
     },
@@ -9140,7 +10144,7 @@
       ]
     },
     {
-      "title": "PATIENT SAFETY IN HEMODIALYSIS: GLUCOSE MANAGEMENT,\nMEDICATION SAFETY, INFECTION CONTROL, AND NURSING LAW",
+      "title": "PATIENT SAFETY IN HEMODIALYSIS: GLUCOSE MANAGEMENT,",
       "startDate": "2026-05-15",
       "endDate": "2026-05-15",
       "provider": "SPMC DIALYSIS UNIT (POCKET LECTURE)",
@@ -9305,6 +10309,171 @@
       ]
     },
     {
+      "title": "MEDICATION SAFETY, INFECTION CONTROL, AND NURSING LAW",
+      "startDate": "2026-03-15",
+      "endDate": "2026-03-15",
+      "provider": "SPMC DIALYSIS UNIT (POCKET LECTURE)",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "ANG, SOPHIA MARIE",
+          "normName": "ANG, SOPHIA MARIE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "BARBARONA, NINA BEATRIZ",
+          "normName": "BARBARONA, NINA BEATRIZ",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "CABAÑOG, HERMELYN CHARISH",
+          "normName": "CABAÑOG, HERMELYN CHARISH",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "CONCEPTION, DANDREB RYAN",
+          "normName": "CONCEPTION, DANDREB RYAN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "CRUZ, ALBERT JOHN",
+          "normName": "CRUZ, ALBERT JOHN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "DELFIN, RYAN JAY",
+          "normName": "DELFIN, RYAN JAY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "DELLOSA, MARK",
+          "normName": "DELLOSA, MARK",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "DINGAL, JULIE ROSE",
+          "normName": "DINGAL, JULIE ROSE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GALORIO, KATELEE",
+          "normName": "GALORIO, KATELEE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GILLESANIA, EMYLEN",
+          "normName": "GILLESANIA, EMYLEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GUEVARA, IRENE",
+          "normName": "GUEVARA, IRENE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GUILLANO, ANDY BON",
+          "normName": "GUILLANO, ANDY BON",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "GUNGON, MARLON",
+          "normName": "GUNGON, MARLON",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "LAGO, CATHERINE",
+          "normName": "LAGO, CATHERINE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "LAMBERTE, CHARMINE",
+          "normName": "LAMBERTE, CHARMINE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MANTEZA, AILEEN ANNE",
+          "normName": "MANTEZA, AILEEN ANNE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "MEDIALDEA, MELISSA MAE",
+          "normName": "MEDIALDEA, MELISSA MAE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PANTONIAL, DOLL JOY",
+          "normName": "PANTONIAL, DOLL JOY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PEROCHO, KRIS MAE",
+          "normName": "PEROCHO, KRIS MAE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "PIELAGO, HARRY",
+          "normName": "PIELAGO, HARRY",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "ROA, LOUELYIEL",
+          "normName": "ROA, LOUELYIEL",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "SARAUSA, ARLEN",
+          "normName": "SARAUSA, ARLEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TENDERO, IMEE",
+          "normName": "TENDERO, IMEE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TRIPOLI, GILCYN",
+          "normName": "TRIPOLI, GILCYN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "TUBALLA, TRISHA GWEN",
+          "normName": "TUBALLA, TRISHA GWEN",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        },
+        {
+          "staffName": "VECINO, LEONA MARIE",
+          "normName": "VECINO, LEONA MARIE",
+          "role": "Participant",
+          "completionDate": "2026-03-15"
+        }
+      ]
+    },
+    {
       "title": "POTENTIAL MULTIPLE ORGAN DONOR (PMOD) MANAGEMENT AND TRAINING COURSE",
       "startDate": "2026-04-15",
       "endDate": "2026-04-15",
@@ -9425,6 +10594,12 @@
         {
           "staffName": "BUQUIRON, FRITZIE",
           "normName": "BUQUIRON, FRITZIE",
+          "role": "Participant",
+          "completionDate": "2026-05-15"
+        },
+        {
+          "staffName": "CACHERO, JOHN CARLO A.",
+          "normName": "CACHERO, JOHN CARLO",
           "role": "Participant",
           "completionDate": "2026-05-15"
         },
@@ -9749,7 +10924,7 @@
       ]
     },
     {
-      "title": "10TH PNA SUMMER CONFERENCE - CLARK, PAMPANGA\nRENAL NURSING IN FOCUS",
+      "title": "10TH PNA SUMMER CONFERENCE - CLARK, PAMPANGA",
       "startDate": "2026-05-15",
       "endDate": "2026-05-15",
       "provider": "PNA NATIONAL\nSPMC NETU",
@@ -11381,7 +12556,22 @@
       ]
     },
     {
-      "title": "INDICATIONS FOR GENETIC \nEVALUATION AND THE LATEST ADVANCES IN GENETIC DIAGNOSTICS",
+      "title": "INDICATIONS FOR GENETIC",
+      "startDate": "2026-05-15",
+      "endDate": "2026-05-15",
+      "provider": "UP MED WEBINAR",
+      "venue": "SPMC / Online",
+      "attendees": [
+        {
+          "staffName": "MONTEFALCON, NASHREINE DARUNDAY",
+          "normName": "MONTEFALCON, NASHREINE DARUNDAY",
+          "role": "Participant",
+          "completionDate": "2026-05-15"
+        }
+      ]
+    },
+    {
+      "title": "EVALUATION AND THE LATEST ADVANCES IN GENETIC DIAGNOSTICS",
       "startDate": "2026-05-15",
       "endDate": "2026-05-15",
       "provider": "UP MED WEBINAR",

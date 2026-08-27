@@ -246,56 +246,74 @@ async function extractWorkbookData() {
     for (let r = 7; r <= qSheet.rowCount; r++) {
       const row = qSheet.getRow(r);
       const staffName = getCellValue(row.getCell(2));
-      const title = getCellValue(row.getCell(3));
-      const dateText = getCellValue(row.getCell(4));
+      const rawTitleCell = getCellValue(row.getCell(3));
+      const rawDateCell = getCellValue(row.getCell(4));
       const provider = getCellValue(row.getCell(5)) || "SPMC";
 
-      if (!staffName || !title || staffName.toUpperCase().includes("NAME")) continue;
+      if (!staffName || !rawTitleCell || staffName.toUpperCase().includes("NAME")) continue;
 
       const normNameKey = `${parseName(staffName).lastName.toUpperCase()}, ${parseName(staffName).firstName.toUpperCase()}`;
-      const catKey = title.trim().toLowerCase();
-      if (!catalogMap.has(catKey)) {
-        catalogMap.set(catKey, {
-          name: title.trim(),
-          category: title.toLowerCase().includes("privacy") || title.toLowerCase().includes("space") ? "Mandatory / Hospital Compliance" : "Clinical Specialization",
-          kind: "Seminar",
-          renewalRequired: false,
-          defaultValidityMonths: null,
+
+      // Split multiple titles in a single cell by newlines
+      const titles = rawTitleCell
+        .split(/\r?\n/)
+        .map((t) => t.trim())
+        .filter((t) => t.length > 2);
+
+      const dates = rawDateCell
+        .split(/\r?\n/)
+        .map((d) => d.trim())
+        .filter(Boolean);
+
+      for (let idx = 0; idx < titles.length; idx++) {
+        const fullTitle = titles[idx];
+        const singleTitle = fullTitle.slice(0, 120).trim();
+        const dateText = dates[idx] || dates[0] || rawDateCell;
+
+        const catKey = singleTitle.toLowerCase();
+        if (!catalogMap.has(catKey)) {
+          catalogMap.set(catKey, {
+            name: singleTitle,
+            category: singleTitle.toLowerCase().includes("privacy") || singleTitle.toLowerCase().includes("space") ? "Mandatory / Hospital Compliance" : "Clinical Specialization",
+            kind: "Seminar",
+            renewalRequired: false,
+            defaultValidityMonths: null,
+          });
+        }
+
+        // Parse date
+        let dateIso = "2026-03-15";
+        const isoMatch = dateText.match(/2026-\d{2}-\d{2}/);
+        if (isoMatch) {
+          dateIso = isoMatch[0];
+        } else if (dateText.match(/jan/i)) dateIso = "2026-01-15";
+        else if (dateText.match(/feb/i)) dateIso = "2026-02-15";
+        else if (dateText.match(/mar/i)) dateIso = "2026-03-15";
+        else if (dateText.match(/apr/i)) dateIso = "2026-04-15";
+        else if (dateText.match(/may/i)) dateIso = "2026-05-15";
+        else if (dateText.match(/jun/i)) dateIso = "2026-06-15";
+
+        // Find or create event
+        let event = eventsList.find((e) => e.title === singleTitle && e.startDate === dateIso);
+        if (!event) {
+          event = {
+            title: singleTitle,
+            startDate: dateIso,
+            endDate: dateIso,
+            provider,
+            venue: "SPMC / Online",
+            attendees: [],
+          };
+          eventsList.push(event);
+        }
+
+        event.attendees.push({
+          staffName,
+          normName: normNameKey,
+          role: "Participant",
+          completionDate: dateIso,
         });
       }
-
-      // Parse date
-      let dateIso = "2026-03-15";
-      const isoMatch = dateText.match(/2026-\d{2}-\d{2}/);
-      if (isoMatch) {
-        dateIso = isoMatch[0];
-      } else if (dateText.match(/jan/i)) dateIso = "2026-01-15";
-      else if (dateText.match(/feb/i)) dateIso = "2026-02-15";
-      else if (dateText.match(/mar/i)) dateIso = "2026-03-15";
-      else if (dateText.match(/apr/i)) dateIso = "2026-04-15";
-      else if (dateText.match(/may/i)) dateIso = "2026-05-15";
-      else if (dateText.match(/jun/i)) dateIso = "2026-06-15";
-
-      // Find or create event
-      let event = eventsList.find((e) => e.title === title.trim() && e.startDate === dateIso);
-      if (!event) {
-        event = {
-          title: title.trim(),
-          startDate: dateIso,
-          endDate: dateIso,
-          provider,
-          venue: "SPMC / Online",
-          attendees: [],
-        };
-        eventsList.push(event);
-      }
-
-      event.attendees.push({
-        staffName,
-        normName: normNameKey,
-        role: "Participant",
-        completionDate: dateIso,
-      });
     }
   }
 

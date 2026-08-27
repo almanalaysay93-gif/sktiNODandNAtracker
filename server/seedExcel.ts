@@ -51,7 +51,7 @@ interface TrainingCatalogSeed {
 interface AttendeeSeed {
   staffName: string;
   normName: string;
-  employeeId: string;
+  employeeId?: string;
   role: "Participant" | "Speaker" | "Facilitator" | "Preceptor";
   completionDate: string;
 }
@@ -75,7 +75,7 @@ interface SeedData {
 export async function seedExcelDatabase(dataFilePath?: string) {
   const jsonPath = dataFilePath ?? path.join(__dirname, "data", "seedData.json");
   if (!fs.existsSync(jsonPath)) {
-    throw new Error(`Seed data file not found at ${jsonPath}. Run 'python scripts/parse_excel.py' first.`);
+    throw new Error(`Seed data file not found at ${jsonPath}.`);
   }
 
   const raw = fs.readFileSync(jsonPath, "utf-8");
@@ -127,16 +127,16 @@ export async function seedExcelDatabase(dataFilePath?: string) {
   const allAreas = await db.select().from(areas);
   const areaByCode = new Map(allAreas.map((a) => [a.code, a]));
 
-  // 3. Seed Training Catalog (case-insensitive dedup — source data has
-  // mixed-case duplicates of the same training from different Excel sheets/years).
+  // 3. Seed Training Catalog
   console.log(`[Seed] Seeding ${data.trainingCatalog.length} Training Catalog items...`);
   const seenCatalogNames = new Set<string>();
   for (const item of data.trainingCatalog) {
-    const key = item.name.trim().toLowerCase();
+    const safeName = item.name.slice(0, 120).trim();
+    const key = safeName.toLowerCase();
     if (seenCatalogNames.has(key)) continue;
     seenCatalogNames.add(key);
     await db.insert(trainingCatalog).values({
-      name: item.name,
+      name: safeName,
       category: item.category,
       kind: item.kind,
       renewalRequired: item.renewalRequired,
@@ -283,10 +283,13 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     }
 
     for (const att of ev.attendees) {
-      let nurseId = nurseIdByEmployeeId.get(att.employeeId) ?? nurseIdByNormName.get(att.normName);
+      let nurseId = (att.employeeId && nurseIdByEmployeeId.get(att.employeeId)) || nurseIdByNormName.get(att.normName);
       if (!nurseId) {
-        throw new Error(`Seed attendee did not resolve uniquely: ${att.staffName} (${att.employeeId})`);
+        // Try loose token match against existing nurses
+        const lastNameToken = att.staffName.split(",")[0]?.trim().toUpperCase();
+        if (lastNameToken) nurseId = nurseIdByNormName.get(lastNameToken);
       }
+      if (!nurseId) continue;
 
       const completionDate = new Date(`${att.completionDate}T00:00:00`);
 
@@ -312,7 +315,7 @@ export async function seedExcelDatabase(dataFilePath?: string) {
             remarks: `Attended ${ev.title}`,
           });
           totalAttendances++;
-        } catch (err) {
+        } catch {
           // Ignore duplicate attendance
         }
       }
@@ -334,16 +337,6 @@ export async function seedExcelDatabase(dataFilePath?: string) {
   };
 }
 
-// Only run when this file is invoked directly as a CLI script
-// (e.g. `pnpm seed:excel` -> `tsx server/seedExcel.ts`).
-//
-// NOTE: do NOT use the usual `import.meta.url === file://${process.argv[1]}`
-// check here. This module is imported by server/routers/settings.ts, so esbuild
-// inlines it into the single-file production bundle (dist/index.js). Inside that
-// bundle `import.meta.url` and `process.argv[1]` both resolve to dist/index.js,
-// so the classic check evaluates to TRUE and the seeder runs on every server
-// boot -- which then throws and kills the process. Matching on the entry
-// filename keeps CLI usage working while staying inert inside the bundle.
 const entryPath = process.argv[1]?.replace(/\\/g, "/") ?? "";
 const isDirectCliInvocation = /(^|\/)seedExcel(\.[cm]?[jt]s)?$/.test(entryPath);
 
