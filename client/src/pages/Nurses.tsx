@@ -94,6 +94,13 @@ export default function Nurses() {
     return rows;
   }, [nurses, search, areaFilter, empFilter, licFilter, staffTypeFilter, sortKey, areas]);
 
+  const counts = useMemo(() => {
+    const all = (nurses ?? []).filter((n) => !n.archivedAt);
+    const rn = all.filter((n) => n.staffType === "Registered Nurse").length;
+    const na = all.filter((n) => n.staffType === "Nursing Attendant").length;
+    return { all: all.length, rn, na };
+  }, [nurses]);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -104,13 +111,6 @@ export default function Nurses() {
       </div>
     );
   }
-
-  const counts = useMemo(() => {
-    const all = (nurses ?? []).filter((n) => !n.archivedAt);
-    const rn = all.filter((n) => n.staffType === "Registered Nurse").length;
-    const na = all.filter((n) => n.staffType === "Nursing Attendant").length;
-    return { all: all.length, rn, na };
-  }, [nurses]);
 
   return (
     <div className="space-y-5">
