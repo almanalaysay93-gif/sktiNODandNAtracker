@@ -51,7 +51,15 @@ export function ChatAssistantWidget() {
           isMobile ? "bottom-20" : "bottom-6",
         )}
       >
-        {open ? <X className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
+        {open ? (
+          <X className="h-6 w-6" />
+        ) : (
+          <img
+            src="/branding/spmc-nephro-cluster.jpg"
+            alt="AI Assistant"
+            className="h-11 w-11 object-contain rounded-full bg-white"
+          />
+        )}
       </Button>
 
       {open && (
@@ -65,7 +73,8 @@ export function ChatAssistantWidget() {
         >
           <CardHeader className="py-3 border-b shrink-0">
             <CardTitle className="flex items-center gap-2 text-sm">
-              <Bot className="h-4 w-4" /> AI Assistant
+              <img src="/branding/spmc-nephro-cluster.jpg" alt="" className="h-5 w-5 object-contain rounded-full bg-white" />
+              AI Assistant
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col gap-3 p-3 min-h-0">
