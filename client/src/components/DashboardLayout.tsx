@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { startLogin } from "@/const";
 import {
   Bell,
+  BedDouble,
   Bot,
   CalendarDays,
   ClipboardList,
@@ -51,7 +52,14 @@ import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, C
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { ScrollArea } from "./ui/scroll-area";
 
-export const NAV_ITEMS = [
+type NavItem = {
+  icon: typeof LayoutDashboard;
+  label: string;
+  path: string;
+  external?: boolean;
+};
+
+export const NAV_ITEMS: NavItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: MapPin, label: "Areas of Assignment", path: "/areas" },
   { icon: Users, label: "Registered Nurses (NOD)", path: "/nurses?type=Registered%20Nurse" },
@@ -64,6 +72,12 @@ export const NAV_ITEMS = [
   { icon: Sparkles, label: "Smart Import", path: "/smart-import" },
   { icon: Bot, label: "AI Insights", path: "/ai-insights" },
   { icon: Settings, label: "Settings", path: "/settings" },
+  {
+    icon: BedDouble,
+    label: "Dialysis Occupancy",
+    path: "https://dialysis-occupancy-board.vercel.app",
+    external: true,
+  },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -143,6 +157,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
     const params = new URLSearchParams(searchString);
     const typeParam = params.get("type");
     return (itemPath: string) => {
+      if (/^https?:\/\//.test(itemPath)) return false;
       if (itemPath.includes("?")) {
         const [itemBase, itemQuery] = itemPath.split("?");
         const itemType = new URLSearchParams(itemQuery).get("type");
@@ -198,7 +213,14 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      onClick={() => setLocation(item.path)}
+                      aria-label={`${item.label}${item.external ? " (opens in new tab)" : ""}`}
+                      onClick={() => {
+                        if (item.external) {
+                          window.open(item.path, "_blank", "noopener,noreferrer");
+                          return;
+                        }
+                        setLocation(item.path);
+                      }}
                       tooltip={item.label}
                       className={cn(
                         "h-12 text-base transition-all duration-200 ease-out font-medium",
@@ -447,6 +469,7 @@ function MobileBottomNav() {
   const currentStaffType = new URLSearchParams(searchString).get("type");
 
   const isItemActive = (itemPath: string) => {
+    if (/^https?:\/\//.test(itemPath)) return false;
     if (itemPath.includes("?")) {
       const [itemBase, itemQuery] = itemPath.split("?");
       const itemType = new URLSearchParams(itemQuery).get("type");
@@ -490,6 +513,7 @@ function MoreMenu() {
   const [open, setOpen] = useState(false);
 
   const isItemActive = (itemPath: string) => {
+    if (/^https?:\/\//.test(itemPath)) return false;
     if (itemPath.includes("?")) {
       const [itemBase, itemQuery] = itemPath.split("?");
       const itemType = new URLSearchParams(itemQuery).get("type");
@@ -521,8 +545,13 @@ function MoreMenu() {
               return (
                 <button
                   key={item.path}
+                  aria-label={`${item.label}${item.external ? " (opens in new tab)" : ""}`}
                   onClick={() => {
                     setOpen(false);
+                    if (item.external) {
+                      window.open(item.path, "_blank", "noopener,noreferrer");
+                      return;
+                    }
                     setLocation(item.path);
                   }}
                   className={cn(
