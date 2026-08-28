@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useSearch } from "wouter";
+import { ChatAssistantWidget } from "./ChatAssistantWidget";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { Button } from "./ui/button";
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./ui/command";
@@ -282,6 +283,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
       </SidebarInset>
 
       <NurseSearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      <ChatAssistantWidget />
     </>
   );
 }
