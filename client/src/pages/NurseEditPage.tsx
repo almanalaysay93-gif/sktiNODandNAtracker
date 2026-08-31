@@ -25,8 +25,17 @@ export function NurseEditPage() {
   if (!nurse) {
     return (
       <div className="space-y-4">
-        <Button variant="ghost" onClick={() => navigate("/nurses")}>
-          <ArrowLeft className="h-4 w-4 mr-1" /> Back to Nurses
+        <Button
+          variant="ghost"
+          onClick={() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              navigate("/nurses");
+            }
+          }}
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" /> Back
         </Button>
         <p className="text-sm text-muted-foreground">Nurse not found.</p>
       </div>
@@ -35,8 +44,17 @@ export function NurseEditPage() {
 
   return (
     <div className="space-y-4">
-      <Button variant="ghost" onClick={() => navigate(`/nurses/${id}`)}>
-        <ArrowLeft className="h-4 w-4 mr-1" /> Back to Profile
+      <Button
+        variant="ghost"
+        onClick={() => {
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            navigate(`/nurses/${id}`);
+          }
+        }}
+      >
+        <ArrowLeft className="h-4 w-4 mr-1" /> Back
       </Button>
       <NurseFormDialog
         open={open}

@@ -97,6 +97,13 @@ export function NurseFormDialog({
     onSuccess: () => {
       toast.success(`Added ${firstName.trim()} ${lastName.trim()}.`);
       utils.nurses.list.invalidate();
+      utils.nurses.initial.invalidate();
+      utils.areas.list.invalidate();
+      utils.areas.get.invalidate();
+      utils.areas.areaDashboard.invalidate();
+      utils.dashboard.invalidate();
+      utils.reports.invalidate();
+      utils.seminars.matrix.invalidate();
       onOpenChange(false);
     },
     onError: (e) => toast.error(e.message),
@@ -106,6 +113,14 @@ export function NurseFormDialog({
       toast.success("Nurse updated.");
       utils.nurses.get.invalidate();
       utils.nurses.list.invalidate();
+      utils.nurses.initial.invalidate();
+      utils.nurses.getAssignments.invalidate();
+      utils.areas.list.invalidate();
+      utils.areas.get.invalidate();
+      utils.areas.areaDashboard.invalidate();
+      utils.dashboard.invalidate();
+      utils.reports.invalidate();
+      utils.seminars.matrix.invalidate();
       onOpenChange(false);
     },
     onError: (e) => toast.error(e.message),
@@ -114,6 +129,7 @@ export function NurseFormDialog({
     onSuccess: () => {
       utils.nurses.get.invalidate();
       utils.nurses.list.invalidate();
+      utils.nurses.initial.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });

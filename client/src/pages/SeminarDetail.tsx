@@ -48,11 +48,42 @@ export default function SeminarDetail() {
   };
 
   if (isLoading) return <Skeleton className="h-96 w-full" />;
-  if (error || !data) return <Card><CardContent className="py-12 text-center text-sm text-destructive">{error?.message ?? "Seminar not found."}</CardContent></Card>;
+  if (error || !data) {
+    return (
+      <div className="space-y-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              navigate("/seminars");
+            }
+          }}
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" />Back
+        </Button>
+        <Card><CardContent className="py-12 text-center text-sm text-destructive">{error?.message ?? "Seminar not found."}</CardContent></Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <Button variant="ghost" size="sm" onClick={() => navigate("/seminars")}><ArrowLeft className="mr-1 h-4 w-4" />Seminars & LDI</Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => {
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            navigate("/seminars");
+          }
+        }}
+      >
+        <ArrowLeft className="mr-1 h-4 w-4" />Back
+      </Button>
       <Card className="glass-card">
         <CardHeader>
           <div className="text-xs font-medium uppercase text-primary">{data.training.kind}</div>

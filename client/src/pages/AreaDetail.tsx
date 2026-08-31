@@ -44,7 +44,7 @@ export default function AreaDetail() {
   const [backfillRemarks, setBackfillRemarks] = useState("");
 
   const filtered = useMemo(() => {
-    const rows = (area?.staff ?? []).filter((s) => {
+    const rows = ((area as any)?.staff ?? []).filter((s: any) => {
       if (!search.trim()) return true;
       const n = s.nurse;
       const q = search.trim().toLowerCase();
@@ -70,7 +70,18 @@ export default function AreaDetail() {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/areas")} aria-label="Back">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              navigate("/areas");
+            }
+          }}
+          aria-label="Back"
+        >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
@@ -105,9 +116,9 @@ export default function AreaDetail() {
             <p className="text-sm text-muted-foreground py-6 text-center">No nurses currently assigned to this area.</p>
           ) : (
             <div className="divide-y">
-              {filtered.map(({ assignment, nurse }) => (
+              {filtered.map(({ assignment, nurse }: any) => (
                 <div
-                  key={assignment.id}
+                  key={assignment.id ? `asgn-${assignment.id}` : `nurse-${nurse.id}`}
                   className="flex items-center gap-3 py-2.5 hover:bg-accent/50 rounded px-1 cursor-pointer"
                   onClick={() => navigate(`/nurses/${nurse.id}`)}
                 >

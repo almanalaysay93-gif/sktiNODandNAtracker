@@ -136,6 +136,19 @@ export const nursesRouter = router({
         if (taken) throw new TRPCError({ code: "CONFLICT", message: "A nurse with this Employee ID already exists." });
       }
       await db.updateNurse(id, { ...rest, ...(employeeId ? { employeeId } : {}) } as Parameters<typeof db.updateNurse>[1]);
+      if (input.currentAreaId !== undefined && input.currentAreaId !== nurse.currentAreaId) {
+        await db.clearCurrentAssignmentsForNurse(id);
+        if (input.currentAreaId) {
+          await db.createAssignment({
+            nurseId: id,
+            areaId: input.currentAreaId,
+            startDate: new Date(),
+            assignmentType: "Permanent Transfer",
+            remarks: "Updated via nurse profile edit",
+            isCurrent: true,
+          });
+        }
+      }
       await db.logActivity({
         supervisorId: ctx.user.id,
         nurseId: id,

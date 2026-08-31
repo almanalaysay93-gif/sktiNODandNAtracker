@@ -12,10 +12,13 @@ export default function TrainingMatrix() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [staffType, setStaffType] = useState("all");
+  const [areaFilter, setAreaFilter] = useState("all");
+  const { data: areas } = trpc.areas.list.useQuery();
   const { data, isLoading } = trpc.seminars.matrix.useQuery({
     from: from || undefined,
     to: to || undefined,
     staffType: staffType === "all" ? undefined : staffType as (typeof STAFF_TYPES)[number],
+    areaId: areaFilter === "all" ? undefined : Number(areaFilter),
   });
 
   const recordByCell = useMemo(() => {
@@ -35,7 +38,7 @@ export default function TrainingMatrix() {
     <Card className="glass-card">
       <CardHeader>
         <CardTitle className="text-base">Training Matrix</CardTitle>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} aria-label="From date" />
           <Input type="date" value={to} onChange={(event) => setTo(event.target.value)} aria-label="To date" />
           <Select value={staffType} onValueChange={setStaffType}>
@@ -43,6 +46,13 @@ export default function TrainingMatrix() {
             <SelectContent>
               <SelectItem value="all">All staff types</SelectItem>
               {STAFF_TYPES.map((type) => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <Select value={areaFilter} onValueChange={setAreaFilter}>
+            <SelectTrigger><SelectValue placeholder="All areas" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All areas</SelectItem>
+              {areas?.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

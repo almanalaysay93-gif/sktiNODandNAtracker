@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { and, eq, isNull, not, sql } from "drizzle-orm";
 import { adminProcedure, router } from "../_core/trpc";
-import { getDb, getAssignmentsForArea, listAreas, listNurses, listCredentials, getAreaById, getNurseLicenseInfo, activeNurseCondition } from "../db";
+import { getDb, getAssignmentsForArea, listAreas, listNurses, listCredentials, getAreaById, getNurseLicenseInfo, activeNurseCondition, createArea, updateArea } from "../db";
 import { areas } from "../../drizzle/schema";
 import { areaAssignments, nurses, nurseCredentials, nurseTrainings } from "../../drizzle/schema";
 import { daysBetween, todayDate, deriveLicenseStatus, daysUntilExpiry, dateKey, INACTIVE_EMPLOYMENT_STATUSES } from "../../shared/nursetrack";
@@ -13,10 +13,7 @@ export const areasRouter = router({
   get: adminProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
-      const rows = await db.select().from(areas).where(eq(areas.id, input.id)).limit(1);
-      const area = rows[0];
+      const area = await getAreaById(input.id);
       if (!area) throw new TRPCError({ code: "NOT_FOUND", message: "Area not found" });
       const staff = await Promise.all(
         (await getAssignmentsForArea(input.id)).map(async (s) => ({
@@ -37,16 +34,14 @@ export const areasRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
-      const id = await db.insert(areas).values({
+      const id = await createArea({
         code: input.code,
         name: input.name,
         description: input.description ?? null,
         sortOrder: input.sortOrder ?? 99,
         active: true,
       });
-      return { id: id[0].insertId };
+      return { id };
     }),
 
   update: adminProcedure
@@ -60,28 +55,19 @@ export const areasRouter = router({
       }),
     )
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
       const { id, ...rest } = input;
-      const patch: Record<string, unknown> = {};
-      if (rest.code !== undefined) patch.code = rest.code;
-      if (rest.name !== undefined) patch.name = rest.name;
-      if (rest.description !== undefined) patch.description = rest.description;
-      if (rest.active !== undefined) patch.active = rest.active;
-      await db.update(areas).set(patch).where(eq(areas.id, id));
+      await updateArea(id, rest);
       return { success: true } as const;
     }),
 
   deactivate: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
       const staff = await getAssignmentsForArea(input.id);
       if (staff.length > 0) {
         throw new TRPCError({ code: "BAD_REQUEST", message: "Area still has assigned nurses. Reassign them first." });
       }
-      await db.update(areas).set({ active: false }).where(eq(areas.id, input.id));
+      await updateArea(input.id, { active: false });
       return { success: true } as const;
     }),
 

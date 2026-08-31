@@ -96,7 +96,14 @@ export default function NurseProfile() {
       toast.success("Area of assignment updated. History preserved.");
       utils.nurses.getAssignments.invalidate();
       utils.nurses.get.invalidate();
+      utils.nurses.list.invalidate();
+      utils.nurses.initial.invalidate();
       utils.areas.list.invalidate();
+      utils.areas.get.invalidate();
+      utils.areas.areaDashboard.invalidate();
+      utils.dashboard.invalidate();
+      utils.reports.invalidate();
+      utils.seminars.matrix.invalidate();
     },
     onError: (e) => toast.error(e.message),
   });
@@ -138,7 +145,18 @@ export default function NurseProfile() {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-2 flex-wrap">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/nurses")} aria-label="Back">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            if (window.history.length > 1) {
+              window.history.back();
+            } else {
+              navigate("/nurses");
+            }
+          }}
+          aria-label="Back"
+        >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex items-center gap-3 flex-1 min-w-0">

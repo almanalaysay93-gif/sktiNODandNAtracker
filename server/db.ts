@@ -467,48 +467,88 @@ export async function clearCurrentAssignmentsForNurse(nurseId: number) {
 export async function getAssignmentsForArea(areaId: number) {
   const db = await getDb();
   if (db) {
-    return await db
-      .select({
-        assignment: areaAssignments,
-        nurse: nurses,
-      })
+    const activeNurses = await db
+      .select()
+      .from(nurses)
+      .where(and(eq(nurses.currentAreaId, areaId), activeNurseCondition()))
+      .orderBy(asc(nurses.lastName), asc(nurses.firstName));
+    if (activeNurses.length === 0) return [];
+    const nurseIds = activeNurses.map((n) => n.id);
+    const asgns = await db
+      .select()
       .from(areaAssignments)
-      .innerJoin(nurses, eq(nurses.id, areaAssignments.nurseId))
-      .where(and(eq(areaAssignments.areaId, areaId), eq(areaAssignments.isCurrent, true), isNull(nurses.archivedAt)));
+      .where(and(eq(areaAssignments.areaId, areaId), eq(areaAssignments.isCurrent, true), inArray(areaAssignments.nurseId, nurseIds)));
+    const asgnMap = new Map(asgns.map((a) => [a.nurseId, a]));
+    return activeNurses.map((nurse) => {
+      const a = asgnMap.get(nurse.id);
+      return {
+        assignment: a ?? {
+          id: 0,
+          nurseId: nurse.id,
+          areaId,
+          startDate: nurse.dateHired ?? new Date(),
+          endDate: null,
+          assignmentType: "Permanent Transfer",
+          remarks: null,
+          isCurrent: true,
+          createdAt: nurse.createdAt,
+          updatedAt: nurse.updatedAt,
+        },
+        nurse,
+      };
+    });
   }
   const sqlite = getSqliteDb();
-  const rows = sqlite.prepare(`
-    SELECT a.id as a_id, a.nurseId, a.areaId, a.startDate, a.endDate, a.assignmentType, a.remarks, a.isCurrent,
-           n.id as n_id, n.employeeId, n.firstName, n.middleName, n.lastName, n.suffix, n.position, n.staffType, n.currentAreaId, n.archivedAt
-    FROM areaAssignments a
-    INNER JOIN nurses n ON n.id = a.nurseId
-    WHERE a.areaId = ? AND a.isCurrent = 1 AND n.archivedAt IS NULL
+  const activeNurses = sqlite.prepare(`
+    SELECT * FROM nurses
+    WHERE currentAreaId = ? AND archivedAt IS NULL AND employmentStatus NOT IN (${INACTIVE_STATUS_SQL_LIST})
+    ORDER BY lastName ASC, firstName ASC
   `).all(areaId) as any[];
 
-  return rows.map((r) => ({
-    assignment: {
-      id: r.a_id,
-      nurseId: r.nurseId,
-      areaId: r.areaId,
-      startDate: r.startDate,
-      endDate: r.endDate,
-      assignmentType: r.assignmentType,
-      remarks: r.remarks,
-      isCurrent: Boolean(r.isCurrent),
-    },
-    nurse: {
-      id: r.n_id,
-      employeeId: r.employeeId,
-      firstName: r.firstName,
-      middleName: r.middleName,
-      lastName: r.lastName,
-      suffix: r.suffix,
-      position: r.position,
-      staffType: r.staffType,
-      currentAreaId: r.currentAreaId,
-      archivedAt: r.archivedAt,
-    },
-  }));
+  if (activeNurses.length === 0) return [];
+  const nurseIds = activeNurses.map((n) => n.id);
+  const asgns = sqlite.prepare(`
+    SELECT * FROM areaAssignments
+    WHERE areaId = ? AND isCurrent = 1 AND nurseId IN (${nurseIds.join(", ")})
+  `).all(areaId) as any[];
+  const asgnMap = new Map(asgns.map((a: any) => [a.nurseId, a]));
+
+  return activeNurses.map((nurse: any) => {
+    const a = asgnMap.get(nurse.id);
+    return {
+      assignment: a ? {
+        id: a.id,
+        nurseId: a.nurseId,
+        areaId: a.areaId,
+        startDate: a.startDate,
+        endDate: a.endDate,
+        assignmentType: a.assignmentType,
+        remarks: a.remarks,
+        isCurrent: Boolean(a.isCurrent),
+      } : {
+        id: 0,
+        nurseId: nurse.id,
+        areaId,
+        startDate: nurse.dateHired ?? new Date().toISOString().slice(0, 10),
+        endDate: null,
+        assignmentType: "Permanent Transfer",
+        remarks: null,
+        isCurrent: true,
+      },
+      nurse: {
+        id: nurse.id,
+        employeeId: nurse.employeeId,
+        firstName: nurse.firstName,
+        middleName: nurse.middleName,
+        lastName: nurse.lastName,
+        suffix: nurse.suffix,
+        position: nurse.position,
+        staffType: nurse.staffType,
+        currentAreaId: nurse.currentAreaId,
+        archivedAt: nurse.archivedAt,
+      },
+    };
+  });
 }
 
 /* ---------------- Credentials (licenses) ---------------- */
