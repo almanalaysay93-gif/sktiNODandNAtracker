@@ -227,6 +227,55 @@ export const settingsRouter = router({
       }
       return out;
     }),
+
+  emailStatus: adminProcedure.query(async () => {
+    const hasKey = Boolean(process.env.RESEND_API_KEY);
+    const fromAddress = process.env.EMAIL_FROM || "SKTI NurseTrack <notifications@sktinursetrack.com>";
+    return {
+      configured: hasKey,
+      mode: hasKey ? "live" : "mock",
+      fromAddress,
+    };
+  }),
+
+  sendTestEmail: adminProcedure
+    .input(z.object({ targetEmail: z.string().email() }))
+    .mutation(async ({ ctx, input }) => {
+      const { sendEmail } = await import("../email/service");
+      const { renderDirectNoticeEmail } = await import("../email/templates");
+      const html = renderDirectNoticeEmail({
+        nurseName: ctx.user.name || "Administrator",
+        subject: "SKTI NurseTrack — Test Notification",
+        message: "This is a test notification confirming your email dispatch configuration is active and working properly.",
+        actionUrl: process.env.APP_URL || "http://localhost:3000",
+      });
+
+      const res = await sendEmail({
+        to: input.targetEmail,
+        subject: "SKTI NurseTrack — Email Configuration Test",
+        html,
+        nurseId: 0,
+        emailType: "manual_notice",
+        thresholdKey: "test",
+      });
+
+      return res;
+    }),
+
+  triggerEmailPassNow: adminProcedure.mutation(async () => {
+    const { runLicenseExpiryEmailPass, runUpcomingSeminarEmailPass } = await import("../email/dispatcher");
+    const today = todayDate();
+    const expiry = await runLicenseExpiryEmailPass(today);
+    const seminars = await runUpcomingSeminarEmailPass();
+    return { expiry, seminars };
+  }),
+
+  listEmailLogs: adminProcedure
+    .input(z.object({ limit: z.number().int().min(1).max(100).default(50) }).optional())
+    .query(async ({ input }) => {
+      const { listRecentEmailLogs } = await import("../db");
+      return listRecentEmailLogs(input?.limit ?? 50);
+    }),
 });
 
 function parseCsv(text: string): string[][] {

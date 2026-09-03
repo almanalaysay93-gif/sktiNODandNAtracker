@@ -295,6 +295,33 @@ export const nursesRouter = router({
           assignmentType: input.assignmentType,
         },
       });
+
+      // Asynchronously dispatch email notification if staff has linked email
+      if (nurse.accountEmail) {
+        (async () => {
+          try {
+            const { sendEmail } = await import("../email/service");
+            const { renderProfileUpdateEmail } = await import("../email/templates");
+            const appUrl = process.env.APP_URL || "http://localhost:3000";
+            const html = renderProfileUpdateEmail({
+              nurseName: nurseFullName(nurse),
+              updateTitle: "Unit / Area Assignment Changed",
+              details: `Your assignment has been updated from ${oldAreaName} to ${newAreaName} (${input.assignmentType}) effective ${effective.toLocaleDateString("en-CA")}.`,
+              actionUrl: `${appUrl}/me`,
+            });
+            await sendEmail({
+              to: nurse.accountEmail!,
+              subject: `Assignment Update: Transferred to ${newAreaName}`,
+              html,
+              nurseId: nurse.id,
+              emailType: "profile_update",
+            });
+          } catch (err) {
+            console.error("[Email:AreaChange] Failed to dispatch email:", err);
+          }
+        })();
+      }
+
       return { success: true } as const;
     }),
 
@@ -335,5 +362,54 @@ export const nursesRouter = router({
     .input(z.object({ employeeId: z.string().min(1).max(64) }))
     .query(async ({ input }) => {
       return await db.getNurseByEmployeeId(input.employeeId);
+    }),
+
+  sendDirectNotice: adminProcedure
+    .input(
+      z.object({
+        nurseId: z.number().int().positive(),
+        subject: z.string().min(1).max(256),
+        message: z.string().min(1).max(2000),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const nurse = await db.getNurseById(input.nurseId);
+      if (!nurse) throw new TRPCError({ code: "NOT_FOUND", message: "Nurse not found." });
+      if (!nurse.accountEmail) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "This staff member does not have a linked email address yet.",
+        });
+      }
+
+      const { sendEmail } = await import("../email/service");
+      const { renderDirectNoticeEmail } = await import("../email/templates");
+      const appUrl = process.env.APP_URL || "http://localhost:3000";
+
+      const html = renderDirectNoticeEmail({
+        nurseName: nurseFullName(nurse),
+        subject: input.subject,
+        message: input.message,
+        actionUrl: `${appUrl}/me`,
+      });
+
+      const res = await sendEmail({
+        to: nurse.accountEmail,
+        subject: input.subject,
+        html,
+        nurseId: nurse.id,
+        emailType: "manual_notice",
+      });
+
+      await db.logActivity({
+        supervisorId: ctx.user.id,
+        nurseId: nurse.id,
+        actionType: "nurse.notice.sent",
+        entityType: "nurse",
+        entityId: nurse.id,
+        summary: `Direct email notice sent to ${nurseFullName(nurse)}: "${input.subject}"`,
+      });
+
+      return res;
     }),
 });
