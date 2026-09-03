@@ -306,7 +306,10 @@ function ExportTab() {
 function ExportButton({ entity, label }: { entity: string; label: string }) {
   const { data, isPending } = trpc.settings.exportData.useQuery({ entity: entity as "nurses" });
   const download = () => {
-    if (!data) return;
+    if (!data || Object.keys(data).length === 0) {
+      toast.error(`No records found to export for ${label}.`);
+      return;
+    }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

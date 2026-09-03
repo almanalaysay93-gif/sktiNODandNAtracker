@@ -89,13 +89,15 @@ async function startServer() {
 
   if (process.env.NODE_ENV === "production") {
     startDailyReminderScheduler();
-    seedExcelDatabase()
-      .then(async (res) => {
-        console.log("[Auto-Sync] Seeded database from workbook:", res);
-        const dedupRes = await deduplicateDatabase();
-        console.log("[Auto-Dedup] Database deduplication complete:", dedupRes);
-      })
-      .catch((err) => console.warn("[Auto-Sync] Warning during startup sync:", err));
+    if (process.env.SEED_ON_BOOT === "1") {
+      seedExcelDatabase()
+        .then(async (res) => {
+          console.log("[Auto-Sync] Seeded database from workbook:", res);
+          const dedupRes = await deduplicateDatabase();
+          console.log("[Auto-Dedup] Database deduplication complete:", dedupRes);
+        })
+        .catch((err) => console.warn("[Auto-Sync] Warning during startup sync:", err));
+    }
   }
 }
 

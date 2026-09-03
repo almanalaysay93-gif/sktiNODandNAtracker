@@ -213,15 +213,17 @@ export const settingsRouter = router({
       if (!db) throw new Error("Database unavailable");
       const out: Record<string, unknown[]> = {};
 
-      const nurseRows = await db.select().from(nurses);
-      if (input.entity === "nurses" || input.entity === "all") out.nurses = nurseRows;
-      if (input.entity === "all") {
-        const credRows = await db.select().from(nurseCredentials);
-        const trainingRows = await db.select().from(nurseTrainings);
-        const asgnRows = await db.select().from(areaAssignments);
-        out.nurseCredentials = credRows;
-        out.nurseTrainings = trainingRows;
-        out.areaAssignments = asgnRows;
+      if (input.entity === "nurses" || input.entity === "all") {
+        out.nurses = await db.select().from(nurses);
+      }
+      if (input.entity === "credentials" || input.entity === "all") {
+        out.nurseCredentials = await db.select().from(nurseCredentials);
+      }
+      if (input.entity === "trainings" || input.entity === "all") {
+        out.nurseTrainings = await db.select().from(nurseTrainings);
+      }
+      if (input.entity === "assignments" || input.entity === "all") {
+        out.areaAssignments = await db.select().from(areaAssignments);
       }
       return out;
     }),

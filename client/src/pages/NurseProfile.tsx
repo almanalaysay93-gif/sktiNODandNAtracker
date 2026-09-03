@@ -45,9 +45,10 @@ import {
   Trash2,
   Undo2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useLocation, useRoute } from "wouter";
+import { safeDateKey } from "@/lib/utils";
 
 const RENEWAL_STATUSES = ["Not Started", "Renewal In Progress", "Submitted", "Renewed"] as const;
 const VERIFICATION_STATUSES = ["Unverified", "Pending Verification", "Verified"] as const;
@@ -527,6 +528,34 @@ function CredentialDialog({
   const [certNumber, setCertNumber] = useState("");
   const [remarks, setRemarks] = useState("");
 
+  const reset = () => {
+    if (current) {
+      setTypeId(String(current.credentialTypeId));
+      setLicenseNumber(current.licenseNumber ?? "");
+      setIssuingOrg(current.issuingOrganization ?? "");
+      setIssueDate(current.issueDate ? safeDateKey(current.issueDate) : "");
+      setExpiryDate(safeDateKey(current.expiryDate));
+      setRenewalStatus(current.renewalStatus ?? "Not Started");
+      setVerificationStatus(current.verificationStatus ?? "Unverified");
+      setRemarks(current.remarks ?? "");
+    } else {
+      setTypeId("");
+      setLicenseNumber("");
+      setIssuingOrg("");
+      setIssueDate("");
+      setExpiryDate("");
+      setRenewalStatus("Not Started");
+      setVerificationStatus("Unverified");
+      setRemarks("");
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      reset();
+    }
+  }, [open, credentialId, current?.id]);
+
   const create = trpc.credentials.create.useMutation({
     onSuccess: () => {
       toast.success("Credential added.");
@@ -578,6 +607,10 @@ function CredentialDialog({
     remarks: remarks.trim() || undefined,
   };
 
+  const isSaveDisabled = credentialId
+    ? create.isPending || update.isPending || !current
+    : create.isPending || update.isPending || !typeId || !expiryDate;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -587,7 +620,7 @@ function CredentialDialog({
         <div className="grid grid-cols-2 gap-4">
           <div className="col-span-2">
             <Label className="mb-1 block">Credential Type *</Label>
-            <Select value={typeId} onValueChange={setTypeId}>
+            <Select value={typeId} onValueChange={setTypeId} disabled={!!credentialId}>
               <SelectTrigger className="w-full"><SelectValue placeholder="Select type…" /></SelectTrigger>
               <SelectContent>
                 {(types ?? []).map((t) => <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>)}
@@ -639,7 +672,7 @@ function CredentialDialog({
           <div className="col-span-2 flex justify-end gap-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button
-              disabled={create.isPending || update.isPending || !typeId || !expiryDate}
+              disabled={isSaveDisabled}
               onClick={() => {
                 if (credentialId) update.mutate(updateData);
                 else create.mutate(createData);

@@ -22,7 +22,7 @@ import { trpc } from "@/lib/trpc";
 import { formatDate, nurseFullName, nurseIdLabel } from "../../../shared/nursetrack";
 import { CalendarCheck, Pencil, Plus, RefreshCw, Search } from "lucide-react";
 import { safeDateKey } from "@/lib/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
@@ -276,6 +276,12 @@ function CredentialDialog({
       setRemarks("");
     }
   };
+
+  useEffect(() => {
+    if (open) {
+      reset();
+    }
+  }, [open, editId, current?.id]);
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onOpenChange(false); }}>

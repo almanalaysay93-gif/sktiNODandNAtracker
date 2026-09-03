@@ -156,6 +156,9 @@ class SDKServer {
   }
 
   private getSessionSecret() {
+    if (ENV.isProduction && !ENV.cookieSecret) {
+      throw new Error("FATAL: JWT_SECRET environment variable is missing in production!");
+    }
     const secret = ENV.cookieSecret || "skti-default-jwt-secret-key-32-chars-min!";
     return new TextEncoder().encode(secret);
   }
