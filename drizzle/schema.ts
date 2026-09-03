@@ -343,3 +343,26 @@ export const appSettings = mysqlTable("appSettings", {
   value: text("value"),
 });
 export type AppSetting = typeof appSettings.$inferSelect;
+
+/** Outbound email delivery ledger for audit and deduplication. */
+export const emailLogs = mysqlTable(
+  "emailLogs",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    nurseId: int("nurseId").notNull(),
+    recipientEmail: varchar("recipientEmail", { length: 320 }).notNull(),
+    emailType: varchar("emailType", { length: 64 }).notNull(),
+    referenceId: int("referenceId"),
+    thresholdKey: varchar("thresholdKey", { length: 64 }),
+    subject: varchar("subject", { length: 256 }).notNull(),
+    status: varchar("status", { length: 32 }).default("sent").notNull(),
+    errorMessage: text("errorMessage"),
+    sentAt: timestamp("sentAt").defaultNow().notNull(),
+  },
+  (t) => ({
+    idxNurse: index("idx_email_nurse").on(t.nurseId),
+    idxTypeRef: index("idx_email_typeref").on(t.emailType, t.referenceId),
+  }),
+);
+export type EmailLog = typeof emailLogs.$inferSelect;
+export type InsertEmailLog = typeof emailLogs.$inferInsert;

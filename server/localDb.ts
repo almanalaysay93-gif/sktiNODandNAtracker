@@ -212,6 +212,19 @@ function initSchemaAndSeed(db: Database.Database) {
       key TEXT NOT NULL UNIQUE,
       value TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS emailLogs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nurseId INTEGER NOT NULL,
+      recipientEmail TEXT NOT NULL,
+      emailType TEXT NOT NULL,
+      referenceId INTEGER,
+      thresholdKey TEXT,
+      subject TEXT NOT NULL,
+      status TEXT DEFAULT 'sent' NOT NULL,
+      errorMessage TEXT,
+      sentAt TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+    );
   `);
 
   // Check if data already seeded

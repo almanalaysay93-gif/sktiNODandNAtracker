@@ -9,7 +9,10 @@ import {
   areas,
   credentialTypes,
   customCalendarEvents,
+  emailLogs,
+  EmailLog,
   InsertArea,
+  InsertEmailLog,
   InsertNurse,
   InsertUser,
   licenseReminders,
@@ -1069,4 +1072,85 @@ export async function countActiveNurses(today?: Date) {
   const sqlite = getSqliteDb();
   const row = sqlite.prepare(`SELECT count(*) as count FROM nurses WHERE archivedAt IS NULL AND employmentStatus NOT IN (${INACTIVE_STATUS_SQL_LIST})`).get() as { count: number };
   return row.count;
+}
+
+/* ---------------- Email Logs Ledger ---------------- */
+export async function recordEmailLog(data: InsertEmailLog): Promise<number> {
+  const db = await getDb();
+  if (db) {
+    const result = await db.insert(emailLogs).values(data);
+    return Number((result as any)[0]?.insertId ?? 0);
+  }
+  const sqlite = getSqliteDb();
+  const info = sqlite
+    .prepare(
+      `INSERT INTO emailLogs (nurseId, recipientEmail, emailType, referenceId, thresholdKey, subject, status, errorMessage, sentAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
+    )
+    .run(
+      data.nurseId,
+      data.recipientEmail,
+      data.emailType,
+      data.referenceId ?? null,
+      data.thresholdKey ?? null,
+      data.subject,
+      data.status ?? "sent",
+      data.errorMessage ?? null
+    );
+  return Number(info.lastInsertRowid);
+}
+
+export async function isEmailDuplicate(params: {
+  nurseId: number;
+  emailType: string;
+  referenceId?: number | null;
+  thresholdKey?: string | null;
+}): Promise<boolean> {
+  const db = await getDb();
+  if (db) {
+    const conditions = [
+      eq(emailLogs.nurseId, params.nurseId),
+      eq(emailLogs.emailType, params.emailType),
+      inArray(emailLogs.status, ["sent", "mock_sent"]),
+    ];
+    if (params.referenceId !== undefined) {
+      conditions.push(params.referenceId === null ? isNull(emailLogs.referenceId) : eq(emailLogs.referenceId, params.referenceId));
+    }
+    if (params.thresholdKey !== undefined) {
+      conditions.push(params.thresholdKey === null ? isNull(emailLogs.thresholdKey) : eq(emailLogs.thresholdKey, params.thresholdKey));
+    }
+    const rows = await db.select({ id: emailLogs.id }).from(emailLogs).where(and(...conditions)).limit(1);
+    return rows.length > 0;
+  }
+  const sqlite = getSqliteDb();
+  let query = `SELECT id FROM emailLogs WHERE nurseId = ? AND emailType = ? AND status IN ('sent', 'mock_sent')`;
+  const binds: any[] = [params.nurseId, params.emailType];
+  if (params.referenceId !== undefined) {
+    if (params.referenceId === null) {
+      query += ` AND referenceId IS NULL`;
+    } else {
+      query += ` AND referenceId = ?`;
+      binds.push(params.referenceId);
+    }
+  }
+  if (params.thresholdKey !== undefined) {
+    if (params.thresholdKey === null) {
+      query += ` AND thresholdKey IS NULL`;
+    } else {
+      query += ` AND thresholdKey = ?`;
+      binds.push(params.thresholdKey);
+    }
+  }
+  query += ` LIMIT 1`;
+  const row = sqlite.prepare(query).get(...binds);
+  return Boolean(row);
+}
+
+export async function listRecentEmailLogs(limit = 50) {
+  const db = await getDb();
+  if (db) {
+    return await db.select().from(emailLogs).orderBy(desc(emailLogs.sentAt)).limit(limit);
+  }
+  const sqlite = getSqliteDb();
+  return sqlite.prepare(`SELECT * FROM emailLogs ORDER BY sentAt DESC LIMIT ?`).all(limit) as EmailLog[];
 }
