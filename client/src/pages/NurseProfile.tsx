@@ -14,6 +14,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -125,7 +135,17 @@ export default function NurseProfile() {
     },
     onError: (e) => toast.error(e.message),
   });
+  const deleteMutation = trpc.nurses.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Staff member permanently deleted.");
+      utils.nurses.list.invalidate();
+      utils.nurses.initial.invalidate();
+      navigate("/nurses");
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [credOpen, setCredOpen] = useState(false);
   const [editCredId, setEditCredId] = useState<number | null>(null);
   const [areaOpen, setAreaOpen] = useState(false);
@@ -234,6 +254,15 @@ export default function NurseProfile() {
               Restore
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+            onClick={() => setDeleteConfirmOpen(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-1" />
+            Delete
+          </Button>
         </div>
       </div>
 
@@ -566,6 +595,33 @@ export default function NurseProfile() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Alert Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Delete Staff Record Permanently?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to permanently delete <strong>{nurseFullName(nurse)}</strong> ({nurseIdLabel(nurse)})?
+              </p>
+              <p className="text-xs text-muted-foreground">
+                This action will delete all related credentials, training history, area assignments, email logs, and notifications. This cannot be undone.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              disabled={deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate({ id })}
+            >
+              {deleteMutation.isPending ? "Deleting…" : "Permanently Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

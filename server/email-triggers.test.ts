@@ -39,4 +39,29 @@ describe("Email Triggers & tRPC Endpoints", () => {
     expect(typeof res.expiry.processed).toBe("number");
     expect(typeof res.seminars.processed).toBe("number");
   });
+
+  it("deletes a staff nurse permanently and cleans up dependencies", async () => {
+    const caller = appRouter.createCaller({
+      user: { id: 1, openId: "admin-test", name: "Admin", email: "admin@example.com", role: "admin" },
+    } as any);
+
+    // Create a temporary nurse to delete
+    const nurseId = await db.createNurse({
+      employeeId: `TEST-DEL-${Date.now()}`,
+      firstName: "Temporary",
+      lastName: "Deletable",
+      staffType: "Registered Nurse",
+      employmentStatus: "Active",
+    });
+
+    const foundBefore = await db.getNurseById(Number(nurseId));
+    expect(foundBefore).toBeDefined();
+
+    // Perform deletion via router
+    const result = await caller.nurses.delete({ id: Number(nurseId) });
+    expect(result.success).toBe(true);
+
+    const foundAfter = await db.getNurseById(Number(nurseId));
+    expect(foundAfter).toBeUndefined();
+  });
 });

@@ -197,6 +197,23 @@ export const nursesRouter = router({
       return { success: true } as const;
     }),
 
+  delete: adminProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const nurse = await db.getNurseById(input.id);
+      if (!nurse) throw new TRPCError({ code: "NOT_FOUND", message: "Nurse not found" });
+      const fullName = nurseFullName(nurse);
+      await db.deleteNurse(input.id);
+      await db.logActivity({
+        supervisorId: ctx.user.id,
+        actionType: "nurse.deleted",
+        entityType: "nurse",
+        entityId: input.id,
+        summary: `Nurse record permanently deleted: ${fullName} (${nurse.employeeId})`,
+      });
+      return { success: true } as const;
+    }),
+
   uploadPhoto: adminProcedure
     .input(
       z.object({

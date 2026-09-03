@@ -217,6 +217,33 @@ export async function updateNurse(id: number, data: Partial<InsertNurse>) {
   }
 }
 
+export async function deleteNurse(id: number) {
+  const db = await getDb();
+  if (db) {
+    // Delete in dependency order
+    await db.delete(emailLogs).where(eq(emailLogs.nurseId, id));
+    await db.delete(notifications).where(eq(notifications.nurseId, id));
+    await db.delete(customCalendarEvents).where(eq(customCalendarEvents.nurseId, id));
+    await db.delete(nurseTrainings).where(eq(nurseTrainings.nurseId, id));
+    await db.delete(nurseCredentials).where(eq(nurseCredentials.nurseId, id));
+    await db.delete(areaAssignments).where(eq(areaAssignments.nurseId, id));
+    await db.delete(activityLog).where(eq(activityLog.nurseId, id));
+    await db.delete(nurses).where(eq(nurses.id, id));
+    return;
+  }
+  const sqlite = getSqliteDb();
+  sqlite.transaction(() => {
+    sqlite.prepare("DELETE FROM emailLogs WHERE nurseId = ?").run(id);
+    sqlite.prepare("DELETE FROM notifications WHERE nurseId = ?").run(id);
+    sqlite.prepare("DELETE FROM customCalendarEvents WHERE nurseId = ?").run(id);
+    sqlite.prepare("DELETE FROM nurseTrainings WHERE nurseId = ?").run(id);
+    sqlite.prepare("DELETE FROM nurseCredentials WHERE nurseId = ?").run(id);
+    sqlite.prepare("DELETE FROM areaAssignments WHERE nurseId = ?").run(id);
+    sqlite.prepare("DELETE FROM activityLog WHERE nurseId = ?").run(id);
+    sqlite.prepare("DELETE FROM nurses WHERE id = ?").run(id);
+  })();
+}
+
 export async function listNurses(opts: { archived?: boolean; areaId?: number; employmentStatus?: string } = {}) {
   const db = await getDb();
   if (db) {

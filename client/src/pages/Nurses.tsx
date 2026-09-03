@@ -24,10 +24,20 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { nurseFullName, nurseIdLabel, EMPLOYMENT_STATUSES, STAFF_TYPES, formatDate as sharedFormatDate } from "../../../shared/nursetrack";
-import { Archive, LayoutGrid, MapPin, Pencil, Plus, Search, Table2, UserCheck, Users } from "lucide-react";
+import { Archive, LayoutGrid, MapPin, Pencil, Plus, Search, Table2, Trash2, UserCheck, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useLocation, useSearch } from "wouter";
@@ -66,6 +76,18 @@ export default function Nurses() {
   const { data: initial, isLoading } = trpc.nurses.initial.useQuery();
   const nurses = initial?.nurses;
   const areas = initial?.areas;
+  const utils = trpc.useUtils();
+  const [nurseToDelete, setNurseToDelete] = useState<{ id: number; name: string; idLabel: string } | null>(null);
+
+  const deleteMutation = trpc.nurses.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Staff member permanently deleted.");
+      utils.nurses.initial.invalidate();
+      utils.nurses.list.invalidate();
+      setNurseToDelete(null);
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   const filtered = useMemo(() => {
     let rows = (nurses ?? []).filter((n) => !n.archivedAt);
@@ -235,7 +257,12 @@ export default function Nurses() {
       ) : view === "cards" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((n) => (
-            <NurseCard key={n.id} nurse={n} navigate={navigate} />
+            <NurseCard
+              key={n.id}
+              nurse={n}
+              navigate={navigate}
+              onDelete={(target) => setNurseToDelete(target)}
+            />
           ))}
         </div>
       ) : (
@@ -252,6 +279,7 @@ export default function Nurses() {
                         <TableHead className="text-sm font-bold uppercase tracking-wider py-4">Date Hired</TableHead>
                         <TableHead className="text-sm font-bold uppercase tracking-wider py-4">Employment</TableHead>
                         <TableHead className="text-sm font-bold uppercase tracking-wider py-4">License Status</TableHead>
+                        <TableHead className="text-sm font-bold uppercase tracking-wider py-4 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -287,6 +315,23 @@ export default function Nurses() {
                           <TableCell className="text-sm font-medium text-muted-foreground">{sharedFormatDate(n.dateHired)}</TableCell>
                           <TableCell><EmploymentStatusBadge status={n.employmentStatus ?? "Active"} /></TableCell>
                           <TableCell>{n.licenseStatus ? <LicenseStatusBadge status={n.licenseStatus as never} /> : "—"}</TableCell>
+                          <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={() =>
+                                setNurseToDelete({
+                                  id: n.id,
+                                  name: nurseFullName(n),
+                                  idLabel: nurseIdLabel(n),
+                                })
+                              }
+                              aria-label="Delete staff member"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -296,6 +341,37 @@ export default function Nurses() {
             )}
 
       <NurseFormDialog open={createOpen} onOpenChange={setCreateOpen} defaultStaffType={createStaffType} />
+
+      {/* Permanent Delete Confirmation Dialog */}
+      <AlertDialog open={Boolean(nurseToDelete)} onOpenChange={(open) => !open && setNurseToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Delete Staff Record Permanently?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to delete <strong>{nurseToDelete?.name}</strong> ({nurseToDelete?.idLabel})?
+              </p>
+              <p className="text-xs text-muted-foreground">
+                This will permanently remove their profile, area assignments, license credentials, seminar records, email logs, and notifications. This action cannot be undone.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (nurseToDelete) {
+                  deleteMutation.mutate({ id: nurseToDelete.id });
+                }
+              }}
+            >
+              {deleteMutation.isPending ? "Deleting…" : "Permanently Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -303,6 +379,7 @@ export default function Nurses() {
 function NurseCard({
   nurse,
   navigate,
+  onDelete,
 }: {
   nurse: {
     id: number;
@@ -323,6 +400,7 @@ function NurseCard({
     archivedAt?: Date | null;
   };
   navigate: (p: string) => void;
+  onDelete: (nurse: { id: number; name: string; idLabel: string }) => void;
 }) {
   return (
     <Card className="glass-card hover-shadow-none">
@@ -365,6 +443,22 @@ function NurseCard({
               aria-label="Archive nurse"
             >
               <Archive className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete({
+                  id: nurse.id,
+                  name: nurseFullName(nurse),
+                  idLabel: nurseIdLabel(nurse),
+                });
+              }}
+              aria-label="Delete nurse"
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
