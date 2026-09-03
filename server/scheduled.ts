@@ -1,5 +1,6 @@
 import { runDailyReminders } from "./reminders";
 import { todayDate } from "../shared/nursetrack";
+import { runLicenseExpiryEmailPass, runUpcomingSeminarEmailPass } from "./email/dispatcher";
 
 const DAILY_RUN_HOUR = 8; // 08:00 server local time, matching the original cron intent
 
@@ -13,12 +14,26 @@ function msUntilNextRun(): number {
 }
 
 async function runOnce() {
+  const today = todayDate();
   try {
-    const today = todayDate();
     const results = await runDailyReminders(today);
     console.log(`[DailyReminders] ran for ${today}:`, results);
   } catch (error) {
     console.error("[DailyReminders] failed:", error);
+  }
+
+  try {
+    const expiryEmails = await runLicenseExpiryEmailPass(today);
+    console.log(`[EmailDispatcher:Expiry] ran for ${today}:`, expiryEmails);
+  } catch (error) {
+    console.error("[EmailDispatcher:Expiry] failed:", error);
+  }
+
+  try {
+    const seminarEmails = await runUpcomingSeminarEmailPass();
+    console.log(`[EmailDispatcher:Seminars] ran for ${today}:`, seminarEmails);
+  } catch (error) {
+    console.error("[EmailDispatcher:Seminars] failed:", error);
   }
 }
 

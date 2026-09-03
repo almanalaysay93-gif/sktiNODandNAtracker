@@ -59,6 +59,9 @@ function initSchemaAndSeed(db: Database.Database) {
       employmentStatus TEXT DEFAULT 'Active' NOT NULL,
       currentAreaId INTEGER,
       profilePhotoKey TEXT,
+      contactNumber TEXT,
+      accountEmail TEXT,
+      linkedUserId INTEGER,
       archivedAt TEXT,
       createdAt TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
       updatedAt TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -226,6 +229,13 @@ function initSchemaAndSeed(db: Database.Database) {
       sentAt TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
     );
   `);
+
+  // Migrate existing SQLite schema if missing newly added columns
+  const cols = db.prepare("PRAGMA table_info(nurses)").all() as { name: string }[];
+  const colSet = new Set(cols.map((c) => c.name));
+  if (!colSet.has("contactNumber")) db.exec("ALTER TABLE nurses ADD COLUMN contactNumber TEXT");
+  if (!colSet.has("accountEmail")) db.exec("ALTER TABLE nurses ADD COLUMN accountEmail TEXT");
+  if (!colSet.has("linkedUserId")) db.exec("ALTER TABLE nurses ADD COLUMN linkedUserId INTEGER");
 
   // Check if data already seeded
   const countRow = db.prepare("SELECT count(*) as cnt FROM nurses").get() as { cnt: number };
