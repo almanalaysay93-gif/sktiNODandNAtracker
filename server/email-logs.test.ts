@@ -25,10 +25,11 @@ describe("emailLogs ledger operations", () => {
   });
 
   it("checks for duplicates correctly", async () => {
+    const uniqueRef = Date.now();
     const isDupBefore = await db.isEmailDuplicate({
       nurseId: 2,
       emailType: "license_expiry",
-      referenceId: 202,
+      referenceId: uniqueRef,
       thresholdKey: "60d",
     });
     expect(isDupBefore).toBe(false);
@@ -37,7 +38,7 @@ describe("emailLogs ledger operations", () => {
       nurseId: 2,
       recipientEmail: "nurse2@example.com",
       emailType: "license_expiry",
-      referenceId: 202,
+      referenceId: uniqueRef,
       thresholdKey: "60d",
       subject: "Test 60d Notice",
       status: "mock_sent",
@@ -46,7 +47,7 @@ describe("emailLogs ledger operations", () => {
     const isDupAfter = await db.isEmailDuplicate({
       nurseId: 2,
       emailType: "license_expiry",
-      referenceId: 202,
+      referenceId: uniqueRef,
       thresholdKey: "60d",
     });
     expect(isDupAfter).toBe(true);

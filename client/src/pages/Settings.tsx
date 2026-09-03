@@ -6,7 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Bell, Download, FileSpreadsheet, Play, RefreshCw, Save, Upload } from "lucide-react";
+import { Bell, Download, FileSpreadsheet, Play, RefreshCw, Save, Upload, Mail, Send, CheckCircle2, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -57,6 +58,7 @@ export default function SettingsPage() {
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="reminders">Reminders</TabsTrigger>
+          <TabsTrigger value="email">Email Automation</TabsTrigger>
           <TabsTrigger value="import">CSV Import</TabsTrigger>
           <TabsTrigger value="export">Export</TabsTrigger>
         </TabsList>
@@ -64,12 +66,14 @@ export default function SettingsPage() {
         <TabsContent value="general" className="mt-4">
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-base">Organization Profile</CardTitle>
-              <CardDescription>Used in report headers and reminders.</CardDescription>
+              <CardTitle className="text-base">Organization & Branding</CardTitle>
+              <CardDescription>
+                Customize how SKTI NurseTrack appears to users across the department.
+              </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 max-w-md">
               <div>
-                <Label className="mb-1 block">App Title</Label>
+                <Label className="mb-1 block">Application Title</Label>
                 <Input value={appTitle} onChange={(e) => setAppTitle(e.target.value)} />
               </div>
               <div>
@@ -113,6 +117,10 @@ export default function SettingsPage() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="email" className="mt-4">
+          <EmailAutomationTab />
         </TabsContent>
 
         <TabsContent value="import" className="mt-4">
@@ -324,5 +332,185 @@ function ExportButton({ entity, label }: { entity: string; label: string }) {
       <FileSpreadsheet className="h-4 w-4 mr-1" />
       {label}
     </Button>
+  );
+}
+
+function EmailAutomationTab() {
+  const utils = trpc.useUtils();
+  const { data: status, isLoading: statusLoading } = trpc.settings.emailStatus.useQuery();
+  const { data: logs, isLoading: logsLoading } = trpc.settings.listEmailLogs.useQuery({ limit: 50 });
+  const [testEmail, setTestEmail] = useState("");
+
+  const sendTest = trpc.settings.sendTestEmail.useMutation({
+    onSuccess: (res) => {
+      if (res.status === "mock_sent") {
+        toast.success("Test email processed in mock mode (logged to server console).");
+      } else if (res.status === "sent") {
+        toast.success("Test email dispatched via Resend!");
+      } else {
+        toast.error(`Email dispatch failed: ${res.error}`);
+      }
+      utils.settings.listEmailLogs.invalidate();
+      setTestEmail("");
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const triggerPass = trpc.settings.triggerEmailPassNow.useMutation({
+    onSuccess: (res) => {
+      toast.success(
+        `Email pass complete: ${res.expiry.sent} expiry alert(s) sent (${res.expiry.skipped} skipped), ${res.seminars.sent} seminar reminder(s) sent.`
+      );
+      utils.settings.listEmailLogs.invalidate();
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              Email Service Status
+            </CardTitle>
+            <CardDescription>
+              Service provider status and outbound notification settings.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Provider:</span>
+              <span className="text-sm">Resend (REST API)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Status:</span>
+              {statusLoading ? (
+                <Skeleton className="h-5 w-24" />
+              ) : status?.configured ? (
+                <Badge className="bg-green-600 text-white flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" /> Configured & Live
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-amber-600 border-amber-300 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" /> Mock Mode (Log Only)
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Sender:</span>
+              <span className="font-mono">{status?.fromAddress ?? "notifications@sktinursetrack.com"}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              To activate live delivery to staff mailboxes, add <code>RESEND_API_KEY</code> to your environment variables on Railway.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Send className="h-4 w-4" />
+              Test & Manual Triggers
+            </CardTitle>
+            <CardDescription>
+              Verify deliverability or manually trigger the daily digest check now.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-xs">Send Test Email</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder="name@spmc.gov.ph"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                />
+                <Button
+                  size="sm"
+                  disabled={!testEmail.trim() || sendTest.isPending}
+                  onClick={() => sendTest.mutate({ targetEmail: testEmail.trim() })}
+                >
+                  {sendTest.isPending ? "Sending…" : "Send Test"}
+                </Button>
+              </div>
+            </div>
+            <div className="pt-2 border-t">
+              <Label className="text-xs mb-1.5 block">Run Automated Pass Manually</Label>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                disabled={triggerPass.isPending}
+                onClick={() => triggerPass.mutate()}
+              >
+                <Play className="h-4 w-4 mr-1" />
+                {triggerPass.isPending ? "Running Pass…" : "Run Daily Digest Pass Now"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="glass-card">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-base">Outbound Email Audit Ledger</CardTitle>
+            <CardDescription>Recent notification attempts, delivery status, and timestamps.</CardDescription>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => utils.settings.listEmailLogs.invalidate()}>
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Refresh
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {logsLoading ? (
+            <Skeleton className="h-32 w-full" />
+          ) : !logs || logs.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">No email notifications dispatched yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b bg-muted/40 text-left">
+                    <th className="px-3 py-2 font-medium">Timestamp</th>
+                    <th className="px-3 py-2 font-medium">Recipient</th>
+                    <th className="px-3 py-2 font-medium">Type</th>
+                    <th className="px-3 py-2 font-medium">Subject</th>
+                    <th className="px-3 py-2 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {logs.map((l) => (
+                    <tr key={l.id}>
+                      <td className="px-3 py-2 text-muted-foreground">{String(l.sentAt).slice(0, 19).replace("T", " ")}</td>
+                      <td className="px-3 py-2 font-mono">{l.recipientEmail}</td>
+                      <td className="px-3 py-2">{l.emailType.replace("_", " ")}</td>
+                      <td className="px-3 py-2 max-w-xs truncate" title={l.subject}>{l.subject}</td>
+                      <td className="px-3 py-2">
+                        <Badge
+                          variant="outline"
+                          className={
+                            l.status === "sent"
+                              ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300"
+                              : l.status === "mock_sent"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+                              : "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300"
+                          }
+                        >
+                          {l.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

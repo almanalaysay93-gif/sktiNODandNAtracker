@@ -38,7 +38,7 @@ export async function fetchLinkedNursesWithExpiringCredentials(): Promise<Active
        LEFT JOIN credentialTypes ct ON ct.id = c.credentialTypeId
        WHERE n.archivedAt IS NULL AND n.linkedUserId IS NOT NULL AND n.accountEmail IS NOT NULL`
     );
-    const list = (rows[0] as any[]) || [];
+    const list = ((rows as any)[0] as any[]) || [];
     return list.map((r) => ({
       nurseId: Number(r.nurseId),
       fullName: nurseFullName(r),

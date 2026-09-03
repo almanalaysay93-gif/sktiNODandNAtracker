@@ -40,6 +40,7 @@ import {
   CalendarCheck,
   CreditCard,
   FileText,
+  Mail,
   MapPin,
   Pencil,
   Trash2,
@@ -133,6 +134,26 @@ export default function NurseProfile() {
   const [areaType, setAreaType] = useState("Permanent Transfer");
   const [areaDate, setAreaDate] = useState(new Date().toISOString().slice(0, 10));
 
+  const [emailNoticeOpen, setEmailNoticeOpen] = useState(false);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
+
+  const sendNoticeMutation = trpc.nurses.sendDirectNotice.useMutation({
+    onSuccess: (res) => {
+      if (res.status === "mock_sent") {
+        toast.success("Notice logged in mock mode (RESEND_API_KEY not configured).");
+      } else if (res.status === "sent") {
+        toast.success("Email notice delivered to staff nurse!");
+      } else {
+        toast.error(`Failed to send email: ${res.error}`);
+      }
+      setEmailNoticeOpen(false);
+      setEmailSubject("");
+      setEmailMessage("");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   if (Number.isNaN(id)) {
     return <p className="text-sm text-muted-foreground">Invalid nurse.</p>;
   }
@@ -180,6 +201,16 @@ export default function NurseProfile() {
         <div className="flex items-center gap-2">
           <EmploymentStatusBadge status={nurse.employmentStatus ?? "Active"} />
           {nurse.licenseStatus ? <LicenseStatusBadge status={nurse.licenseStatus as never} /> : null}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!nurse.accountEmail}
+            title={nurse.accountEmail ? `Send email to ${nurse.accountEmail}` : "Nurse does not have a linked email address"}
+            onClick={() => setEmailNoticeOpen(true)}
+          >
+            <Mail className="h-4 w-4 mr-1" />
+            Send Notice
+          </Button>
           <Button variant="outline" size="sm" onClick={() => {
             utils.nurses.get.invalidate();
             navigate(`/nurses/${id}/edit`);
@@ -483,6 +514,53 @@ export default function NurseProfile() {
                 }}
               >
                 Confirm Change
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Direct Email Notice Dialog */}
+      <Dialog open={emailNoticeOpen} onOpenChange={setEmailNoticeOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send Email Notice to Staff</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="mb-1 block text-xs">Recipient</Label>
+              <div className="text-sm font-medium">{nurse.firstName} {nurse.lastName} &lt;{nurse.accountEmail}&gt;</div>
+            </div>
+            <div>
+              <Label className="mb-1 block">Subject *</Label>
+              <Input
+                placeholder="e.g. Action Required: Submit PRC Renewal Proof"
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label className="mb-1 block">Message *</Label>
+              <Textarea
+                placeholder="Type your notice or reminder to the staff nurse..."
+                rows={4}
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setEmailNoticeOpen(false)}>Cancel</Button>
+              <Button
+                disabled={!emailSubject.trim() || !emailMessage.trim() || sendNoticeMutation.isPending}
+                onClick={() => {
+                  sendNoticeMutation.mutate({
+                    nurseId: id,
+                    subject: emailSubject.trim(),
+                    message: emailMessage.trim(),
+                  });
+                }}
+              >
+                {sendNoticeMutation.isPending ? "Sending…" : "Send Email"}
               </Button>
             </div>
           </div>
