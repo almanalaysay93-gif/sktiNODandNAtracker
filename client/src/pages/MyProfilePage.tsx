@@ -8,11 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { NurseAvatar } from "@/components/nursetrack/NurseAvatar";
 import { FileUploadButton } from "@/components/nursetrack/FileUpload";
-import { LICENSE_STATUS_META, nurseIdLabel, type LicenseStatus } from "@shared/nursetrack";
+import { LicenseStatusBadge, TrainingStatusBadge } from "@/components/nursetrack/StatusBadge";
+import { LICENSE_STATUS_META, nurseIdLabel, type LicenseStatus, formatDate } from "@shared/nursetrack";
 import { toast } from "sonner";
-import { LogOut } from "lucide-react";
+import { FileCheck, LogOut, Plus, Upload, CheckCircle2 } from "lucide-react";
 
 function StaffShell({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
@@ -79,21 +83,161 @@ function LinkAccountForm() {
   );
 }
 
+function AddTrainingDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const utils = trpc.useUtils();
+  const { data: catalog } = trpc.staffAccount.listCatalog.useQuery(undefined, { enabled: open });
+  const [trainingId, setTrainingId] = useState("");
+  const [provider, setProvider] = useState("");
+  const [completionDate, setCompletionDate] = useState(new Date().toISOString().slice(0, 10));
+  const [trainingHours, setTrainingHours] = useState("");
+  const [cpdUnits, setCpdUnits] = useState("");
+  const [certNumber, setCertNumber] = useState("");
+  const [remarks, setRemarks] = useState("");
+
+  const addMutation = trpc.staffAccount.addTrainingRecord.useMutation({
+    onSuccess: () => {
+      toast.success("Training completion recorded.");
+      utils.staffAccount.myProfile.invalidate();
+      onOpenChange(false);
+      setTrainingId("");
+      setProvider("");
+      setTrainingHours("");
+      setCpdUnits("");
+      setCertNumber("");
+      setRemarks("");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add Completed Training or Seminar</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <Label className="mb-1 block">Training Topic *</Label>
+            <Select value={trainingId} onValueChange={setTrainingId}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select topic from catalog…" />
+              </SelectTrigger>
+              <SelectContent>
+                {(catalog ?? []).map((item) => (
+                  <SelectItem key={item.id} value={String(item.id)}>
+                    {item.name} ({item.kind})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="mb-1 block">Completion Date *</Label>
+            <Input
+              type="date"
+              value={completionDate}
+              onChange={(e) => setCompletionDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <Label className="mb-1 block">Training Provider</Label>
+            <Input
+              value={provider}
+              onChange={(e) => setProvider(e.target.value)}
+              placeholder="e.g. SPMC / DOH / PRC"
+            />
+          </div>
+          <div>
+            <Label className="mb-1 block">Training Hours</Label>
+            <Input
+              type="number"
+              min={1}
+              value={trainingHours}
+              onChange={(e) => setTrainingHours(e.target.value)}
+              placeholder="e.g. 8"
+            />
+          </div>
+          <div>
+            <Label className="mb-1 block">CPD Units</Label>
+            <Input
+              type="number"
+              min={0}
+              value={cpdUnits}
+              onChange={(e) => setCpdUnits(e.target.value)}
+              placeholder="e.g. 5"
+            />
+          </div>
+          <div className="col-span-2">
+            <Label className="mb-1 block">Certificate Number</Label>
+            <Input
+              value={certNumber}
+              onChange={(e) => setCertNumber(e.target.value)}
+              placeholder="e.g. CERT-2026-001"
+            />
+          </div>
+          <div className="col-span-2">
+            <Label className="mb-1 block">Remarks / Notes</Label>
+            <Textarea
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              placeholder="Optional notes or details…"
+            />
+          </div>
+          <div className="col-span-2 flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button
+              disabled={!trainingId || !completionDate || addMutation.isPending}
+              onClick={() => {
+                addMutation.mutate({
+                  trainingId: Number(trainingId),
+                  completionDate,
+                  provider: provider.trim() || undefined,
+                  trainingHours: trainingHours ? Number(trainingHours) : undefined,
+                  cpdUnits: cpdUnits ? Number(cpdUnits) : undefined,
+                  certificateNumber: certNumber.trim() || undefined,
+                  remarks: remarks.trim() || undefined,
+                });
+              }}
+            >
+              {addMutation.isPending ? "Saving..." : "Save Record"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function MyProfileView() {
   const { data: profile, isLoading } = trpc.staffAccount.myProfile.useQuery();
   const utils = trpc.useUtils();
   const [contactNumber, setContactNumber] = useState<string | null>(null);
+  const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
 
   const saveMutation = trpc.staffAccount.updateMyBasicInfo.useMutation({
     onSuccess: () => {
-      toast.success("Saved.");
+      toast.success("Contact info saved.");
       utils.staffAccount.myProfile.invalidate();
     },
     onError: (err) => toast.error(err.message),
   });
   const photoMutation = trpc.staffAccount.uploadMyPhoto.useMutation({
     onSuccess: () => {
-      toast.success("Photo updated.");
+      toast.success("Profile photo updated.");
+      utils.staffAccount.myProfile.invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const credDocMutation = trpc.staffAccount.uploadCredentialDocument.useMutation({
+    onSuccess: () => {
+      toast.success("License document uploaded.");
+      utils.staffAccount.myProfile.invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+  const certUploadMutation = trpc.staffAccount.uploadTrainingCertificate.useMutation({
+    onSuccess: () => {
+      toast.success("Training certificate uploaded.");
       utils.staffAccount.myProfile.invalidate();
     },
     onError: (err) => toast.error(err.message),
@@ -109,7 +253,6 @@ function MyProfileView() {
     );
   }
 
-  const statusMeta = profile.licenseStatus ? LICENSE_STATUS_META[profile.licenseStatus as LicenseStatus] : null;
   const currentContact = contactNumber ?? profile.contactNumber ?? "";
 
   return (
@@ -140,8 +283,8 @@ function MyProfileView() {
       <Card className="glass-card p-6 space-y-3">
         <h2 className="font-semibold">License</h2>
         <div className="flex items-center gap-2">
-          {statusMeta ? <Badge variant="outline">{statusMeta.label}</Badge> : <Badge variant="outline">No license on file</Badge>}
-          {profile.licenseNumber ? <span className="text-sm text-muted-foreground">{profile.licenseNumber}</span> : null}
+          {profile.licenseStatus ? <LicenseStatusBadge status={profile.licenseStatus as never} /> : <Badge variant="outline">No license on file</Badge>}
+          {profile.licenseNumber ? <span className="text-sm text-muted-foreground font-mono">{profile.licenseNumber}</span> : null}
         </div>
       </Card>
 
@@ -157,38 +300,90 @@ function MyProfileView() {
             disabled={saveMutation.isPending || currentContact === (profile.contactNumber ?? "")}
             onClick={() => saveMutation.mutate({ contactNumber: currentContact || undefined })}
           >
-            Save
+            {saveMutation.isPending ? "Saving..." : "Save"}
           </Button>
         </div>
       </Card>
 
-      {profile.credentials.length > 0 && (
-        <Card className="glass-card p-6 space-y-3">
-          <h2 className="font-semibold">Credentials</h2>
-          <div className="space-y-2">
+      <Card className="glass-card p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Licenses & Credentials</h2>
+        </div>
+        {profile.credentials.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-2">No credentials recorded.</p>
+        ) : (
+          <div className="space-y-3">
             {profile.credentials.map((c) => (
-              <div key={c.id} className="flex items-center justify-between text-sm border-b last:border-0 pb-2 last:pb-0">
-                <span>{c.licenseNumber || "—"}</span>
-                <span className="text-muted-foreground">{c.expiryDate ? String(c.expiryDate).slice(0, 10) : "—"}</span>
+              <div key={c.id} className="p-3 border rounded-lg bg-card/40 flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-1 min-w-48">
+                  <div className="font-medium text-sm">{c.typeName}</div>
+                  <div className="text-xs text-muted-foreground">
+                    Number: <span className="font-mono">{c.licenseNumber || "—"}</span> &middot; Expires: {formatDate(c.expiryDate)}
+                  </div>
+                  {c.documentKey && (
+                    <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Document verified & on file</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <FileUploadButton
+                    kind="document"
+                    label={c.documentKey ? "Replace Document" : "Upload Document"}
+                    disabled={credDocMutation.isPending}
+                    onFile={(f) => credDocMutation.mutate({ credentialId: c.id, ...f })}
+                  />
+                </div>
               </div>
             ))}
           </div>
-        </Card>
-      )}
+        )}
+      </Card>
 
-      {profile.trainings.length > 0 && (
-        <Card className="glass-card p-6 space-y-3">
-          <h2 className="font-semibold">Trainings</h2>
-          <div className="space-y-2">
+      <Card className="glass-card p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Trainings & Seminars</h2>
+          <Button size="sm" variant="outline" onClick={() => setTrainingDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            Add Training
+          </Button>
+        </div>
+        {profile.trainings.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-2">No training records on file yet.</p>
+        ) : (
+          <div className="space-y-3">
             {profile.trainings.map((t) => (
-              <div key={t.id} className="flex items-center justify-between text-sm border-b last:border-0 pb-2 last:pb-0">
-                <span>{t.status}</span>
-                <span className="text-muted-foreground">{t.completionDate ? String(t.completionDate).slice(0, 10) : "—"}</span>
+              <div key={t.id} className="p-3 border rounded-lg bg-card/40 flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-1 min-w-48">
+                  <div className="font-medium text-sm">{t.trainingName}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {t.provider ? `${t.provider} · ` : ""}Completed: {formatDate(t.completionDate)}
+                  </div>
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <TrainingStatusBadge status={t.status} />
+                    {t.certificateKey && (
+                      <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                        <CheckCircle2 className="h-3 w-3" /> Certificate on file
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <FileUploadButton
+                    kind="document"
+                    label={t.certificateKey ? "Replace Certificate" : "Upload Certificate"}
+                    disabled={certUploadMutation.isPending}
+                    onFile={(f) => certUploadMutation.mutate({ recordId: t.id, ...f })}
+                  />
+                </div>
               </div>
             ))}
           </div>
-        </Card>
-      )}
+        )}
+      </Card>
+
+      <AddTrainingDialog open={trainingDialogOpen} onOpenChange={setTrainingDialogOpen} />
     </div>
   );
 }
