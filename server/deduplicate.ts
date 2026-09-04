@@ -155,7 +155,8 @@ export async function deduplicateDatabase() {
         description: ca.description,
         sortOrder: ca.sortOrder,
         active: true,
-      }).onDuplicateKeyUpdate({
+      }).onConflictDoUpdate({
+        target: areas.code,
         set: {
           name: ca.name,
           description: ca.description,

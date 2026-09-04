@@ -1,14 +1,19 @@
 {
   "version": 2,
-  "buildCommand": "pnpm run build",
+  "buildCommand": "pnpm run build:vercel-api && vite build",
   "outputDirectory": "dist/public",
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 15
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.ts"
+      "destination": "/api/index.js"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/|images/|manus-storage/|assets/).*)",
       "destination": "/index.html"
     }
   ]

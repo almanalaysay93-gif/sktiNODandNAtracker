@@ -126,13 +126,13 @@ export async function seedExcelDatabase(dataFilePath?: string) {
     name: "PRC Registered Nurse License",
     issuingOrganizationDefault: "Professional Regulation Commission (PRC)",
     active: true,
-  }).onDuplicateKeyUpdate({ set: { active: true } });
+  }).onConflictDoUpdate({ target: credentialTypes.name, set: { active: true } });
   
   await db.insert(credentialTypes).values({
     name: "TESDA NC II / PRC Attendant Certification",
     issuingOrganizationDefault: "TESDA / DOH / SPMC",
     active: true,
-  }).onDuplicateKeyUpdate({ set: { active: true } });
+  }).onConflictDoUpdate({ target: credentialTypes.name, set: { active: true } });
 
   const allCredTypes = await db.select().from(credentialTypes);
   const rnCredTypeId = allCredTypes.find((c) => c.name.includes("Nurse"))?.id ?? 1;
@@ -147,7 +147,8 @@ export async function seedExcelDatabase(dataFilePath?: string) {
       description: area.description,
       sortOrder: area.sortOrder,
       active: true,
-    }).onDuplicateKeyUpdate({
+    }).onConflictDoUpdate({
+      target: areas.code,
       set: {
         name: area.name,
         description: area.description,
@@ -174,7 +175,8 @@ export async function seedExcelDatabase(dataFilePath?: string) {
       renewalRequired: item.renewalRequired,
       defaultValidityMonths: item.defaultValidityMonths ?? null,
       active: true,
-    }).onDuplicateKeyUpdate({
+    }).onConflictDoUpdate({
+      target: trainingCatalog.name,
       set: {
         category: item.category,
         kind: item.kind,
@@ -225,8 +227,8 @@ export async function seedExcelDatabase(dataFilePath?: string) {
         staffType: person.staffType,
         employmentStatus: person.employmentStatus,
         currentAreaId: area.id,
-      });
-      nurseId = Number(res[0].insertId);
+      }).returning({ id: nurses.id });
+      nurseId = Number(res[0].id);
     }
 
     const normKey = `${person.nameInfo.lastName.toUpperCase()}, ${person.nameInfo.firstName.toUpperCase()}`;
@@ -310,8 +312,8 @@ export async function seedExcelDatabase(dataFilePath?: string) {
         endDate,
         targetStaffType: "All",
         remarks: `Conducted by ${ev.provider}`,
-      });
-      eventId = Number(eventRes[0].insertId);
+      }).returning({ id: trainingEvents.id });
+      eventId = Number(eventRes[0].id);
     }
 
     for (const att of ev.attendees) {

@@ -147,7 +147,7 @@ importers:
         version: 17.2.3
       drizzle-orm:
         specifier: ^0.44.5
-        version: 0.44.6(@types/better-sqlite3@9.6.0)(@types/sql.js@1.4.11)(better-sqlite3@13.0.3)(mysql2@3.15.1)(sql.js@1.14.2)
+        version: 0.44.6(@types/better-sqlite3@9.6.0)(@types/sql.js@1.4.11)(better-sqlite3@13.0.3)(mysql2@3.15.1)(postgres@3.4.9)(sql.js@1.14.2)
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.2.1)
@@ -184,6 +184,9 @@ importers:
       pdf-parse:
         specifier: ^2.4.5
         version: 2.4.5
+      postgres:
+        specifier: ^3.4.9
+        version: 3.4.9
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
@@ -4156,6 +4159,10 @@ packages:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
 
+  postgres@3.4.9:
+    resolution: {integrity: sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw==}
+    engines: {node: '>=12'}
+
   prettier@3.6.2:
     resolution: {integrity: sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==}
     engines: {node: '>=14'}
@@ -8003,12 +8010,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.6(@types/better-sqlite3@9.6.0)(@types/sql.js@1.4.11)(better-sqlite3@13.0.3)(mysql2@3.15.1)(sql.js@1.14.2):
+  drizzle-orm@0.44.6(@types/better-sqlite3@9.6.0)(@types/sql.js@1.4.11)(better-sqlite3@13.0.3)(mysql2@3.15.1)(postgres@3.4.9)(sql.js@1.14.2):
     optionalDependencies:
       '@types/better-sqlite3': 9.6.0
       '@types/sql.js': 1.4.11
       better-sqlite3: 13.0.3
       mysql2: 3.15.1
+      postgres: 3.4.9
       sql.js: 1.14.2
 
   duck@0.1.12:
@@ -9349,6 +9357,8 @@ snapshots:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  postgres@3.4.9: {}
 
   prettier@3.6.2: {}
 

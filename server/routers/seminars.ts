@@ -107,8 +107,8 @@ export const seminarsRouter = router({
         endTime: input.endTime ?? null,
         targetStaffType: input.targetStaffType ?? "All",
         remarks: input.remarks ?? null,
-      });
-      const id = Number(result[0].insertId);
+      }).returning({ id: trainingEvents.id });
+      const id = Number(result[0].id);
       await logActivity({
         supervisorId: ctx.user.id,
         actionType: "seminar.created",
@@ -254,8 +254,8 @@ export const seminarsRouter = router({
           certificateNumber: input.certificateNumber ?? null,
           expiryDate: input.expiryDate ?? null,
           remarks: input.remarks ?? null,
-        });
-        const id = Number(result[0].insertId);
+        }).returning({ id: nurseTrainings.id });
+        const id = Number(result[0].id);
         await tx.insert(activityLog).values({
           supervisorId: ctx.user.id,
           nurseId: input.nurseId,
