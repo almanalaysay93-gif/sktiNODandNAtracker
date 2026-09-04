@@ -1,6 +1,7 @@
 import { dateKey, INACTIVE_EMPLOYMENT_STATUSES } from "../shared/nursetrack";
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, like, lte, not, or, sql, type SQL } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import {
   activityLog,
   appSettings,
@@ -40,9 +41,18 @@ export const INACTIVE_STATUS_SQL_LIST = INACTIVE_EMPLOYMENT_STATUSES.map((s) => 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      // max: 1 keeps serverless invocations from exhausting the hosted connection cap.
+      const client = postgres(process.env.DATABASE_URL, {
+        max: 1,
+        idle_timeout: 20,
+        connect_timeout: 15,
+        connection: {
+          search_path: "nursetrack, public",
+        },
+      });
+      _db = drizzle(client);
     } catch (error) {
-      console.warn("[Database] Failed to connect MySQL:", error);
+      console.warn("[Database] Failed to connect PostgreSQL:", error);
       _db = null;
     }
   }
@@ -86,7 +96,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     }
     if (!values.lastSignedIn) values.lastSignedIn = new Date();
     if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
-    await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+    await db.insert(users).values(values).onConflictDoUpdate({ target: users.openId, set: updateSet });
     return;
   }
   const sqlite = getSqliteDb();
@@ -132,8 +142,8 @@ export async function listAreas(includeInactive = true) {
 export async function createArea(data: InsertArea) {
   const db = await getDb();
   if (db) {
-    const result = await db.insert(areas).values(data);
-    return result[0].insertId;
+    const [row] = await db.insert(areas).values(data).returning({ id: areas.id });
+    return row.id;
   }
   const sqlite = getSqliteDb();
   const res = sqlite.prepare("INSERT INTO areas (code, name, description, sortOrder, active) VALUES (?, ?, ?, ?, ?)").run(
@@ -177,8 +187,8 @@ export async function getAreaById(id: number) {
 export async function createNurse(data: InsertNurse) {
   const db = await getDb();
   if (db) {
-    const result = await db.insert(nurses).values(data);
-    return result[0].insertId;
+    const [row] = await db.insert(nurses).values(data).returning({ id: nurses.id });
+    return row.id;
   }
   const sqlite = getSqliteDb();
   const res = sqlite.prepare(`
@@ -461,8 +471,8 @@ export async function listAssignmentsForNurse(nurseId: number) {
 export async function createAssignment(data: { nurseId: number; areaId: number; startDate: Date | string; endDate?: Date | string | null; assignmentType?: string; remarks?: string; isCurrent?: boolean }) {
   const db = await getDb();
   if (db) {
-    const result = await db.insert(areaAssignments).values(data as any);
-    return result[0].insertId;
+    const [row] = await db.insert(areaAssignments).values(data as any).returning({ id: areaAssignments.id });
+    return row.id;
   }
   const sqlite = getSqliteDb();
   const start = data.startDate instanceof Date ? data.startDate.toISOString().slice(0, 10) : String(data.startDate);
@@ -605,8 +615,8 @@ export async function createCredential(data: {
 }) {
   const db = await getDb();
   if (db) {
-    const result = await db.insert(nurseCredentials).values(data as any);
-    return result[0].insertId;
+    const [row] = await db.insert(nurseCredentials).values(data as any).returning({ id: nurseCredentials.id });
+    return row.id;
   }
   const sqlite = getSqliteDb();
   const issue = data.issueDate ? (data.issueDate instanceof Date ? data.issueDate.toISOString().slice(0, 10) : String(data.issueDate)) : null;
@@ -664,8 +674,11 @@ export async function listCredentialTypes(includeInactive = true) {
 export async function createCredentialType(name: string, issuingOrganizationDefault?: string) {
   const db = await getDb();
   if (db) {
-    const result = await db.insert(credentialTypes).values({ name, issuingOrganizationDefault });
-    return result[0].insertId;
+    const [row] = await db
+      .insert(credentialTypes)
+      .values({ name, issuingOrganizationDefault })
+      .returning({ id: credentialTypes.id });
+    return row.id;
   }
   const sqlite = getSqliteDb();
   const res = sqlite.prepare("INSERT INTO credentialTypes (name, issuingOrganizationDefault, active) VALUES (?, ?, 1)").run(name, issuingOrganizationDefault ?? null);
@@ -707,8 +720,8 @@ export async function createReminder(data: { credentialId: number; thresholdDays
       .where(and(eq(licenseReminders.credentialId, data.credentialId), eq(licenseReminders.thresholdDays, data.thresholdDays), eq(licenseReminders.renewalCycleKey, data.renewalCycleKey)))
       .limit(1);
     if (existing.length > 0) return existing[0].id;
-    const result = await db.insert(licenseReminders).values(data as any);
-    return result[0].insertId;
+    const [row] = await db.insert(licenseReminders).values(data as any).returning({ id: licenseReminders.id });
+    return row.id;
   }
   const sqlite = getSqliteDb();
   const existing = sqlite.prepare("SELECT id FROM licenseReminders WHERE credentialId = ? AND thresholdDays = ? AND renewalCycleKey = ?").get(data.credentialId, data.thresholdDays, data.renewalCycleKey) as any;
@@ -754,8 +767,8 @@ export async function listTrainingCatalog(includeInactive = false) {
 export async function createTrainingType(data: { name: string; category?: string; kind?: "Training" | "Seminar" | "LDI"; renewalRequired?: boolean; defaultValidityMonths?: number | null }) {
   const db = await getDb();
   if (db) {
-    const result = await db.insert(trainingCatalog).values(data as any);
-    return result[0].insertId;
+    const [row] = await db.insert(trainingCatalog).values(data as any).returning({ id: trainingCatalog.id });
+    return row.id;
   }
   const sqlite = getSqliteDb();
   const res = sqlite.prepare("INSERT INTO trainingCatalog (name, category, kind, renewalRequired, defaultValidityMonths, active) VALUES (?, ?, ?, ?, ?, 1)").run(
@@ -807,8 +820,8 @@ export async function createNurseTraining(data: {
 }) {
   const db = await getDb();
   if (db) {
-    const result = await db.insert(nurseTrainings).values(data as any);
-    return result[0].insertId;
+    const [row] = await db.insert(nurseTrainings).values(data as any).returning({ id: nurseTrainings.id });
+    return row.id;
   }
   const sqlite = getSqliteDb();
   const sched = data.scheduledDate ? (data.scheduledDate instanceof Date ? data.scheduledDate.toISOString().slice(0, 10) : String(data.scheduledDate)) : null;
@@ -941,7 +954,10 @@ export async function setAreaTrainingRequirement(areaId: number, trainingId: num
     await db
       .insert(areaTrainingRequirements)
       .values({ areaId, trainingId, required })
-      .onDuplicateKeyUpdate({ set: { required } });
+      .onConflictDoUpdate({
+        target: [areaTrainingRequirements.areaId, areaTrainingRequirements.trainingId],
+        set: { required },
+      });
     return;
   }
   const sqlite = getSqliteDb();
@@ -978,8 +994,8 @@ export async function createCustomEvent(data: {
 }) {
   const db = await getDb();
   if (db) {
-    const result = await db.insert(customCalendarEvents).values(data as any);
-    return result[0].insertId;
+    const [row] = await db.insert(customCalendarEvents).values(data as any).returning({ id: customCalendarEvents.id });
+    return row.id;
   }
   const sqlite = getSqliteDb();
   const dateStr = data.eventDate instanceof Date ? data.eventDate.toISOString().slice(0, 10) : String(data.eventDate);
@@ -1140,7 +1156,7 @@ export async function getSetting(key: string): Promise<string | null> {
 export async function setSetting(key: string, value: string | null) {
   const db = await getDb();
   if (db) {
-    await db.insert(appSettings).values({ key, value }).onDuplicateKeyUpdate({ set: { value } });
+    await db.insert(appSettings).values({ key, value }).onConflictDoUpdate({ target: appSettings.key, set: { value } });
     return;
   }
   const sqlite = getSqliteDb();
@@ -1170,8 +1186,8 @@ export async function countActiveNurses(today?: Date) {
 export async function recordEmailLog(data: InsertEmailLog): Promise<number> {
   const db = await getDb();
   if (db) {
-    const result = await db.insert(emailLogs).values(data);
-    return Number((result as any)[0]?.insertId ?? 0);
+    const [row] = await db.insert(emailLogs).values(data).returning({ id: emailLogs.id });
+    return Number(row?.id ?? 0);
   }
   const sqlite = getSqliteDb();
   const info = sqlite
