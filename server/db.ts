@@ -43,7 +43,7 @@ export async function getDb() {
     try {
       // max: 1 keeps serverless invocations from exhausting the hosted connection cap.
       const client = postgres(process.env.DATABASE_URL, {
-        max: 1,
+        max: 10,
         idle_timeout: 20,
         connect_timeout: 15,
         connection: {
@@ -409,6 +409,37 @@ export async function getNurseLicenseInfo(nurseId: number): Promise<{ status: st
 
 export async function getNurseLicenseStatus(nurseId: number): Promise<string | null> {
   return (await getNurseLicenseInfo(nurseId)).status;
+}
+
+export async function getAllNurseLicenseInfos(): Promise<Map<number, { status: string | null; licenseNumber: string | null }>> {
+  const map = new Map<number, { status: string | null; licenseNumber: string | null }>();
+  const db = await getDb();
+  if (db) {
+    const creds = await db
+      .select()
+      .from(nurseCredentials)
+      .orderBy(desc(nurseCredentials.expiryDate));
+    for (const cred of creds) {
+      if (!map.has(cred.nurseId)) {
+        map.set(cred.nurseId, {
+          status: deriveLicenseStatusFromCred(cred),
+          licenseNumber: cred.licenseNumber ?? null,
+        });
+      }
+    }
+    return map;
+  }
+  const sqlite = getSqliteDb();
+  const creds = sqlite.prepare("SELECT * FROM nurseCredentials ORDER BY date(expiryDate) DESC").all() as any[];
+  for (const cred of creds) {
+    if (!map.has(cred.nurseId)) {
+      map.set(cred.nurseId, {
+        status: deriveLicenseStatusFromCred(cred),
+        licenseNumber: cred.licenseNumber ?? null,
+      });
+    }
+  }
+  return map;
 }
 
 function parseLocalDate(value: string | Date): Date {

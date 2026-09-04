@@ -12,35 +12,42 @@ const nullableDateInput = z.union([z.date(), z.string().datetime(), z.null()]).t
 export const nursesRouter = router({
   // Single round-trip initial load: nurses with areas in one call.
   initial: adminProcedure.query(async () => {
-    const [rows, areaRows] = await Promise.all([db.listNurses(), db.listAreas(false)]);
+    const [rows, areaRows, licenseMap] = await Promise.all([
+      db.listNurses(),
+      db.listAreas(false),
+      db.getAllNurseLicenseInfos(),
+    ]);
     const areaById = new Map(areaRows.map((a) => [a.id, a]));
-    const nurses = await Promise.all(rows.map(async (n) => {
-      const { status, licenseNumber } = await db.getNurseLicenseInfo(n.id);
+    const nurses = rows.map((n) => {
+      const info = licenseMap.get(n.id) ?? { status: null, licenseNumber: null };
       return {
         ...n,
         currentArea: n.currentAreaId ? areaById.get(n.currentAreaId) ?? null : null,
-        licenseStatus: status,
-        licenseNumber,
+        licenseStatus: info.status,
+        licenseNumber: info.licenseNumber,
       };
-    }));
+    });
     return { nurses, areas: areaRows };
   }),
 
   list: adminProcedure
     .input(z.object({ archived: z.boolean().optional(), areaId: z.number().optional() }).optional())
     .query(async ({ input }) => {
-      const rows = await db.listNurses({ archived: input?.archived, areaId: input?.areaId });
-      const areaRows = await db.listAreas(false);
+      const [rows, areaRows, licenseMap] = await Promise.all([
+        db.listNurses({ archived: input?.archived, areaId: input?.areaId }),
+        db.listAreas(false),
+        db.getAllNurseLicenseInfos(),
+      ]);
       const areaById = new Map(areaRows.map((a) => [a.id, a]));
-      return Promise.all(rows.map(async (n) => {
-        const { status, licenseNumber } = await db.getNurseLicenseInfo(n.id);
+      return rows.map((n) => {
+        const info = licenseMap.get(n.id) ?? { status: null, licenseNumber: null };
         return {
           ...n,
           currentArea: n.currentAreaId ? areaById.get(n.currentAreaId) ?? null : null,
-          licenseStatus: status,
-          licenseNumber,
+          licenseStatus: info.status,
+          licenseNumber: info.licenseNumber,
         };
-      }));
+      });
     }),
 
   search: adminProcedure
