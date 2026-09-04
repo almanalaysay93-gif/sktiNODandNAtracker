@@ -2,6 +2,7 @@
   "version": 2,
   "buildCommand": "pnpm run build:vercel-api && vite build",
   "outputDirectory": "dist/public",
+  "regions": ["syd1"],
   "functions": {
     "api/index.js": {
       "maxDuration": 15
