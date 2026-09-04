@@ -8,6 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,7 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { formatDate, nurseFullName, TRAINING_KINDS } from "../../../shared/nursetrack";
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -182,6 +192,27 @@ function RecordsTab({
     },
     onError: (e) => toast.error(e.message),
   });
+  const [recordToDelete, setRecordToDelete] = useState<(typeof records)[number] | null>(null);
+  const remove = trpc.trainings.deleteRecord.useMutation({
+    onSuccess: async () => {
+      toast.success("Training record deleted.");
+      await Promise.all([
+        utils.trainings.initial.invalidate(),
+        utils.trainings.listRecords.invalidate(),
+        utils.trainings.listForNurse.invalidate(),
+        utils.trainings.getCompliance.invalidate(),
+        utils.seminars.list.invalidate(),
+        utils.seminars.detail.invalidate(),
+        utils.seminars.matrix.invalidate(),
+        utils.seminars.monthlySummary.invalidate(),
+        utils.seminars.quarterlyLedger.invalidate(),
+        utils.calendar.listEvents.invalidate(),
+        utils.dashboard.initial.invalidate(),
+      ]);
+      setRecordToDelete(null);
+    },
+    onError: (e) => toast.error(e.message),
+  });
 
   const [subset, setSubset] = useState<"upcoming" | "completed" | "expiring" | "all">("all");
 
@@ -196,7 +227,8 @@ function RecordsTab({
   const target = records.find((r) => r.id === certUploadId);
 
   return (
-    <Card className="glass-card">
+    <>
+      <Card className="glass-card">
       <CardContent className="pt-5">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex flex-wrap gap-1">
@@ -280,6 +312,16 @@ function RecordsTab({
                           disabled={upload.isPending}
                           onFile={(f) => upload.mutate({ recordId: r.id, ...f })}
                         />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          aria-label={`Delete ${r.trainingName ?? "training"} record`}
+                          title="Delete training record"
+                          onClick={() => setRecordToDelete(r)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -289,7 +331,33 @@ function RecordsTab({
           </div>
         )}
       </CardContent>
-    </Card>
+      </Card>
+      <AlertDialog open={Boolean(recordToDelete)} onOpenChange={(open) => !open && setRecordToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Delete Training Record Permanently?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Delete <strong>{recordToDelete?.trainingName ?? "this training"}</strong> for {recordToDelete?.nurseName ?? `staff #${recordToDelete?.nurseId}`}?
+              </p>
+              <p className="text-xs text-muted-foreground">
+                This removes this training history record. This action cannot be undone.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={remove.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={remove.isPending}
+              onClick={() => recordToDelete && remove.mutate({ id: recordToDelete.id })}
+            >
+              {remove.isPending ? "Deleting..." : "Permanently Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

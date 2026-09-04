@@ -1,6 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { dateKey, formatDate, PARTICIPATION_ROLES, TRAINING_STATUSES } from "../../../shared/nursetrack";
-import { ArrowLeft, Download, Plus } from "lucide-react";
+import { ArrowLeft, Download, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Link, useLocation, useRoute } from "wouter";
@@ -23,11 +33,34 @@ function csvCell(value: unknown) {
 export default function SeminarDetail() {
   const [, params] = useRoute("/seminars/:id");
   const [, navigate] = useLocation();
+  const utils = trpc.useUtils();
   const eventId = Number(params?.id);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const { data, isLoading, error } = trpc.seminars.detail.useQuery({ eventId }, { enabled: Number.isFinite(eventId) });
+  const remove = trpc.seminars.deleteEvent.useMutation({
+    onSuccess: async ({ attendanceDeleted }) => {
+      toast.success(`Seminar deleted. ${attendanceDeleted} attendance record(s) removed.`);
+      await Promise.all([
+        utils.seminars.list.invalidate(),
+        utils.seminars.detail.invalidate(),
+        utils.seminars.matrix.invalidate(),
+        utils.seminars.monthlySummary.invalidate(),
+        utils.seminars.quarterlyLedger.invalidate(),
+        utils.trainings.initial.invalidate(),
+        utils.trainings.listRecords.invalidate(),
+        utils.trainings.listForNurse.invalidate(),
+        utils.trainings.getCompliance.invalidate(),
+        utils.calendar.listEvents.invalidate(),
+        utils.dashboard.initial.invalidate(),
+      ]);
+      setDeleteConfirmOpen(false);
+      navigate("/seminars");
+    },
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
   const attendees = useMemo(() => (data?.attendees ?? []).filter((row) => {
     const matchesSearch = row.staffName.toLowerCase().includes(search.toLowerCase()) || row.areaName.toLowerCase().includes(search.toLowerCase());
     return matchesSearch && (status === "all" || row.status === status);
@@ -86,8 +119,20 @@ export default function SeminarDetail() {
       </Button>
       <Card className="glass-card">
         <CardHeader>
-          <div className="text-xs font-medium uppercase text-primary">{data.training.kind}</div>
-          <CardTitle>{data.training.name}</CardTitle>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-xs font-medium uppercase text-primary">{data.training.kind}</div>
+              <CardTitle>{data.training.name}</CardTitle>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-destructive/50 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => setDeleteConfirmOpen(true)}
+            >
+              <Trash2 className="mr-1 h-4 w-4" />Delete Seminar
+            </Button>
+          </div>
           <div className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2">
             <span>Date: {formatDate(data.event.startDate)}{String(data.event.endDate) !== String(data.event.startDate) ? ` to ${formatDate(data.event.endDate)}` : ""}</span>
             <span>Time: {data.event.startTime || "Not set"}{data.event.endTime ? ` to ${data.event.endTime}` : ""}</span>
@@ -115,6 +160,31 @@ export default function SeminarDetail() {
         </TabsContent>
         <TabsContent value="missing"><Card className="glass-card"><CardContent className="space-y-3 pt-5"><Button variant="outline" onClick={() => exportRows(true)} disabled={!data.missing.length}><Download className="mr-1 h-4 w-4" />CSV</Button><div className="overflow-auto rounded-md border"><table className="min-w-full text-sm"><thead><tr className="bg-muted/50 text-left"><th className="px-3 py-2">Staff</th><th className="px-3 py-2">Staff Type</th><th className="px-3 py-2">Area</th></tr></thead><tbody>{data.missing.map((row) => <tr key={row.id} className="border-t"><td className="px-3 py-2"><Link href={`/nurses/${row.id}`} className="font-medium text-primary hover:underline">{row.staffName}</Link></td><td className="px-3 py-2">{row.staffType}</td><td className="px-3 py-2">{row.areaName}</td></tr>)}</tbody></table></div></CardContent></Card></TabsContent>
       </Tabs>
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Delete Seminar Permanently?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Delete <strong>{data.training.name}</strong> on {formatDate(data.event.startDate)}?
+              </p>
+              <p className="text-xs text-muted-foreground">
+                This removes the seminar and {data.attendees.length} linked attendance record(s). This action cannot be undone.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={remove.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={remove.isPending}
+              onClick={() => remove.mutate({ eventId })}
+            >
+              {remove.isPending ? "Deleting..." : "Permanently Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AttendanceDialog open={dialogOpen} onOpenChange={setDialogOpen} eventId={eventId} defaultDate={dateKey(data.event.startDate)} />
     </div>
   );

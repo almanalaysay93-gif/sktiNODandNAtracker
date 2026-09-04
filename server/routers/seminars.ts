@@ -17,7 +17,7 @@ import {
   TARGET_STAFF_TYPES,
 } from "../../shared/nursetrack";
 import { adminProcedure, router } from "../_core/trpc";
-import { getDb, logActivity } from "../db";
+import { deleteTrainingEvent, getDb, logActivity } from "../db";
 import {
   getLocalSeminarsList,
   getLocalSeminarDetail,
@@ -117,6 +117,21 @@ export const seminarsRouter = router({
         summary: `${training.kind} scheduled: ${training.name} (${dateKey(input.startDate)})`,
       });
       return { id };
+    }),
+
+  deleteEvent: adminProcedure
+    .input(z.object({ eventId: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const deleted = await deleteTrainingEvent(input.eventId);
+      if (!deleted) throw new TRPCError({ code: "NOT_FOUND", message: "Seminar occurrence not found." });
+      await logActivity({
+        supervisorId: ctx.user.id,
+        actionType: "seminar.deleted",
+        entityType: "trainingEvent",
+        entityId: input.eventId,
+        summary: `${deleted.training.kind} permanently deleted: ${deleted.training.name} (${dateKey(deleted.event.startDate)}), including ${deleted.attendanceDeleted} attendance record(s)`,
+      });
+      return { success: true, attendanceDeleted: deleted.attendanceDeleted } as const;
     }),
 
   detail: adminProcedure

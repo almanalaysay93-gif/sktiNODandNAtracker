@@ -21,6 +21,7 @@ import {
   nurseTrainings,
   nurses,
   trainingCatalog,
+  trainingEvents,
   users,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
@@ -854,6 +855,70 @@ export async function updateNurseTraining(id: number, data: Partial<typeof nurse
     vals.push(id);
     sqlite.prepare(`UPDATE nurseTrainings SET ${sets.join(", ")} WHERE id = ?`).run(...vals);
   }
+}
+
+export async function deleteNurseTraining(id: number) {
+  const db = await getDb();
+  if (db) {
+    return db.transaction(async (tx) => {
+      const [record] = await tx.select().from(nurseTrainings).where(eq(nurseTrainings.id, id)).limit(1);
+      if (!record) return null;
+      await tx.delete(nurseTrainings).where(eq(nurseTrainings.id, id));
+      return record;
+    });
+  }
+  const sqlite = getSqliteDb();
+  return sqlite.transaction(() => {
+    const record = sqlite.prepare("SELECT * FROM nurseTrainings WHERE id = ?").get(id) as typeof nurseTrainings.$inferSelect | undefined;
+    if (!record) return null;
+    sqlite.prepare("DELETE FROM nurseTrainings WHERE id = ?").run(id);
+    return record;
+  })();
+}
+
+export async function deleteTrainingEvent(id: number) {
+  const db = await getDb();
+  if (db) {
+    return db.transaction(async (tx) => {
+      const [selected] = await tx
+        .select({ event: trainingEvents, training: trainingCatalog })
+        .from(trainingEvents)
+        .innerJoin(trainingCatalog, eq(trainingCatalog.id, trainingEvents.trainingId))
+        .where(eq(trainingEvents.id, id))
+        .limit(1);
+      if (!selected) return null;
+      const attendance = await tx.select({ id: nurseTrainings.id }).from(nurseTrainings).where(eq(nurseTrainings.eventId, id));
+      await tx.delete(nurseTrainings).where(eq(nurseTrainings.eventId, id));
+      await tx.delete(trainingEvents).where(eq(trainingEvents.id, id));
+      return { ...selected, attendanceDeleted: attendance.length };
+    });
+  }
+  const sqlite = getSqliteDb();
+  return sqlite.transaction(() => {
+    const selected = sqlite.prepare(`
+      SELECT e.*, c.id AS catalogId, c.name AS trainingName, c.kind AS trainingKind
+      FROM trainingEvents e
+      INNER JOIN trainingCatalog c ON c.id = e.trainingId
+      WHERE e.id = ?
+    `).get(id) as ({
+      id: number;
+      trainingId: number;
+      startDate: string;
+      catalogId: number;
+      trainingName: string;
+      trainingKind: "Training" | "Seminar" | "LDI";
+    } & Record<string, unknown>) | undefined;
+    if (!selected) return null;
+    const attendanceDeleted = Number((sqlite.prepare("SELECT COUNT(*) AS count FROM nurseTrainings WHERE eventId = ?").get(id) as { count: number }).count);
+    sqlite.prepare("DELETE FROM nurseTrainings WHERE eventId = ?").run(id);
+    sqlite.prepare("DELETE FROM trainingEvents WHERE id = ?").run(id);
+    const { catalogId, trainingName, trainingKind, ...event } = selected;
+    return {
+      event,
+      training: { id: catalogId, name: trainingName, kind: trainingKind },
+      attendanceDeleted,
+    };
+  })();
 }
 
 export async function getAreaTrainingRequirementIds(areaId: number) {

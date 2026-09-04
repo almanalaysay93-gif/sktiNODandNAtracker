@@ -170,6 +170,22 @@ export const trainingsRouter = router({
       return { success: true } as const;
     }),
 
+  deleteRecord: adminProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const record = await db.deleteNurseTraining(input.id);
+      if (!record) throw new TRPCError({ code: "NOT_FOUND", message: "Training record not found." });
+      await db.logActivity({
+        supervisorId: ctx.user.id,
+        nurseId: record.nurseId,
+        actionType: "training.deleted",
+        entityType: "nurseTraining",
+        entityId: input.id,
+        summary: `Training record #${input.id} permanently deleted`,
+      });
+      return { success: true } as const;
+    }),
+
   uploadCertificate: adminProcedure
     .input(
       z.object({
