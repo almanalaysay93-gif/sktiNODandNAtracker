@@ -1092,11 +1092,19 @@ export async function createNotification(data: { type: string; severity: string;
   const db = await getDb();
   if (db) {
     const dayKey = data.dayKey != null ? new Date(data.dayKey + "T00:00:00") : new Date(todayDate().slice(0, 10) + "T00:00:00");
-    await db.execute(sql`
-      INSERT IGNORE INTO ${notifications}
-      (type, severity, title, message, nurseId, relatedEntityType, relatedEntityId, dayKey)
-      VALUES (${data.type}, ${data.severity}, ${data.title}, ${data.message ?? null}, ${data.nurseId ?? null}, ${data.relatedEntityType ?? null}, ${data.relatedEntityId ?? null}, ${dayKey})
-    `);
+    await db
+      .insert(notifications)
+      .values({
+        type: data.type,
+        severity: data.severity,
+        title: data.title,
+        message: data.message ?? null,
+        nurseId: data.nurseId ?? null,
+        relatedEntityType: data.relatedEntityType ?? null,
+        relatedEntityId: data.relatedEntityId ?? null,
+        dayKey,
+      })
+      .onConflictDoNothing();
     return 1;
   }
   const sqlite = getSqliteDb();
@@ -1111,15 +1119,17 @@ export async function createNotificationsBatch(data: Array<{ type: string; sever
   if (data.length === 0) return;
   const db = await getDb();
   if (db) {
-    const rows = data.map((d) => {
-      const dayKey = d.dayKey != null ? new Date(d.dayKey + "T00:00:00") : new Date(todayDate().slice(0, 10) + "T00:00:00");
-      return sql`(${d.type}, ${d.severity}, ${d.title}, ${d.message ?? null}, ${d.nurseId ?? null}, ${d.relatedEntityType ?? null}, ${d.relatedEntityId ?? null}, ${dayKey})`;
-    });
-    await db.execute(sql`
-      INSERT IGNORE INTO ${notifications}
-      (type, severity, title, message, nurseId, relatedEntityType, relatedEntityId, dayKey)
-      VALUES ${sql.join(rows, sql`, `)}
-    `);
+    const rows = data.map((d) => ({
+      type: d.type,
+      severity: d.severity,
+      title: d.title,
+      message: d.message ?? null,
+      nurseId: d.nurseId ?? null,
+      relatedEntityType: d.relatedEntityType ?? null,
+      relatedEntityId: d.relatedEntityId ?? null,
+      dayKey: d.dayKey != null ? new Date(d.dayKey + "T00:00:00") : new Date(todayDate().slice(0, 10) + "T00:00:00"),
+    }));
+    await db.insert(notifications).values(rows).onConflictDoNothing();
     return;
   }
   const sqlite = getSqliteDb();

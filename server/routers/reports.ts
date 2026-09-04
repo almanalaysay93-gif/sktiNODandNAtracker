@@ -120,8 +120,8 @@ export const reportsRouter = router({
           .from(nurseCredentials)
           .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId))
           .innerJoin(credentialTypes, eq(credentialTypes.id, nurseCredentials.credentialTypeId))
-          .where(sql`DATEDIFF(${nurseCredentials.expiryDate}, CURDATE()) <= 365`)
-          .orderBy(sql`DATEDIFF(${nurseCredentials.expiryDate}, CURDATE()) ASC`)
+          .where(sql`(${nurseCredentials.expiryDate} - CURRENT_DATE) <= 365`)
+          .orderBy(sql`(${nurseCredentials.expiryDate} - CURRENT_DATE) ASC`)
           .limit(300);
         const areaRows = await db.select().from(areas);
         const areaById = new Map(areaRows.map((a) => [a.id, a]));

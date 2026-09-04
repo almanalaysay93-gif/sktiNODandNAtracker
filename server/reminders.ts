@@ -11,7 +11,7 @@
  * - Renewed license (new credential record = new renewalCycleKey) starts a new cycle.
  */
 import { eq, isNull, sql } from "drizzle-orm";
-import { licenseReminders } from "../drizzle/schema";
+import { licenseReminders, nurseCredentials, nurses } from "../drizzle/schema";
 import {
   acknowledgeReminder,
   createNotification,
@@ -49,25 +49,24 @@ interface CredentialRow {
 async function fetchActiveCredentials(): Promise<CredentialRow[]> {
   const db = await getDb();
   if (!db) return [];
-  const nursesTable = await import("../drizzle/schema").then((m) => m.nurses);
   const rows = await db
     .select({
-      id: sql<number>`nurseCredentials.id`,
-      nurseId: sql<number>`nurseCredentials.nurseId`,
-      credentialTypeId: sql<number>`nurseCredentials.credentialTypeId`,
-      expiryDate: sql<Date>`nurseCredentials.expiryDate`,
-      renewalCycleKey: sql<string>`nurseCredentials.renewalCycleKey`,
-      employeeId: sql<string>`nurses.employeeId`,
-      firstName: sql<string>`nurses.firstName`,
-      middleName: sql<string>`nurses.middleName`,
-      lastName: sql<string>`nurses.lastName`,
-      suffix: sql<string>`nurses.suffix`,
-      archivedAt: sql<Date>`nurses.archivedAt`,
-      currentAreaId: sql<number>`nurses.currentAreaId`,
+      id: nurseCredentials.id,
+      nurseId: nurseCredentials.nurseId,
+      credentialTypeId: nurseCredentials.credentialTypeId,
+      expiryDate: nurseCredentials.expiryDate,
+      renewalCycleKey: nurseCredentials.renewalCycleKey,
+      employeeId: nurses.employeeId,
+      firstName: nurses.firstName,
+      middleName: nurses.middleName,
+      lastName: nurses.lastName,
+      suffix: nurses.suffix,
+      archivedAt: nurses.archivedAt,
+      currentAreaId: nurses.currentAreaId,
     })
-    .from(sql`nurseCredentials`)
-    .innerJoin(sql`nurses`, sql`nurses.id = nurseCredentials.nurseId`)
-    .where(isNull(sql`nurses.archivedAt`));
+    .from(nurseCredentials)
+    .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId))
+    .where(isNull(nurses.archivedAt));
   return rows.map((r: Record<string, unknown>) => ({
     id: Number(r.id),
     nurseId: Number(r.nurseId),
@@ -131,14 +130,7 @@ export async function runDailyReminders(today: string, thresholds: readonly numb
       renewalCycleKey: cred.renewalCycleKey,
       triggerDate: new Date(new Date(`${today}T00:00:00`).getTime() + threshold * 86400000),
     }));
-    await db.execute(sql`
-      INSERT IGNORE INTO ${licenseReminders}
-      (credentialId, thresholdDays, renewalCycleKey, triggerDate)
-      VALUES ${sql.join(
-        rows.map((r) => sql`(${r.credentialId}, ${r.thresholdDays}, ${r.renewalCycleKey}, ${r.triggerDate})`),
-        sql`, `,
-      )}
-    `);
+    await db.insert(licenseReminders).values(rows).onConflictDoNothing();
     results.created += duePairs.length;
   }
 

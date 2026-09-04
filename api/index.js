@@ -161,26 +161,6 @@ var init_nursetrack = __esm({
 });
 
 // drizzle/schema.ts
-var schema_exports = {};
-__export(schema_exports, {
-  activityLog: () => activityLog,
-  appSettings: () => appSettings,
-  areaAssignments: () => areaAssignments,
-  areaTrainingRequirements: () => areaTrainingRequirements,
-  areas: () => areas,
-  credentialTypes: () => credentialTypes,
-  customCalendarEvents: () => customCalendarEvents,
-  emailLogs: () => emailLogs,
-  licenseReminders: () => licenseReminders,
-  notifications: () => notifications,
-  nurseCredentials: () => nurseCredentials,
-  nurseTrainings: () => nurseTrainings,
-  nurses: () => nurses,
-  nursetrack: () => nursetrack,
-  trainingCatalog: () => trainingCatalog,
-  trainingEvents: () => trainingEvents,
-  users: () => users
-});
 import {
   boolean,
   customType,
@@ -1988,11 +1968,16 @@ async function createNotification(data) {
   const db = await getDb();
   if (db) {
     const dayKey2 = data.dayKey != null ? /* @__PURE__ */ new Date(data.dayKey + "T00:00:00") : /* @__PURE__ */ new Date(todayDate2().slice(0, 10) + "T00:00:00");
-    await db.execute(sql`
-      INSERT IGNORE INTO ${notifications}
-      (type, severity, title, message, nurseId, relatedEntityType, relatedEntityId, dayKey)
-      VALUES (${data.type}, ${data.severity}, ${data.title}, ${data.message ?? null}, ${data.nurseId ?? null}, ${data.relatedEntityType ?? null}, ${data.relatedEntityId ?? null}, ${dayKey2})
-    `);
+    await db.insert(notifications).values({
+      type: data.type,
+      severity: data.severity,
+      title: data.title,
+      message: data.message ?? null,
+      nurseId: data.nurseId ?? null,
+      relatedEntityType: data.relatedEntityType ?? null,
+      relatedEntityId: data.relatedEntityId ?? null,
+      dayKey: dayKey2
+    }).onConflictDoNothing();
     return 1;
   }
   const sqlite = getSqliteDb();
@@ -2013,15 +1998,17 @@ async function createNotificationsBatch(data) {
   if (data.length === 0) return;
   const db = await getDb();
   if (db) {
-    const rows = data.map((d) => {
-      const dayKey = d.dayKey != null ? /* @__PURE__ */ new Date(d.dayKey + "T00:00:00") : /* @__PURE__ */ new Date(todayDate2().slice(0, 10) + "T00:00:00");
-      return sql`(${d.type}, ${d.severity}, ${d.title}, ${d.message ?? null}, ${d.nurseId ?? null}, ${d.relatedEntityType ?? null}, ${d.relatedEntityId ?? null}, ${dayKey})`;
-    });
-    await db.execute(sql`
-      INSERT IGNORE INTO ${notifications}
-      (type, severity, title, message, nurseId, relatedEntityType, relatedEntityId, dayKey)
-      VALUES ${sql.join(rows, sql`, `)}
-    `);
+    const rows = data.map((d) => ({
+      type: d.type,
+      severity: d.severity,
+      title: d.title,
+      message: d.message ?? null,
+      nurseId: d.nurseId ?? null,
+      relatedEntityType: d.relatedEntityType ?? null,
+      relatedEntityId: d.relatedEntityId ?? null,
+      dayKey: d.dayKey != null ? /* @__PURE__ */ new Date(d.dayKey + "T00:00:00") : /* @__PURE__ */ new Date(todayDate2().slice(0, 10) + "T00:00:00")
+    }));
+    await db.insert(notifications).values(rows).onConflictDoNothing();
     return;
   }
   const sqlite = getSqliteDb();
@@ -4747,16 +4734,16 @@ var dashboardRouter = router({
       eventDate: customCalendarEvents.eventDate,
       nurseId: customCalendarEvents.nurseId,
       areaId: customCalendarEvents.areaId,
-      nurseName: sql2`CONCAT(nurses.firstName, ' ', nurses.lastName)`,
-      areaName: sql2`areas.name`
+      nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+      areaName: areas.name
     }).from(customCalendarEvents).leftJoin(nurses, eq2(nurses.id, customCalendarEvents.nurseId)).leftJoin(areas, eq2(areas.id, customCalendarEvents.areaId)).where(sql2`${customCalendarEvents.eventDate} >= ${today}`).orderBy(asc2(customCalendarEvents.eventDate)).limit(10);
     const upcomingLicenses = await db.select({
       id: nurseCredentials.id,
       nurseId: nurseCredentials.nurseId,
       expiryDate: nurseCredentials.expiryDate,
-      nurseName: sql2`CONCAT(nurses.firstName, ' ', nurses.lastName)`,
-      daysRemaining: sql2`DATEDIFF(${nurseCredentials.expiryDate}, CURDATE())`
-    }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId)).where(and2(isNull2(nurses.archivedAt), sql2`${nurseCredentials.expiryDate} >= CURDATE()`)).orderBy(asc2(nurseCredentials.expiryDate)).limit(10);
+      nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+      daysRemaining: sql2`(${nurseCredentials.expiryDate} - CURRENT_DATE)`
+    }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId)).where(and2(isNull2(nurses.archivedAt), sql2`${nurseCredentials.expiryDate} >= CURRENT_DATE`)).orderBy(asc2(nurseCredentials.expiryDate)).limit(10);
     const upcoming = {
       upcomingCustoms: upcomingCustoms.map((r) => ({
         ...r,
@@ -4990,16 +4977,16 @@ var dashboardRouter = router({
       eventDate: customCalendarEvents.eventDate,
       nurseId: customCalendarEvents.nurseId,
       areaId: customCalendarEvents.areaId,
-      nurseName: sql2`CONCAT(nurses.firstName, ' ', nurses.lastName)`,
-      areaName: sql2`areas.name`
+      nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+      areaName: areas.name
     }).from(customCalendarEvents).leftJoin(nurses, eq2(nurses.id, customCalendarEvents.nurseId)).leftJoin(areas, eq2(areas.id, customCalendarEvents.areaId)).where(sql2`${customCalendarEvents.eventDate} >= ${today}`).orderBy(asc2(customCalendarEvents.eventDate)).limit(10);
     const upcomingLicenses = await db.select({
       id: nurseCredentials.id,
       nurseId: nurseCredentials.nurseId,
       expiryDate: nurseCredentials.expiryDate,
-      nurseName: sql2`CONCAT(nurses.firstName, ' ', nurses.lastName)`,
-      daysRemaining: sql2`DATEDIFF(${nurseCredentials.expiryDate}, CURDATE())`
-    }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId)).where(and2(isNull2(nurses.archivedAt), sql2`${nurseCredentials.expiryDate} >= CURDATE()`)).orderBy(asc2(nurseCredentials.expiryDate)).limit(10);
+      nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+      daysRemaining: sql2`(${nurseCredentials.expiryDate} - CURRENT_DATE)`
+    }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId)).where(and2(isNull2(nurses.archivedAt), sql2`${nurseCredentials.expiryDate} >= CURRENT_DATE`)).orderBy(asc2(nurseCredentials.expiryDate)).limit(10);
     return {
       upcomingCustoms: upcomingCustoms.map((r) => ({
         ...r,
@@ -5269,7 +5256,7 @@ var reportsRouter = router({
         expiryDate: nurseCredentials.expiryDate,
         renewalStatus: nurseCredentials.renewalStatus,
         archivedAt: nurses.archivedAt
-      }).from(nurseCredentials).innerJoin(nurses, eq4(nurses.id, nurseCredentials.nurseId)).innerJoin(credentialTypes, eq4(credentialTypes.id, nurseCredentials.credentialTypeId)).where(sql4`DATEDIFF(${nurseCredentials.expiryDate}, CURDATE()) <= 365`).orderBy(sql4`DATEDIFF(${nurseCredentials.expiryDate}, CURDATE()) ASC`).limit(300);
+      }).from(nurseCredentials).innerJoin(nurses, eq4(nurses.id, nurseCredentials.nurseId)).innerJoin(credentialTypes, eq4(credentialTypes.id, nurseCredentials.credentialTypeId)).where(sql4`(${nurseCredentials.expiryDate} - CURRENT_DATE) <= 365`).orderBy(sql4`(${nurseCredentials.expiryDate} - CURRENT_DATE) ASC`).limit(300);
       const areaRows = await db.select().from(areas);
       const areaById = new Map(areaRows.map((a) => [a.id, a]));
       return rows2.filter((r) => !r.archivedAt).map((r) => ({
@@ -5429,26 +5416,25 @@ init_nursetrack();
 init_schema();
 init_db();
 init_nursetrack();
-import { isNull as isNull5, sql as sql5 } from "drizzle-orm";
+import { eq as eq5, isNull as isNull5, sql as sql5 } from "drizzle-orm";
 var DEFAULT_THRESHOLDS = [365, 180];
 async function fetchActiveCredentials() {
   const db = await getDb();
   if (!db) return [];
-  const nursesTable = await Promise.resolve().then(() => (init_schema(), schema_exports)).then((m) => m.nurses);
   const rows = await db.select({
-    id: sql5`nurseCredentials.id`,
-    nurseId: sql5`nurseCredentials.nurseId`,
-    credentialTypeId: sql5`nurseCredentials.credentialTypeId`,
-    expiryDate: sql5`nurseCredentials.expiryDate`,
-    renewalCycleKey: sql5`nurseCredentials.renewalCycleKey`,
-    employeeId: sql5`nurses.employeeId`,
-    firstName: sql5`nurses.firstName`,
-    middleName: sql5`nurses.middleName`,
-    lastName: sql5`nurses.lastName`,
-    suffix: sql5`nurses.suffix`,
-    archivedAt: sql5`nurses.archivedAt`,
-    currentAreaId: sql5`nurses.currentAreaId`
-  }).from(sql5`nurseCredentials`).innerJoin(sql5`nurses`, sql5`nurses.id = nurseCredentials.nurseId`).where(isNull5(sql5`nurses.archivedAt`));
+    id: nurseCredentials.id,
+    nurseId: nurseCredentials.nurseId,
+    credentialTypeId: nurseCredentials.credentialTypeId,
+    expiryDate: nurseCredentials.expiryDate,
+    renewalCycleKey: nurseCredentials.renewalCycleKey,
+    employeeId: nurses.employeeId,
+    firstName: nurses.firstName,
+    middleName: nurses.middleName,
+    lastName: nurses.lastName,
+    suffix: nurses.suffix,
+    archivedAt: nurses.archivedAt,
+    currentAreaId: nurses.currentAreaId
+  }).from(nurseCredentials).innerJoin(nurses, eq5(nurses.id, nurseCredentials.nurseId)).where(isNull5(nurses.archivedAt));
   return rows.map((r) => ({
     id: Number(r.id),
     nurseId: Number(r.nurseId),
@@ -5502,14 +5488,7 @@ async function runDailyReminders(today, thresholds = DEFAULT_THRESHOLDS) {
       renewalCycleKey: cred.renewalCycleKey,
       triggerDate: new Date((/* @__PURE__ */ new Date(`${today}T00:00:00`)).getTime() + threshold * 864e5)
     }));
-    await db.execute(sql5`
-      INSERT IGNORE INTO ${licenseReminders}
-      (credentialId, thresholdDays, renewalCycleKey, triggerDate)
-      VALUES ${sql5.join(
-      rows.map((r) => sql5`(${r.credentialId}, ${r.thresholdDays}, ${r.renewalCycleKey}, ${r.triggerDate})`),
-      sql5`, `
-    )}
-    `);
+    await db.insert(licenseReminders).values(rows).onConflictDoNothing();
     results.created += duePairs.length;
   }
   if (expiredIds.length > 0) {

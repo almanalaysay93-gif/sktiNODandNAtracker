@@ -254,8 +254,8 @@ export const dashboardRouter = router({
         eventDate: customCalendarEvents.eventDate,
         nurseId: customCalendarEvents.nurseId,
         areaId: customCalendarEvents.areaId,
-        nurseName: sql<string | null>`CONCAT(nurses.firstName, ' ', nurses.lastName)`,
-        areaName: sql<string | null>`areas.name`,
+        nurseName: sql<string | null>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+        areaName: areas.name,
       })
       .from(customCalendarEvents)
       .leftJoin(nurses, eq(nurses.id, customCalendarEvents.nurseId))
@@ -268,12 +268,12 @@ export const dashboardRouter = router({
         id: nurseCredentials.id,
         nurseId: nurseCredentials.nurseId,
         expiryDate: nurseCredentials.expiryDate,
-        nurseName: sql<string>`CONCAT(nurses.firstName, ' ', nurses.lastName)`,
-        daysRemaining: sql<number>`DATEDIFF(${nurseCredentials.expiryDate}, CURDATE())`,
+        nurseName: sql<string>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+        daysRemaining: sql<number>`(${nurseCredentials.expiryDate} - CURRENT_DATE)`,
       })
       .from(nurseCredentials)
       .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId))
-      .where(and(isNull(nurses.archivedAt), sql`${nurseCredentials.expiryDate} >= CURDATE()`))
+      .where(and(isNull(nurses.archivedAt), sql`${nurseCredentials.expiryDate} >= CURRENT_DATE`))
       .orderBy(asc(nurseCredentials.expiryDate))
       .limit(10);
     const upcoming = {
@@ -590,8 +590,8 @@ export const dashboardRouter = router({
         eventDate: customCalendarEvents.eventDate,
         nurseId: customCalendarEvents.nurseId,
         areaId: customCalendarEvents.areaId,
-        nurseName: sql<string | null>`CONCAT(nurses.firstName, ' ', nurses.lastName)`,
-        areaName: sql<string | null>`areas.name`,
+        nurseName: sql<string | null>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+        areaName: areas.name,
       })
       .from(customCalendarEvents)
       .leftJoin(nurses, eq(nurses.id, customCalendarEvents.nurseId))
@@ -605,12 +605,12 @@ export const dashboardRouter = router({
         id: nurseCredentials.id,
         nurseId: nurseCredentials.nurseId,
         expiryDate: nurseCredentials.expiryDate,
-        nurseName: sql<string>`CONCAT(nurses.firstName, ' ', nurses.lastName)`,
-        daysRemaining: sql<number>`DATEDIFF(${nurseCredentials.expiryDate}, CURDATE())`,
+        nurseName: sql<string>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+        daysRemaining: sql<number>`(${nurseCredentials.expiryDate} - CURRENT_DATE)`,
       })
       .from(nurseCredentials)
       .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId))
-      .where(and(isNull(nurses.archivedAt), sql`${nurseCredentials.expiryDate} >= CURDATE()`))
+      .where(and(isNull(nurses.archivedAt), sql`${nurseCredentials.expiryDate} >= CURRENT_DATE`))
       .orderBy(asc(nurseCredentials.expiryDate))
       .limit(10);
 
