@@ -1,7 +1,7 @@
 import { asc, and, desc, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
 import { adminProcedure, router } from "../_core/trpc";
-import { getDb, activeNurseCondition } from "../db";
+import { getDb, getBatchClient, activeNurseCondition, INACTIVE_STATUS_SQL_LIST } from "../db";
 import {
   activityLog,
   areaAssignments,
@@ -13,6 +13,64 @@ import {
 } from "../../drizzle/schema";
 import { daysUntilExpiry, deriveLicenseStatus, todayDate, dateKey } from "../../shared/nursetrack";
 import { getLocalDashboardInitial } from "../sqliteHelpers";
+
+/**
+ * Result sets of the dashboard's batched read, in statement order. Raw rows
+ * carry no types of their own, so the shape each statement selects is declared
+ * here. Timestamps arrive as Date (postgres.js parses them), matching what the
+ * equivalent drizzle queries returned; DATE columns are selected as text, which
+ * every consumer below normalises through dateKey and which avoids the
+ * timezone shift a local-midnight Date would introduce.
+ */
+type DashboardSets = [
+  { count: number }[],
+  { id: number; name: string; sortOrder: number }[],
+  { id: number; firstName: string; lastName: string }[],
+  {
+    id: number;
+    nurseId: number;
+    expiryDate: string | null;
+    renewalStatus: string | null;
+    archivedAt: Date | null;
+    firstName: string;
+    lastName: string;
+    currentAreaId: number | null;
+  }[],
+  {
+    id: number;
+    nurseId: number;
+    status: string | null;
+    scheduledDate: string | null;
+    expiryDate: string | null;
+    archivedAt: Date | null;
+    firstName: string;
+    lastName: string;
+    currentAreaId: number | null;
+  }[],
+  { areaId: number | null; count: number }[],
+  { currentAreaId: number | null; id: number; profilePhotoKey: string | null }[],
+  {
+    id: number;
+    nurseId: number;
+    startDate: string | null;
+    assignmentType: string | null;
+    areaId: number;
+    archivedAt: Date | null;
+    firstName: string;
+    lastName: string;
+  }[],
+  { id: number; nurseId: number | null; [key: string]: unknown }[],
+  {
+    id: number;
+    title: string;
+    eventDate: string | null;
+    nurseId: number | null;
+    areaId: number | null;
+    nurseName: string | null;
+    areaName: string | null;
+  }[],
+  { id: number; nurseId: number; expiryDate: string | null; nurseName: string; daysRemaining: number }[],
+];
 
 export const dashboardRouter = router({
   // Single round-trip initial load: merges the five section queries into one
@@ -26,17 +84,70 @@ export const dashboardRouter = router({
     const today = todayDate();
 
     // ---- shared source data ----
-    // nurseCredentials/nurseTrainings joined with nurses once each, then reused
-    // for summary counts, per-area attention, and action-center items below —
-    // previously each of those three sections re-ran its own copy of these
-    // joins (6 full-table joins per dashboard load instead of 2).
+    // The whole dashboard is read in ONE database round trip.
     //
-    // Every query below is independent of the others, so they are issued as one
-    // parallel fan-out. Awaiting them in sequence cost one network round trip
-    // each against the hosted database, which dominated the dashboard's load
-    // time; the section-building code further down is pure in-memory work over
-    // these results and is unchanged.
-    const activeNurseCond = activeNurseCondition();
+    // Every statement below is independent of the others (the code further down
+    // is pure in-memory work over their results), but issuing them as separate
+    // queries cost one round trip each, and the database is in a different
+    // region from the serverless function, so each was worth a few hundred
+    // milliseconds. Fanning them out concurrently is not the fix either: the
+    // connection string points at a transaction-mode pooler, and a burst of
+    // parallel connections from one invocation queues there rather than running
+    // side by side. Sending them as a single simple-protocol batch collapses the
+    // cost to one round trip regardless of pool behaviour.
+    //
+    // The simple protocol carries no bind parameters, so every statement here
+    // must stay literal — no user input is interpolated, and date filtering uses
+    // CURRENT_DATE rather than a supplied value.
+    const pg = getBatchClient();
+    if (!pg) throw new Error("Database unavailable");
+    const sets = (await pg
+      .unsafe(
+        [
+          `select count(*)::int as count from nursetrack.nurses
+             where "archivedAt" is null and not ("employmentStatus" in (${INACTIVE_STATUS_SQL_LIST}))`,
+          `select * from nursetrack.areas order by "sortOrder"`,
+          `select id, "firstName", "lastName" from nursetrack.nurses where "archivedAt" is null`,
+          `select c.id, c."nurseId", c."expiryDate"::text as "expiryDate", c."renewalStatus",
+                  n."archivedAt", n."firstName", n."lastName", n."currentAreaId"
+             from nursetrack."nurseCredentials" c
+             join nursetrack.nurses n on n.id = c."nurseId"`,
+          `select t.id, t."nurseId", t.status, t."scheduledDate"::text as "scheduledDate", t."expiryDate"::text as "expiryDate",
+                  n."archivedAt", n."firstName", n."lastName", n."currentAreaId"
+             from nursetrack."nurseTrainings" t
+             join nursetrack.nurses n on n.id = t."nurseId"`,
+          `select "currentAreaId" as "areaId", count(*)::int as count from nursetrack.nurses
+             where "archivedAt" is null and not ("employmentStatus" in (${INACTIVE_STATUS_SQL_LIST}))
+             group by "currentAreaId"`,
+          `select "currentAreaId", id, "profilePhotoKey" from nursetrack.nurses
+             where "archivedAt" is null and not ("employmentStatus" in (${INACTIVE_STATUS_SQL_LIST}))
+             limit 300`,
+          `select a.id, a."nurseId", a."startDate"::text as "startDate", a."assignmentType", a."areaId",
+                  n."archivedAt", n."firstName", n."lastName"
+             from nursetrack."areaAssignments" a
+             join nursetrack.nurses n on n.id = a."nurseId"
+             where n."archivedAt" is null and a."endDate" is null`,
+          `select * from nursetrack."activityLog" order by "createdAt" desc limit 20`,
+          `select e.id, e.title, e."eventDate"::text as "eventDate", e."nurseId", e."areaId",
+                  concat(n."firstName", ' ', n."lastName") as "nurseName",
+                  ar.name as "areaName"
+             from nursetrack."customCalendarEvents" e
+             left join nursetrack.nurses n on n.id = e."nurseId"
+             left join nursetrack.areas ar on ar.id = e."areaId"
+             where e."eventDate" >= CURRENT_DATE
+             order by e."eventDate" asc
+             limit 10`,
+          `select c.id, c."nurseId", c."expiryDate"::text as "expiryDate",
+                  concat(n."firstName", ' ', n."lastName") as "nurseName",
+                  (c."expiryDate" - CURRENT_DATE)::int as "daysRemaining"
+             from nursetrack."nurseCredentials" c
+             join nursetrack.nurses n on n.id = c."nurseId"
+             where n."archivedAt" is null and c."expiryDate" >= CURRENT_DATE
+             order by c."expiryDate" asc
+             limit 10`,
+        ].join(";\n"),
+      )
+      .simple()) as unknown as DashboardSets;
     const [
       activeCountRows,
       areaRows,
@@ -49,95 +160,8 @@ export const dashboardRouter = router({
       feedRows,
       upcomingCustoms,
       upcomingLicenses,
-    ] = await Promise.all([
-      db.select({ count: sql<number>`count(*)` }).from(nurses).where(activeNurseCond),
-      db.select().from(areas).orderBy(areas.sortOrder),
-      db
-        .select({ id: nurses.id, firstName: nurses.firstName, lastName: nurses.lastName })
-        .from(nurses)
-        .where(isNull(nurses.archivedAt)),
-      db
-        .select({
-          id: nurseCredentials.id,
-          nurseId: nurseCredentials.nurseId,
-          expiryDate: nurseCredentials.expiryDate,
-          renewalStatus: nurseCredentials.renewalStatus,
-          archivedAt: nurses.archivedAt,
-          firstName: nurses.firstName,
-          lastName: nurses.lastName,
-          currentAreaId: nurses.currentAreaId,
-        })
-        .from(nurseCredentials)
-        .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId)),
-      db
-        .select({
-          id: nurseTrainings.id,
-          nurseId: nurseTrainings.nurseId,
-          status: nurseTrainings.status,
-          scheduledDate: nurseTrainings.scheduledDate,
-          expiryDate: nurseTrainings.expiryDate,
-          archivedAt: nurses.archivedAt,
-          firstName: nurses.firstName,
-          lastName: nurses.lastName,
-          currentAreaId: nurses.currentAreaId,
-        })
-        .from(nurseTrainings)
-        .innerJoin(nurses, eq(nurses.id, nurseTrainings.nurseId)),
-      db
-        .select({ areaId: nurses.currentAreaId, count: sql<number>`count(*)` })
-        .from(nurses)
-        .where(activeNurseCond)
-        .groupBy(nurses.currentAreaId),
-      db
-        .select({ currentAreaId: nurses.currentAreaId, id: nurses.id, profilePhotoKey: nurses.profilePhotoKey })
-        .from(nurses)
-        .where(activeNurseCond)
-        .limit(300),
-      db
-        .select({
-          id: areaAssignments.id,
-          nurseId: areaAssignments.nurseId,
-          startDate: areaAssignments.startDate,
-          assignmentType: areaAssignments.assignmentType,
-          areaId: areaAssignments.areaId,
-          archivedAt: nurses.archivedAt,
-          firstName: nurses.firstName,
-          lastName: nurses.lastName,
-        })
-        .from(areaAssignments)
-        .innerJoin(nurses, eq(nurses.id, areaAssignments.nurseId))
-        .where(and(isNull(nurses.archivedAt), isNull(areaAssignments.endDate))),
-      db.select().from(activityLog).orderBy(desc(activityLog.createdAt)).limit(20),
-      db
-        .select({
-          id: customCalendarEvents.id,
-          title: customCalendarEvents.title,
-          eventDate: customCalendarEvents.eventDate,
-          nurseId: customCalendarEvents.nurseId,
-          areaId: customCalendarEvents.areaId,
-          nurseName: sql<string | null>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
-          areaName: areas.name,
-        })
-        .from(customCalendarEvents)
-        .leftJoin(nurses, eq(nurses.id, customCalendarEvents.nurseId))
-        .leftJoin(areas, eq(areas.id, customCalendarEvents.areaId))
-        .where(sql`${customCalendarEvents.eventDate} >= ${today}`)
-        .orderBy(asc(customCalendarEvents.eventDate))
-        .limit(10),
-      db
-        .select({
-          id: nurseCredentials.id,
-          nurseId: nurseCredentials.nurseId,
-          expiryDate: nurseCredentials.expiryDate,
-          nurseName: sql<string>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
-          daysRemaining: sql<number>`(${nurseCredentials.expiryDate} - CURRENT_DATE)`,
-        })
-        .from(nurseCredentials)
-        .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId))
-        .where(and(isNull(nurses.archivedAt), sql`${nurseCredentials.expiryDate} >= CURRENT_DATE`))
-        .orderBy(asc(nurseCredentials.expiryDate))
-        .limit(10),
-    ]);
+    ] = sets;
+
     const activeNurses = Number(activeCountRows[0]?.count ?? 0);
     const areaById = new Map(areaRows.map((a) => [a.id, a]));
     const nurseById = new Map(nurseRows.map((n) => [n.id, n]));

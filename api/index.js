@@ -901,6 +901,7 @@ __export(db_exports, {
   getAreaById: () => getAreaById,
   getAreaTrainingRequirementIds: () => getAreaTrainingRequirementIds,
   getAssignmentsForArea: () => getAssignmentsForArea,
+  getBatchClient: () => getBatchClient,
   getDb: () => getDb,
   getNurseByEmployeeId: () => getNurseByEmployeeId,
   getNurseById: () => getNurseById,
@@ -951,7 +952,8 @@ async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
       const client = postgres(process.env.DATABASE_URL, {
-        max: 10,
+        max: 3,
+        prepare: false,
         idle_timeout: 20,
         connect_timeout: 15,
         connection: {
@@ -965,6 +967,20 @@ async function getDb() {
     }
   }
   return _db;
+}
+function getBatchClient() {
+  if (!_batchPg && process.env.DATABASE_URL) {
+    _batchPg = postgres(process.env.DATABASE_URL, {
+      max: 1,
+      prepare: false,
+      idle_timeout: 20,
+      connect_timeout: 15,
+      connection: {
+        search_path: "nursetrack, public"
+      }
+    });
+  }
+  return _batchPg;
 }
 function shouldBeAdmin(user, currentCount = 0) {
   if (user.role === "admin") return true;
@@ -2182,7 +2198,7 @@ async function listRecentEmailLogs(limit = 50) {
   const sqlite = getSqliteDb();
   return sqlite.prepare(`SELECT * FROM emailLogs ORDER BY sentAt DESC LIMIT ?`).all(limit);
 }
-var _db, INACTIVE_STATUS_SQL_LIST, normalizeForMatch;
+var _db, _batchPg, INACTIVE_STATUS_SQL_LIST, normalizeForMatch;
 var init_db = __esm({
   "server/db.ts"() {
     "use strict";
@@ -2191,6 +2207,7 @@ var init_db = __esm({
     init_env();
     init_localDb();
     _db = null;
+    _batchPg = null;
     INACTIVE_STATUS_SQL_LIST = INACTIVE_EMPLOYMENT_STATUSES.map((s) => `'${s}'`).join(", ");
     normalizeForMatch = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
   }
@@ -4570,7 +4587,53 @@ var dashboardRouter = router({
       return getLocalDashboardInitial();
     }
     const today = todayDate();
-    const activeNurseCond = activeNurseCondition();
+    const pg = getBatchClient();
+    if (!pg) throw new Error("Database unavailable");
+    const sets = await pg.unsafe(
+      [
+        `select count(*)::int as count from nursetrack.nurses
+             where "archivedAt" is null and not ("employmentStatus" in (${INACTIVE_STATUS_SQL_LIST}))`,
+        `select * from nursetrack.areas order by "sortOrder"`,
+        `select id, "firstName", "lastName" from nursetrack.nurses where "archivedAt" is null`,
+        `select c.id, c."nurseId", c."expiryDate"::text as "expiryDate", c."renewalStatus",
+                  n."archivedAt", n."firstName", n."lastName", n."currentAreaId"
+             from nursetrack."nurseCredentials" c
+             join nursetrack.nurses n on n.id = c."nurseId"`,
+        `select t.id, t."nurseId", t.status, t."scheduledDate"::text as "scheduledDate", t."expiryDate"::text as "expiryDate",
+                  n."archivedAt", n."firstName", n."lastName", n."currentAreaId"
+             from nursetrack."nurseTrainings" t
+             join nursetrack.nurses n on n.id = t."nurseId"`,
+        `select "currentAreaId" as "areaId", count(*)::int as count from nursetrack.nurses
+             where "archivedAt" is null and not ("employmentStatus" in (${INACTIVE_STATUS_SQL_LIST}))
+             group by "currentAreaId"`,
+        `select "currentAreaId", id, "profilePhotoKey" from nursetrack.nurses
+             where "archivedAt" is null and not ("employmentStatus" in (${INACTIVE_STATUS_SQL_LIST}))
+             limit 300`,
+        `select a.id, a."nurseId", a."startDate"::text as "startDate", a."assignmentType", a."areaId",
+                  n."archivedAt", n."firstName", n."lastName"
+             from nursetrack."areaAssignments" a
+             join nursetrack.nurses n on n.id = a."nurseId"
+             where n."archivedAt" is null and a."endDate" is null`,
+        `select * from nursetrack."activityLog" order by "createdAt" desc limit 20`,
+        `select e.id, e.title, e."eventDate"::text as "eventDate", e."nurseId", e."areaId",
+                  concat(n."firstName", ' ', n."lastName") as "nurseName",
+                  ar.name as "areaName"
+             from nursetrack."customCalendarEvents" e
+             left join nursetrack.nurses n on n.id = e."nurseId"
+             left join nursetrack.areas ar on ar.id = e."areaId"
+             where e."eventDate" >= CURRENT_DATE
+             order by e."eventDate" asc
+             limit 10`,
+        `select c.id, c."nurseId", c."expiryDate"::text as "expiryDate",
+                  concat(n."firstName", ' ', n."lastName") as "nurseName",
+                  (c."expiryDate" - CURRENT_DATE)::int as "daysRemaining"
+             from nursetrack."nurseCredentials" c
+             join nursetrack.nurses n on n.id = c."nurseId"
+             where n."archivedAt" is null and c."expiryDate" >= CURRENT_DATE
+             order by c."expiryDate" asc
+             limit 10`
+      ].join(";\n")
+    ).simple();
     const [
       activeCountRows,
       areaRows,
@@ -4583,61 +4646,7 @@ var dashboardRouter = router({
       feedRows,
       upcomingCustoms,
       upcomingLicenses
-    ] = await Promise.all([
-      db.select({ count: sql2`count(*)` }).from(nurses).where(activeNurseCond),
-      db.select().from(areas).orderBy(areas.sortOrder),
-      db.select({ id: nurses.id, firstName: nurses.firstName, lastName: nurses.lastName }).from(nurses).where(isNull2(nurses.archivedAt)),
-      db.select({
-        id: nurseCredentials.id,
-        nurseId: nurseCredentials.nurseId,
-        expiryDate: nurseCredentials.expiryDate,
-        renewalStatus: nurseCredentials.renewalStatus,
-        archivedAt: nurses.archivedAt,
-        firstName: nurses.firstName,
-        lastName: nurses.lastName,
-        currentAreaId: nurses.currentAreaId
-      }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId)),
-      db.select({
-        id: nurseTrainings.id,
-        nurseId: nurseTrainings.nurseId,
-        status: nurseTrainings.status,
-        scheduledDate: nurseTrainings.scheduledDate,
-        expiryDate: nurseTrainings.expiryDate,
-        archivedAt: nurses.archivedAt,
-        firstName: nurses.firstName,
-        lastName: nurses.lastName,
-        currentAreaId: nurses.currentAreaId
-      }).from(nurseTrainings).innerJoin(nurses, eq2(nurses.id, nurseTrainings.nurseId)),
-      db.select({ areaId: nurses.currentAreaId, count: sql2`count(*)` }).from(nurses).where(activeNurseCond).groupBy(nurses.currentAreaId),
-      db.select({ currentAreaId: nurses.currentAreaId, id: nurses.id, profilePhotoKey: nurses.profilePhotoKey }).from(nurses).where(activeNurseCond).limit(300),
-      db.select({
-        id: areaAssignments.id,
-        nurseId: areaAssignments.nurseId,
-        startDate: areaAssignments.startDate,
-        assignmentType: areaAssignments.assignmentType,
-        areaId: areaAssignments.areaId,
-        archivedAt: nurses.archivedAt,
-        firstName: nurses.firstName,
-        lastName: nurses.lastName
-      }).from(areaAssignments).innerJoin(nurses, eq2(nurses.id, areaAssignments.nurseId)).where(and2(isNull2(nurses.archivedAt), isNull2(areaAssignments.endDate))),
-      db.select().from(activityLog).orderBy(desc2(activityLog.createdAt)).limit(20),
-      db.select({
-        id: customCalendarEvents.id,
-        title: customCalendarEvents.title,
-        eventDate: customCalendarEvents.eventDate,
-        nurseId: customCalendarEvents.nurseId,
-        areaId: customCalendarEvents.areaId,
-        nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
-        areaName: areas.name
-      }).from(customCalendarEvents).leftJoin(nurses, eq2(nurses.id, customCalendarEvents.nurseId)).leftJoin(areas, eq2(areas.id, customCalendarEvents.areaId)).where(sql2`${customCalendarEvents.eventDate} >= ${today}`).orderBy(asc2(customCalendarEvents.eventDate)).limit(10),
-      db.select({
-        id: nurseCredentials.id,
-        nurseId: nurseCredentials.nurseId,
-        expiryDate: nurseCredentials.expiryDate,
-        nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
-        daysRemaining: sql2`(${nurseCredentials.expiryDate} - CURRENT_DATE)`
-      }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId)).where(and2(isNull2(nurses.archivedAt), sql2`${nurseCredentials.expiryDate} >= CURRENT_DATE`)).orderBy(asc2(nurseCredentials.expiryDate)).limit(10)
-    ]);
+    ] = sets;
     const activeNurses = Number(activeCountRows[0]?.count ?? 0);
     const areaById = new Map(areaRows.map((a) => [a.id, a]));
     const nurseById = new Map(nurseRows.map((n) => [n.id, n]));

@@ -29,6 +29,7 @@ import { ENV } from "./_core/env";
 import { getSqliteDb } from "./localDb";
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _batchPg: ReturnType<typeof postgres> | null = null;
 
 /** Drizzle condition: nurse counts as part of the active roster (not archived, not resigned/retired). */
 export function activeNurseCondition() {
@@ -41,9 +42,19 @@ export const INACTIVE_STATUS_SQL_LIST = INACTIVE_EMPLOYMENT_STATUSES.map((s) => 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      // max: 1 keeps serverless invocations from exhausting the hosted connection cap.
+      // DATABASE_URL points at Supabase's transaction-mode pooler (pgbouncer on
+      // 6543), which shapes both settings below:
+      //   max — asking for a large connection burst from one serverless
+      //   invocation stalls behind the pooler instead of running in parallel, so
+      //   a small pool is deliberate. Round trips are saved by sending fewer
+      //   statements (see the dashboard's single multi-statement load), not by
+      //   opening more sockets.
+      //   prepare — a transaction-mode pooler hands each statement to whichever
+      //   backend is free, so a named prepared statement parsed on one backend
+      //   may not exist on the next.
       const client = postgres(process.env.DATABASE_URL, {
-        max: 10,
+        max: 3,
+        prepare: false,
         idle_timeout: 20,
         connect_timeout: 15,
         connection: {
@@ -57,6 +68,31 @@ export async function getDb() {
     }
   }
   return _db;
+}
+
+/**
+ * Client for the rare read that is better expressed as one multi-statement
+ * round trip than as several drizzle queries.
+ *
+ * This is deliberately a separate connection rather than the one drizzle wraps:
+ * drizzle replaces postgres.js's type parsers with pass-throughs so it can map
+ * columns itself, which leaves raw queries on its client returning every value
+ * as a string. A client of our own keeps native parsing, so timestamps come back
+ * as Date exactly as the equivalent drizzle queries returned them.
+ */
+export function getBatchClient() {
+  if (!_batchPg && process.env.DATABASE_URL) {
+    _batchPg = postgres(process.env.DATABASE_URL, {
+      max: 1,
+      prepare: false,
+      idle_timeout: 20,
+      connect_timeout: 15,
+      connection: {
+        search_path: "nursetrack, public",
+      },
+    });
+  }
+  return _batchPg;
 }
 
 function shouldBeAdmin(user: InsertUser, currentCount = 0): boolean {
