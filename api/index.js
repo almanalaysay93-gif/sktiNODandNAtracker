@@ -931,6 +931,7 @@ __export(db_exports, {
   searchNurses: () => searchNurses,
   setAreaTrainingRequirement: () => setAreaTrainingRequirement,
   setSetting: () => setSetting,
+  touchUserSession: () => touchUserSession,
   updateArea: () => updateArea,
   updateCredential: () => updateCredential,
   updateCredentialType: () => updateCredentialType,
@@ -1016,6 +1017,21 @@ async function upsertUser(user) {
       role = CASE WHEN excluded.role = 'admin' THEN 'admin' ELSE users.role END,
       lastSignedIn = CURRENT_TIMESTAMP
   `).run(user.openId, user.name ?? null, user.email ?? null, user.loginMethod ?? "local", assignedRole);
+}
+async function touchUserSession(openId) {
+  const db = await getDb();
+  if (db) {
+    const set = { lastSignedIn: /* @__PURE__ */ new Date() };
+    if (shouldBeAdmin({ openId }, 1)) set.role = "admin";
+    const rows = await db.update(users).set(set).where(eq(users.openId, openId)).returning();
+    return rows.length > 0 ? rows[0] : void 0;
+  }
+  const sqlite = getSqliteDb();
+  const role = shouldBeAdmin({ openId }, 1) ? "admin" : null;
+  sqlite.prepare(
+    role ? "UPDATE users SET lastSignedIn = CURRENT_TIMESTAMP, role = 'admin' WHERE openId = ?" : "UPDATE users SET lastSignedIn = CURRENT_TIMESTAMP WHERE openId = ?"
+  ).run(openId);
+  return sqlite.prepare("SELECT * FROM users WHERE openId = ?").get(openId);
 }
 async function getUserByOpenId(openId) {
   const db = await getDb();
@@ -2871,16 +2887,11 @@ var SDKServer = class {
     if (!session) {
       throw ForbiddenError("Invalid session cookie");
     }
-    const signedInAt = /* @__PURE__ */ new Date();
-    const user = await getUserByOpenId(session.openId);
+    const user = await touchUserSession(session.openId);
     if (!user) {
       throw ForbiddenError("User not found");
     }
-    await upsertUser({
-      openId: user.openId,
-      lastSignedIn: signedInAt
-    });
-    return await getUserByOpenId(user.openId) ?? user;
+    return user;
   }
 };
 var sdk = new SDKServer();
@@ -4559,33 +4570,77 @@ var dashboardRouter = router({
       return getLocalDashboardInitial();
     }
     const today = todayDate();
-    const [activeRow] = await db.select({ count: sql2`count(*)` }).from(nurses).where(activeNurseCondition());
-    const activeNurses = Number(activeRow?.count ?? 0);
-    const areaRows = await db.select().from(areas).orderBy(areas.sortOrder);
+    const activeNurseCond = activeNurseCondition();
+    const [
+      activeCountRows,
+      areaRows,
+      nurseRows,
+      credsJoined,
+      trainingsJoined,
+      nurseCounts,
+      photoNurses,
+      assignments,
+      feedRows,
+      upcomingCustoms,
+      upcomingLicenses
+    ] = await Promise.all([
+      db.select({ count: sql2`count(*)` }).from(nurses).where(activeNurseCond),
+      db.select().from(areas).orderBy(areas.sortOrder),
+      db.select({ id: nurses.id, firstName: nurses.firstName, lastName: nurses.lastName }).from(nurses).where(isNull2(nurses.archivedAt)),
+      db.select({
+        id: nurseCredentials.id,
+        nurseId: nurseCredentials.nurseId,
+        expiryDate: nurseCredentials.expiryDate,
+        renewalStatus: nurseCredentials.renewalStatus,
+        archivedAt: nurses.archivedAt,
+        firstName: nurses.firstName,
+        lastName: nurses.lastName,
+        currentAreaId: nurses.currentAreaId
+      }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId)),
+      db.select({
+        id: nurseTrainings.id,
+        nurseId: nurseTrainings.nurseId,
+        status: nurseTrainings.status,
+        scheduledDate: nurseTrainings.scheduledDate,
+        expiryDate: nurseTrainings.expiryDate,
+        archivedAt: nurses.archivedAt,
+        firstName: nurses.firstName,
+        lastName: nurses.lastName,
+        currentAreaId: nurses.currentAreaId
+      }).from(nurseTrainings).innerJoin(nurses, eq2(nurses.id, nurseTrainings.nurseId)),
+      db.select({ areaId: nurses.currentAreaId, count: sql2`count(*)` }).from(nurses).where(activeNurseCond).groupBy(nurses.currentAreaId),
+      db.select({ currentAreaId: nurses.currentAreaId, id: nurses.id, profilePhotoKey: nurses.profilePhotoKey }).from(nurses).where(activeNurseCond).limit(300),
+      db.select({
+        id: areaAssignments.id,
+        nurseId: areaAssignments.nurseId,
+        startDate: areaAssignments.startDate,
+        assignmentType: areaAssignments.assignmentType,
+        areaId: areaAssignments.areaId,
+        archivedAt: nurses.archivedAt,
+        firstName: nurses.firstName,
+        lastName: nurses.lastName
+      }).from(areaAssignments).innerJoin(nurses, eq2(nurses.id, areaAssignments.nurseId)).where(and2(isNull2(nurses.archivedAt), isNull2(areaAssignments.endDate))),
+      db.select().from(activityLog).orderBy(desc2(activityLog.createdAt)).limit(20),
+      db.select({
+        id: customCalendarEvents.id,
+        title: customCalendarEvents.title,
+        eventDate: customCalendarEvents.eventDate,
+        nurseId: customCalendarEvents.nurseId,
+        areaId: customCalendarEvents.areaId,
+        nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+        areaName: areas.name
+      }).from(customCalendarEvents).leftJoin(nurses, eq2(nurses.id, customCalendarEvents.nurseId)).leftJoin(areas, eq2(areas.id, customCalendarEvents.areaId)).where(sql2`${customCalendarEvents.eventDate} >= ${today}`).orderBy(asc2(customCalendarEvents.eventDate)).limit(10),
+      db.select({
+        id: nurseCredentials.id,
+        nurseId: nurseCredentials.nurseId,
+        expiryDate: nurseCredentials.expiryDate,
+        nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+        daysRemaining: sql2`(${nurseCredentials.expiryDate} - CURRENT_DATE)`
+      }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId)).where(and2(isNull2(nurses.archivedAt), sql2`${nurseCredentials.expiryDate} >= CURRENT_DATE`)).orderBy(asc2(nurseCredentials.expiryDate)).limit(10)
+    ]);
+    const activeNurses = Number(activeCountRows[0]?.count ?? 0);
     const areaById = new Map(areaRows.map((a) => [a.id, a]));
-    const nurseRows = await db.select({ id: nurses.id, firstName: nurses.firstName, lastName: nurses.lastName }).from(nurses).where(isNull2(nurses.archivedAt));
     const nurseById = new Map(nurseRows.map((n) => [n.id, n]));
-    const credsJoined = await db.select({
-      id: nurseCredentials.id,
-      nurseId: nurseCredentials.nurseId,
-      expiryDate: nurseCredentials.expiryDate,
-      renewalStatus: nurseCredentials.renewalStatus,
-      archivedAt: nurses.archivedAt,
-      firstName: nurses.firstName,
-      lastName: nurses.lastName,
-      currentAreaId: nurses.currentAreaId
-    }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId));
-    const trainingsJoined = await db.select({
-      id: nurseTrainings.id,
-      nurseId: nurseTrainings.nurseId,
-      status: nurseTrainings.status,
-      scheduledDate: nurseTrainings.scheduledDate,
-      expiryDate: nurseTrainings.expiryDate,
-      archivedAt: nurses.archivedAt,
-      firstName: nurses.firstName,
-      lastName: nurses.lastName,
-      currentAreaId: nurses.currentAreaId
-    }).from(nurseTrainings).innerJoin(nurses, eq2(nurses.id, nurseTrainings.nurseId));
     let within1Year = 0;
     let within6Months = 0;
     let expired = 0;
@@ -4609,10 +4664,7 @@ var dashboardRouter = router({
       licensesExpired: expired,
       trainingsAttention
     };
-    const activeNurseCond = activeNurseCondition();
-    const nurseCounts = await db.select({ areaId: nurses.currentAreaId, count: sql2`count(*)` }).from(nurses).where(activeNurseCond).groupBy(nurses.currentAreaId);
     const countByArea = new Map(nurseCounts.map((r) => [r.areaId ?? 0, Number(r.count)]));
-    const photoNurses = await db.select({ currentAreaId: nurses.currentAreaId, id: nurses.id, profilePhotoKey: nurses.profilePhotoKey }).from(nurses).where(activeNurseCond).limit(300);
     const attentionByArea = /* @__PURE__ */ new Map();
     for (const c of credsJoined) {
       if (c.archivedAt) continue;
@@ -4684,16 +4736,6 @@ var dashboardRouter = router({
         });
       }
     }
-    const assignments = await db.select({
-      id: areaAssignments.id,
-      nurseId: areaAssignments.nurseId,
-      startDate: areaAssignments.startDate,
-      assignmentType: areaAssignments.assignmentType,
-      areaId: areaAssignments.areaId,
-      archivedAt: nurses.archivedAt,
-      firstName: nurses.firstName,
-      lastName: nurses.lastName
-    }).from(areaAssignments).innerJoin(nurses, eq2(nurses.id, areaAssignments.nurseId)).where(and2(isNull2(nurses.archivedAt), isNull2(areaAssignments.endDate)));
     for (const a of assignments) {
       if (dateKey(a.startDate) > today) {
         items.push({
@@ -4723,27 +4765,10 @@ var dashboardRouter = router({
       next6Months: items.filter((i) => i.date > d30 && i.date <= d180),
       next1Year: items.filter((i) => i.date > d180 && i.date <= d365)
     };
-    const feedRows = await db.select().from(activityLog).orderBy(desc2(activityLog.createdAt)).limit(20);
     const activityFeed = feedRows.map((r) => ({
       ...r,
       nurse: r.nurseId ? nurseById.get(r.nurseId) ?? null : null
     }));
-    const upcomingCustoms = await db.select({
-      id: customCalendarEvents.id,
-      title: customCalendarEvents.title,
-      eventDate: customCalendarEvents.eventDate,
-      nurseId: customCalendarEvents.nurseId,
-      areaId: customCalendarEvents.areaId,
-      nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
-      areaName: areas.name
-    }).from(customCalendarEvents).leftJoin(nurses, eq2(nurses.id, customCalendarEvents.nurseId)).leftJoin(areas, eq2(areas.id, customCalendarEvents.areaId)).where(sql2`${customCalendarEvents.eventDate} >= ${today}`).orderBy(asc2(customCalendarEvents.eventDate)).limit(10);
-    const upcomingLicenses = await db.select({
-      id: nurseCredentials.id,
-      nurseId: nurseCredentials.nurseId,
-      expiryDate: nurseCredentials.expiryDate,
-      nurseName: sql2`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
-      daysRemaining: sql2`(${nurseCredentials.expiryDate} - CURRENT_DATE)`
-    }).from(nurseCredentials).innerJoin(nurses, eq2(nurses.id, nurseCredentials.nurseId)).where(and2(isNull2(nurses.archivedAt), sql2`${nurseCredentials.expiryDate} >= CURRENT_DATE`)).orderBy(asc2(nurseCredentials.expiryDate)).limit(10);
     const upcoming = {
       upcomingCustoms: upcomingCustoms.map((r) => ({
         ...r,

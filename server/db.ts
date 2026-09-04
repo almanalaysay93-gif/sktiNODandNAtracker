@@ -114,6 +114,36 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   `).run(user.openId, user.name ?? null, user.email ?? null, user.loginMethod ?? "local", assignedRole);
 }
 
+/**
+ * Session refresh for an already-authenticated request: stamp lastSignedIn and
+ * apply owner promotion, returning the post-update row.
+ *
+ * This is the hot path — it runs on every authenticated request — so it is a
+ * single UPDATE ... RETURNING rather than the read/existence-check/write/re-read
+ * sequence it replaces. UPDATE (not upsert) is deliberate: a session whose
+ * openId has no user row must still resolve to "not found" for the caller to
+ * reject, never silently create an account.
+ */
+export async function touchUserSession(openId: string) {
+  const db = await getDb();
+  if (db) {
+    const set: Record<string, unknown> = { lastSignedIn: new Date() };
+    if (shouldBeAdmin({ openId } as InsertUser, 1)) set.role = "admin";
+    const rows = await db.update(users).set(set).where(eq(users.openId, openId)).returning();
+    return rows.length > 0 ? rows[0] : undefined;
+  }
+  const sqlite = getSqliteDb();
+  const role = shouldBeAdmin({ openId } as InsertUser, 1) ? "admin" : null;
+  sqlite
+    .prepare(
+      role
+        ? "UPDATE users SET lastSignedIn = CURRENT_TIMESTAMP, role = 'admin' WHERE openId = ?"
+        : "UPDATE users SET lastSignedIn = CURRENT_TIMESTAMP WHERE openId = ?",
+    )
+    .run(openId);
+  return sqlite.prepare("SELECT * FROM users WHERE openId = ?").get(openId) as any;
+}
+
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (db) {

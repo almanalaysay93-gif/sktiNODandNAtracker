@@ -241,22 +241,16 @@ class SDKServer {
       throw ForbiddenError("Invalid session cookie");
     }
 
-    const signedInAt = new Date();
-    const user = await db.getUserByOpenId(session.openId);
+    // One round trip: stamps lastSignedIn, applies owner promotion, and returns
+    // the post-update row. A missing row means the session references a user
+    // that no longer exists, which stays a hard rejection.
+    const user = await db.touchUserSession(session.openId);
 
     if (!user) {
       throw ForbiddenError("User not found");
     }
 
-    await db.upsertUser({
-      openId: user.openId,
-      lastSignedIn: signedInAt,
-    });
-
-    // Re-fetch: upsertUser may have just promoted this openId to admin
-    // (ENV.ownerOpenId match) — the pre-upsert `user` above would still say
-    // "user" for the rest of this request otherwise.
-    return (await db.getUserByOpenId(user.openId)) ?? user;
+    return user;
   }
 }
 

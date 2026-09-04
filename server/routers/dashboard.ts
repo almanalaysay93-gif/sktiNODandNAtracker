@@ -30,49 +30,117 @@ export const dashboardRouter = router({
     // for summary counts, per-area attention, and action-center items below —
     // previously each of those three sections re-ran its own copy of these
     // joins (6 full-table joins per dashboard load instead of 2).
-    const [activeRow] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(nurses)
-      .where(activeNurseCondition());
-    const activeNurses = Number(activeRow?.count ?? 0);
-
-    const areaRows = await db.select().from(areas).orderBy(areas.sortOrder);
+    //
+    // Every query below is independent of the others, so they are issued as one
+    // parallel fan-out. Awaiting them in sequence cost one network round trip
+    // each against the hosted database, which dominated the dashboard's load
+    // time; the section-building code further down is pure in-memory work over
+    // these results and is unchanged.
+    const activeNurseCond = activeNurseCondition();
+    const [
+      activeCountRows,
+      areaRows,
+      nurseRows,
+      credsJoined,
+      trainingsJoined,
+      nurseCounts,
+      photoNurses,
+      assignments,
+      feedRows,
+      upcomingCustoms,
+      upcomingLicenses,
+    ] = await Promise.all([
+      db.select({ count: sql<number>`count(*)` }).from(nurses).where(activeNurseCond),
+      db.select().from(areas).orderBy(areas.sortOrder),
+      db
+        .select({ id: nurses.id, firstName: nurses.firstName, lastName: nurses.lastName })
+        .from(nurses)
+        .where(isNull(nurses.archivedAt)),
+      db
+        .select({
+          id: nurseCredentials.id,
+          nurseId: nurseCredentials.nurseId,
+          expiryDate: nurseCredentials.expiryDate,
+          renewalStatus: nurseCredentials.renewalStatus,
+          archivedAt: nurses.archivedAt,
+          firstName: nurses.firstName,
+          lastName: nurses.lastName,
+          currentAreaId: nurses.currentAreaId,
+        })
+        .from(nurseCredentials)
+        .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId)),
+      db
+        .select({
+          id: nurseTrainings.id,
+          nurseId: nurseTrainings.nurseId,
+          status: nurseTrainings.status,
+          scheduledDate: nurseTrainings.scheduledDate,
+          expiryDate: nurseTrainings.expiryDate,
+          archivedAt: nurses.archivedAt,
+          firstName: nurses.firstName,
+          lastName: nurses.lastName,
+          currentAreaId: nurses.currentAreaId,
+        })
+        .from(nurseTrainings)
+        .innerJoin(nurses, eq(nurses.id, nurseTrainings.nurseId)),
+      db
+        .select({ areaId: nurses.currentAreaId, count: sql<number>`count(*)` })
+        .from(nurses)
+        .where(activeNurseCond)
+        .groupBy(nurses.currentAreaId),
+      db
+        .select({ currentAreaId: nurses.currentAreaId, id: nurses.id, profilePhotoKey: nurses.profilePhotoKey })
+        .from(nurses)
+        .where(activeNurseCond)
+        .limit(300),
+      db
+        .select({
+          id: areaAssignments.id,
+          nurseId: areaAssignments.nurseId,
+          startDate: areaAssignments.startDate,
+          assignmentType: areaAssignments.assignmentType,
+          areaId: areaAssignments.areaId,
+          archivedAt: nurses.archivedAt,
+          firstName: nurses.firstName,
+          lastName: nurses.lastName,
+        })
+        .from(areaAssignments)
+        .innerJoin(nurses, eq(nurses.id, areaAssignments.nurseId))
+        .where(and(isNull(nurses.archivedAt), isNull(areaAssignments.endDate))),
+      db.select().from(activityLog).orderBy(desc(activityLog.createdAt)).limit(20),
+      db
+        .select({
+          id: customCalendarEvents.id,
+          title: customCalendarEvents.title,
+          eventDate: customCalendarEvents.eventDate,
+          nurseId: customCalendarEvents.nurseId,
+          areaId: customCalendarEvents.areaId,
+          nurseName: sql<string | null>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+          areaName: areas.name,
+        })
+        .from(customCalendarEvents)
+        .leftJoin(nurses, eq(nurses.id, customCalendarEvents.nurseId))
+        .leftJoin(areas, eq(areas.id, customCalendarEvents.areaId))
+        .where(sql`${customCalendarEvents.eventDate} >= ${today}`)
+        .orderBy(asc(customCalendarEvents.eventDate))
+        .limit(10),
+      db
+        .select({
+          id: nurseCredentials.id,
+          nurseId: nurseCredentials.nurseId,
+          expiryDate: nurseCredentials.expiryDate,
+          nurseName: sql<string>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
+          daysRemaining: sql<number>`(${nurseCredentials.expiryDate} - CURRENT_DATE)`,
+        })
+        .from(nurseCredentials)
+        .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId))
+        .where(and(isNull(nurses.archivedAt), sql`${nurseCredentials.expiryDate} >= CURRENT_DATE`))
+        .orderBy(asc(nurseCredentials.expiryDate))
+        .limit(10),
+    ]);
+    const activeNurses = Number(activeCountRows[0]?.count ?? 0);
     const areaById = new Map(areaRows.map((a) => [a.id, a]));
-
-    const nurseRows = await db
-      .select({ id: nurses.id, firstName: nurses.firstName, lastName: nurses.lastName })
-      .from(nurses)
-      .where(isNull(nurses.archivedAt));
     const nurseById = new Map(nurseRows.map((n) => [n.id, n]));
-
-    const credsJoined = await db
-      .select({
-        id: nurseCredentials.id,
-        nurseId: nurseCredentials.nurseId,
-        expiryDate: nurseCredentials.expiryDate,
-        renewalStatus: nurseCredentials.renewalStatus,
-        archivedAt: nurses.archivedAt,
-        firstName: nurses.firstName,
-        lastName: nurses.lastName,
-        currentAreaId: nurses.currentAreaId,
-      })
-      .from(nurseCredentials)
-      .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId));
-
-    const trainingsJoined = await db
-      .select({
-        id: nurseTrainings.id,
-        nurseId: nurseTrainings.nurseId,
-        status: nurseTrainings.status,
-        scheduledDate: nurseTrainings.scheduledDate,
-        expiryDate: nurseTrainings.expiryDate,
-        archivedAt: nurses.archivedAt,
-        firstName: nurses.firstName,
-        lastName: nurses.lastName,
-        currentAreaId: nurses.currentAreaId,
-      })
-      .from(nurseTrainings)
-      .innerJoin(nurses, eq(nurses.id, nurseTrainings.nurseId));
 
     // ---- summary ----
     let within1Year = 0;
@@ -100,18 +168,7 @@ export const dashboardRouter = router({
     };
 
     // ---- areaSnapshots ----
-    const activeNurseCond = activeNurseCondition();
-    const nurseCounts = await db
-      .select({ areaId: nurses.currentAreaId, count: sql<number>`count(*)` })
-      .from(nurses)
-      .where(activeNurseCond)
-      .groupBy(nurses.currentAreaId);
     const countByArea = new Map(nurseCounts.map((r) => [r.areaId ?? 0, Number(r.count)]));
-    const photoNurses = await db
-      .select({ currentAreaId: nurses.currentAreaId, id: nurses.id, profilePhotoKey: nurses.profilePhotoKey })
-      .from(nurses)
-      .where(activeNurseCond)
-      .limit(300);
     const attentionByArea = new Map<number, number>();
     for (const c of credsJoined) {
       if (c.archivedAt) continue;
@@ -195,20 +252,6 @@ export const dashboardRouter = router({
         });
       }
     }
-    const assignments = await db
-      .select({
-        id: areaAssignments.id,
-        nurseId: areaAssignments.nurseId,
-        startDate: areaAssignments.startDate,
-        assignmentType: areaAssignments.assignmentType,
-        areaId: areaAssignments.areaId,
-        archivedAt: nurses.archivedAt,
-        firstName: nurses.firstName,
-        lastName: nurses.lastName,
-      })
-      .from(areaAssignments)
-      .innerJoin(nurses, eq(nurses.id, areaAssignments.nurseId))
-      .where(and(isNull(nurses.archivedAt), isNull(areaAssignments.endDate)));
     for (const a of assignments) {
       if (dateKey(a.startDate) > today) {
         items.push({
@@ -240,42 +283,12 @@ export const dashboardRouter = router({
     };
 
     // ---- activityFeed ----
-    const feedRows = await db.select().from(activityLog).orderBy(desc(activityLog.createdAt)).limit(20);
     const activityFeed = feedRows.map((r) => ({
       ...r,
       nurse: r.nurseId ? (nurseById.get(r.nurseId) ?? null) : null,
     }));
 
     // ---- upcoming ----
-    const upcomingCustoms = await db
-      .select({
-        id: customCalendarEvents.id,
-        title: customCalendarEvents.title,
-        eventDate: customCalendarEvents.eventDate,
-        nurseId: customCalendarEvents.nurseId,
-        areaId: customCalendarEvents.areaId,
-        nurseName: sql<string | null>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
-        areaName: areas.name,
-      })
-      .from(customCalendarEvents)
-      .leftJoin(nurses, eq(nurses.id, customCalendarEvents.nurseId))
-      .leftJoin(areas, eq(areas.id, customCalendarEvents.areaId))
-      .where(sql`${customCalendarEvents.eventDate} >= ${today}`)
-      .orderBy(asc(customCalendarEvents.eventDate))
-      .limit(10);
-    const upcomingLicenses = await db
-      .select({
-        id: nurseCredentials.id,
-        nurseId: nurseCredentials.nurseId,
-        expiryDate: nurseCredentials.expiryDate,
-        nurseName: sql<string>`concat(${nurses.firstName}, ' ', ${nurses.lastName})`,
-        daysRemaining: sql<number>`(${nurseCredentials.expiryDate} - CURRENT_DATE)`,
-      })
-      .from(nurseCredentials)
-      .innerJoin(nurses, eq(nurses.id, nurseCredentials.nurseId))
-      .where(and(isNull(nurses.archivedAt), sql`${nurseCredentials.expiryDate} >= CURRENT_DATE`))
-      .orderBy(asc(nurseCredentials.expiryDate))
-      .limit(10);
     const upcoming = {
       upcomingCustoms: upcomingCustoms.map((r) => ({
         ...r,
