@@ -10,7 +10,7 @@ vi.mock("./localDb", () => ({
   },
 }));
 
-import { deleteNurseTraining, deleteTrainingEvent } from "./db";
+import { deleteNurseTraining, deleteTrainingCatalogItem, deleteTrainingEvent } from "./db";
 
 beforeAll(() => {
   vi.stubEnv("DATABASE_URL", "");
@@ -19,7 +19,11 @@ beforeAll(() => {
     CREATE TABLE trainingCatalog (
       id INTEGER PRIMARY KEY,
       name TEXT NOT NULL,
-      kind TEXT NOT NULL
+      kind TEXT NOT NULL,
+      category TEXT,
+      renewalRequired INTEGER DEFAULT 0,
+      defaultValidityMonths INTEGER,
+      active INTEGER DEFAULT 1
     );
     CREATE TABLE trainingEvents (
       id INTEGER PRIMARY KEY,
@@ -33,14 +37,21 @@ beforeAll(() => {
       eventId INTEGER,
       status TEXT NOT NULL
     );
+    CREATE TABLE areaTrainingRequirements (
+      id INTEGER PRIMARY KEY,
+      areaId INTEGER NOT NULL,
+      trainingId INTEGER NOT NULL,
+      required INTEGER DEFAULT 1
+    );
   `);
 });
 
 beforeEach(() => {
-  localState.sqlite!.exec("DELETE FROM nurseTrainings; DELETE FROM trainingEvents; DELETE FROM trainingCatalog;");
+  localState.sqlite!.exec("DELETE FROM areaTrainingRequirements; DELETE FROM nurseTrainings; DELETE FROM trainingEvents; DELETE FROM trainingCatalog;");
   localState.sqlite!.prepare("INSERT INTO trainingCatalog (id, name, kind) VALUES (1, 'Dialysis Safety', 'Seminar')").run();
   localState.sqlite!.prepare("INSERT INTO trainingEvents (id, trainingId, startDate) VALUES (10, 1, '2026-09-10'), (11, 1, '2026-10-10')").run();
   localState.sqlite!.prepare("INSERT INTO nurseTrainings (id, nurseId, trainingId, eventId, status) VALUES (100, 1, 1, 10, 'Completed'), (101, 2, 1, 11, 'Completed'), (102, 3, 1, NULL, 'Completed')").run();
+  localState.sqlite!.prepare("INSERT INTO areaTrainingRequirements (id, areaId, trainingId, required) VALUES (1, 5, 1, 1)").run();
 });
 
 afterAll(() => {
@@ -73,8 +84,22 @@ describe("training deletion database operations", () => {
     expect(localState.sqlite!.prepare("SELECT COUNT(*) AS count FROM trainingCatalog").get()).toEqual({ count: 1 });
   });
 
+  it("deletes a training/seminar catalog item and all associated events, records, and area requirements", async () => {
+    await expect(deleteTrainingCatalogItem(1)).resolves.toMatchObject({
+      catalog: { id: 1, name: "Dialysis Safety", kind: "Seminar" },
+      eventsDeleted: 2,
+      attendanceDeleted: 3,
+    });
+
+    expect(localState.sqlite!.prepare("SELECT COUNT(*) AS count FROM trainingCatalog").get()).toEqual({ count: 0 });
+    expect(localState.sqlite!.prepare("SELECT COUNT(*) AS count FROM trainingEvents").get()).toEqual({ count: 0 });
+    expect(localState.sqlite!.prepare("SELECT COUNT(*) AS count FROM nurseTrainings").get()).toEqual({ count: 0 });
+    expect(localState.sqlite!.prepare("SELECT COUNT(*) AS count FROM areaTrainingRequirements").get()).toEqual({ count: 0 });
+  });
+
   it("returns null when the target does not exist", async () => {
     await expect(deleteNurseTraining(999)).resolves.toBeNull();
     await expect(deleteTrainingEvent(999)).resolves.toBeNull();
+    await expect(deleteTrainingCatalogItem(999)).resolves.toBeNull();
   });
 });

@@ -258,12 +258,13 @@ export async function createNurse(data: InsertNurse) {
   }
   const sqlite = getSqliteDb();
   const res = sqlite.prepare(`
-    INSERT INTO nurses (employeeId, firstName, middleName, lastName, suffix, position, staffType, dateHired, employmentStatus, currentAreaId, profilePhotoKey)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO nurses (employeeId, firstName, middleName, lastName, suffix, position, staffType, dateHired, employmentStatus, currentAreaId, profilePhotoKey, contactNumber, accountEmail, linkedUserId)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     data.employeeId, data.firstName, data.middleName ?? null, data.lastName, data.suffix ?? null,
-    data.position ?? null, data.staffType ?? "Registered Nurse", data.dateHired ? String(data.dateHired) : null,
-    data.employmentStatus ?? "Active", data.currentAreaId ?? null, data.profilePhotoKey ?? null
+    data.position ?? null, data.staffType ?? "Registered Nurse", data.dateHired ? dateKey(data.dateHired as any) : null,
+    data.employmentStatus ?? "Active", data.currentAreaId ?? null, data.profilePhotoKey ?? null,
+    data.contactNumber ?? null, data.accountEmail ?? null, data.linkedUserId ?? null
   );
   return Number(res.lastInsertRowid);
 }
@@ -277,7 +278,7 @@ export async function updateNurse(id: number, data: Partial<InsertNurse>) {
   const sqlite = getSqliteDb();
   const sets: string[] = [];
   const vals: any[] = [];
-  const fields = ["employeeId", "firstName", "middleName", "lastName", "suffix", "position", "staffType", "employmentStatus", "currentAreaId", "profilePhotoKey", "archivedAt"] as const;
+  const fields = ["employeeId", "firstName", "middleName", "lastName", "suffix", "position", "staffType", "employmentStatus", "currentAreaId", "profilePhotoKey", "contactNumber", "accountEmail", "linkedUserId", "archivedAt"] as const;
   for (const f of fields) {
     if (data[f] !== undefined) {
       sets.push(`${f} = ?`);
@@ -286,7 +287,7 @@ export async function updateNurse(id: number, data: Partial<InsertNurse>) {
   }
   if (data.dateHired !== undefined) {
     sets.push("dateHired = ?");
-    vals.push(data.dateHired ? String(data.dateHired) : null);
+    vals.push(data.dateHired ? dateKey(data.dateHired as any) : null);
   }
   if (sets.length) {
     vals.push(id);
@@ -297,19 +298,29 @@ export async function updateNurse(id: number, data: Partial<InsertNurse>) {
 export async function deleteNurse(id: number) {
   const db = await getDb();
   if (db) {
-    // Delete in dependency order
-    await db.delete(emailLogs).where(eq(emailLogs.nurseId, id));
-    await db.delete(notifications).where(eq(notifications.nurseId, id));
-    await db.delete(customCalendarEvents).where(eq(customCalendarEvents.nurseId, id));
-    await db.delete(nurseTrainings).where(eq(nurseTrainings.nurseId, id));
-    await db.delete(nurseCredentials).where(eq(nurseCredentials.nurseId, id));
-    await db.delete(areaAssignments).where(eq(areaAssignments.nurseId, id));
-    await db.delete(activityLog).where(eq(activityLog.nurseId, id));
-    await db.delete(nurses).where(eq(nurses.id, id));
+    // Delete in dependency order, atomically: a partial delete would strand rows
+    // pointing at a nurse that no longer exists (there are no FK constraints).
+    await db.transaction(async (tx) => {
+      const credentialIds = (
+        await tx.select({ id: nurseCredentials.id }).from(nurseCredentials).where(eq(nurseCredentials.nurseId, id))
+      ).map((c) => c.id);
+      if (credentialIds.length) {
+        await tx.delete(licenseReminders).where(inArray(licenseReminders.credentialId, credentialIds));
+      }
+      await tx.delete(emailLogs).where(eq(emailLogs.nurseId, id));
+      await tx.delete(notifications).where(eq(notifications.nurseId, id));
+      await tx.delete(customCalendarEvents).where(eq(customCalendarEvents.nurseId, id));
+      await tx.delete(nurseTrainings).where(eq(nurseTrainings.nurseId, id));
+      await tx.delete(nurseCredentials).where(eq(nurseCredentials.nurseId, id));
+      await tx.delete(areaAssignments).where(eq(areaAssignments.nurseId, id));
+      await tx.delete(activityLog).where(eq(activityLog.nurseId, id));
+      await tx.delete(nurses).where(eq(nurses.id, id));
+    });
     return;
   }
   const sqlite = getSqliteDb();
   sqlite.transaction(() => {
+    sqlite.prepare("DELETE FROM licenseReminders WHERE credentialId IN (SELECT id FROM nurseCredentials WHERE nurseId = ?)").run(id);
     sqlite.prepare("DELETE FROM emailLogs WHERE nurseId = ?").run(id);
     sqlite.prepare("DELETE FROM notifications WHERE nurseId = ?").run(id);
     sqlite.prepare("DELETE FROM customCalendarEvents WHERE nurseId = ?").run(id);
@@ -986,6 +997,99 @@ export async function deleteNurseTraining(id: number) {
   })();
 }
 
+/** Find an existing occurrence for a training on the given dates, or create one. Used by CSV import. */
+export async function findOrCreateTrainingEvent(data: {
+  trainingId: number;
+  startDate: Date | string;
+  endDate: Date | string;
+  provider?: string | null;
+  venue?: string | null;
+  remarks?: string | null;
+}): Promise<{ id: number; created: boolean }> {
+  const startKey = dateKey(data.startDate);
+  const endKey = dateKey(data.endDate) || startKey;
+  if (!startKey) throw new Error("findOrCreateTrainingEvent requires a valid startDate");
+  const start = new Date(`${startKey}T00:00:00Z`);
+  const end = new Date(`${endKey}T00:00:00Z`);
+
+  const db = await getDb();
+  if (db) {
+    const [existing] = await db
+      .select({ id: trainingEvents.id })
+      .from(trainingEvents)
+      .where(and(eq(trainingEvents.trainingId, data.trainingId), eq(trainingEvents.startDate, start), eq(trainingEvents.endDate, end)))
+      .limit(1);
+    if (existing) return { id: existing.id, created: false };
+    const [row] = await db
+      .insert(trainingEvents)
+      .values({
+        trainingId: data.trainingId,
+        startDate: start,
+        endDate: end,
+        provider: data.provider ?? null,
+        venue: data.venue ?? null,
+        remarks: data.remarks ?? null,
+      })
+      .returning({ id: trainingEvents.id });
+    return { id: row.id, created: true };
+  }
+
+  const sqlite = getSqliteDb();
+  const existing = sqlite
+    .prepare("SELECT id FROM trainingEvents WHERE trainingId = ? AND startDate = ? AND endDate = ? LIMIT 1")
+    .get(data.trainingId, startKey, endKey) as { id: number } | undefined;
+  if (existing) return { id: existing.id, created: false };
+  const res = sqlite
+    .prepare("INSERT INTO trainingEvents (trainingId, provider, venue, startDate, endDate, remarks) VALUES (?, ?, ?, ?, ?, ?)")
+    .run(data.trainingId, data.provider ?? null, data.venue ?? null, startKey, endKey, data.remarks ?? null);
+  return { id: Number(res.lastInsertRowid), created: true };
+}
+
+export async function getNurseTrainingById(id: number) {
+  const db = await getDb();
+  if (db) {
+    const [row] = await db.select().from(nurseTrainings).where(eq(nurseTrainings.id, id)).limit(1);
+    return row ?? null;
+  }
+  const sqlite = getSqliteDb();
+  return (sqlite.prepare("SELECT * FROM nurseTrainings WHERE id = ?").get(id) as typeof nurseTrainings.$inferSelect | undefined) ?? null;
+}
+
+/** Look up an attendance/training record by its natural key, so re-imports do not duplicate rows. */
+export async function findNurseTrainingByKey(params: {
+  nurseId: number;
+  trainingId: number;
+  completionDate?: Date | string | null;
+  eventId?: number | null;
+}): Promise<{ id: number } | null> {
+  const compKey = dateKey(params.completionDate ?? null);
+
+  const db = await getDb();
+  if (db) {
+    const conditions = [eq(nurseTrainings.nurseId, params.nurseId), eq(nurseTrainings.trainingId, params.trainingId)];
+    if (params.eventId != null) conditions.push(eq(nurseTrainings.eventId, params.eventId));
+    conditions.push(compKey ? eq(nurseTrainings.completionDate, new Date(`${compKey}T00:00:00Z`)) : isNull(nurseTrainings.completionDate));
+    const [row] = await db.select({ id: nurseTrainings.id }).from(nurseTrainings).where(and(...conditions)).limit(1);
+    return row ?? null;
+  }
+
+  const sqlite = getSqliteDb();
+  const clauses = ["nurseId = ?", "trainingId = ?"];
+  const vals: any[] = [params.nurseId, params.trainingId];
+  if (params.eventId != null) {
+    clauses.push("eventId = ?");
+    vals.push(params.eventId);
+  }
+  if (compKey) {
+    clauses.push("completionDate = ?");
+    vals.push(compKey);
+  } else {
+    clauses.push("completionDate IS NULL");
+  }
+  const row = sqlite.prepare(`SELECT id FROM nurseTrainings WHERE ${clauses.join(" AND ")} LIMIT 1`).get(...vals) as { id: number } | undefined;
+  return row ?? null;
+}
+
 export async function deleteTrainingEvent(id: number) {
   const db = await getDb();
   if (db) {
@@ -1026,6 +1130,47 @@ export async function deleteTrainingEvent(id: number) {
     return {
       event,
       training: { id: catalogId, name: trainingName, kind: trainingKind },
+      attendanceDeleted,
+    };
+  })();
+}
+
+export async function deleteTrainingCatalogItem(id: number) {
+  const db = await getDb();
+  if (db) {
+    return db.transaction(async (tx) => {
+      const [catalog] = await tx.select().from(trainingCatalog).where(eq(trainingCatalog.id, id)).limit(1);
+      if (!catalog) return null;
+      const attendance = await tx.select({ id: nurseTrainings.id }).from(nurseTrainings).where(eq(nurseTrainings.trainingId, id));
+      const events = await tx.select({ id: trainingEvents.id }).from(trainingEvents).where(eq(trainingEvents.trainingId, id));
+      await tx.delete(nurseTrainings).where(eq(nurseTrainings.trainingId, id));
+      await tx.delete(trainingEvents).where(eq(trainingEvents.trainingId, id));
+      await tx.delete(areaTrainingRequirements).where(eq(areaTrainingRequirements.trainingId, id));
+      await tx.delete(trainingCatalog).where(eq(trainingCatalog.id, id));
+      return {
+        catalog,
+        eventsDeleted: events.length,
+        attendanceDeleted: attendance.length,
+      };
+    });
+  }
+  const sqlite = getSqliteDb();
+  return sqlite.transaction(() => {
+    const catalog = sqlite.prepare("SELECT * FROM trainingCatalog WHERE id = ?").get(id) as typeof trainingCatalog.$inferSelect | undefined;
+    if (!catalog) return null;
+    const attendanceDeleted = Number((sqlite.prepare("SELECT COUNT(*) AS count FROM nurseTrainings WHERE trainingId = ?").get(id) as { count: number }).count);
+    const eventsDeleted = Number((sqlite.prepare("SELECT COUNT(*) AS count FROM trainingEvents WHERE trainingId = ?").get(id) as { count: number }).count);
+    sqlite.prepare("DELETE FROM nurseTrainings WHERE trainingId = ?").run(id);
+    sqlite.prepare("DELETE FROM trainingEvents WHERE trainingId = ?").run(id);
+    sqlite.prepare("DELETE FROM areaTrainingRequirements WHERE trainingId = ?").run(id);
+    sqlite.prepare("DELETE FROM trainingCatalog WHERE id = ?").run(id);
+    return {
+      catalog: {
+        ...catalog,
+        active: Boolean(catalog.active),
+        renewalRequired: Boolean(catalog.renewalRequired),
+      },
+      eventsDeleted,
       attendanceDeleted,
     };
   })();

@@ -73,6 +73,25 @@ export const trainingsRouter = router({
       return { success: true } as const;
     }),
 
+  deleteCatalogItem: adminProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const deleted = await db.deleteTrainingCatalogItem(input.id);
+      if (!deleted) throw new TRPCError({ code: "NOT_FOUND", message: "Training catalog item not found." });
+      await db.logActivity({
+        supervisorId: ctx.user.id,
+        actionType: "training.catalog.deleted",
+        entityType: "trainingCatalog",
+        entityId: input.id,
+        summary: `${deleted.catalog.kind} "${deleted.catalog.name}" permanently deleted, including ${deleted.eventsDeleted} seminar event(s) and ${deleted.attendanceDeleted} attendance record(s)`,
+      });
+      return {
+        success: true,
+        eventsDeleted: deleted.eventsDeleted,
+        attendanceDeleted: deleted.attendanceDeleted,
+      } as const;
+    }),
+
   listRecords: adminProcedure.query(async () => {
     const rows = await db.listNurseTrainings();
     const nurses = await db.listNurses();

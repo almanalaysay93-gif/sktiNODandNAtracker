@@ -337,12 +337,12 @@ function RecordsTab({
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">Delete Training Record Permanently?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
-              <p>
+              <span className="block">
                 Delete <strong>{recordToDelete?.trainingName ?? "this training"}</strong> for {recordToDelete?.nurseName ?? `staff #${recordToDelete?.nurseId}`}?
-              </p>
-              <p className="text-xs text-muted-foreground">
+              </span>
+              <span className="block text-xs text-muted-foreground">
                 This removes this training history record. This action cannot be undone.
-              </p>
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -371,6 +371,7 @@ function CatalogTab({
   catalog: {
     id: number;
     name: string;
+    kind?: string;
     defaultValidityMonths?: number | null;
     category?: string | null;
     renewalRequired: boolean;
@@ -381,55 +382,118 @@ function CatalogTab({
   onToggleActive: (id: number, currentlyActive: boolean) => void;
   utils: ReturnType<typeof trpc.useUtils>;
 }) {
+  const [catalogToDelete, setCatalogToDelete] = useState<(typeof catalog)[number] | null>(null);
+  const deleteCatalogMutation = trpc.trainings.deleteCatalogItem.useMutation({
+    onSuccess: async () => {
+      toast.success(`${catalogToDelete?.kind ?? "Catalog item"} deleted.`);
+      await Promise.all([
+        utils.trainings.initial.invalidate(),
+        utils.trainings.listCatalog.invalidate(),
+        utils.trainings.listRecords.invalidate(),
+        utils.trainings.listForNurse.invalidate(),
+        utils.trainings.getCompliance.invalidate(),
+        utils.seminars.list.invalidate(),
+        utils.seminars.detail.invalidate(),
+        utils.seminars.matrix.invalidate(),
+        utils.seminars.monthlySummary.invalidate(),
+        utils.seminars.quarterlyLedger.invalidate(),
+        utils.calendar.listEvents.invalidate(),
+        utils.dashboard.initial.invalidate(),
+      ]);
+      setCatalogToDelete(null);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
   return (
-    <Card className="glass-card">
-      <CardContent className="pt-5">
-        <div className="flex justify-end mb-3">
-          <Button size="sm" onClick={onAdd}>
-            <Plus className="h-4 w-4 mr-1" />
-            Add to Catalog
-          </Button>
-        </div>
-        {catalog.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-8">No training types in the catalog.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                {catalog.map((c) => (
-              <div key={c.id} className={"border rounded-lg p-3.5" + (!c.active ? " opacity-60" : "")}>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{c.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {[c.category, c.defaultValidityMonths ? `valid ${c.defaultValidityMonths} mo` : null].filter(Boolean).join(" · ") || "—"}
-                    </p>
-                  </div>
-                  <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
-                </div>
-                {c.renewalRequired && (
-                  <p className="mt-2 text-xs font-medium text-[#B4700A] dark:text-[#FBBF24]">Renewal required</p>
-                )}
-                <div className="flex items-center gap-2 mt-3 pt-2 border-t">
-                  <button
-                    type="button"
-                    className="text-xs text-primary hover:underline"
-                    onClick={() => onEditCatalog(c.id)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="text-xs hover:underline"
-                    onClick={() => onToggleActive(c.id, c.active)}
-                  >
-                    {c.active ? "Deactivate" : "Activate"}
-                  </button>
-                </div>
-              </div>
-            ))}
+    <>
+      <Card className="glass-card">
+        <CardContent className="pt-5">
+          <div className="flex justify-end mb-3">
+            <Button size="sm" onClick={onAdd}>
+              <Plus className="h-4 w-4 mr-1" />
+              Add to Catalog
+            </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+          {catalog.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">No training types in the catalog.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {catalog.map((c) => (
+                <div key={c.id} className={"border rounded-lg p-3.5 flex flex-col justify-between" + (!c.active ? " opacity-60" : "")}>
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        {c.kind ? <span className="text-[10px] font-semibold uppercase tracking-wider text-primary mb-0.5 block">{c.kind}</span> : null}
+                        <p className="font-medium truncate">{c.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {[c.category, c.defaultValidityMonths ? `valid ${c.defaultValidityMonths} mo` : null].filter(Boolean).join(" · ") || "—"}
+                        </p>
+                      </div>
+                      <BookOpen className="h-4 w-4 text-muted-foreground shrink-0" />
+                    </div>
+                    {c.renewalRequired && (
+                      <p className="mt-2 text-xs font-medium text-[#B4700A] dark:text-[#FBBF24]">Renewal required</p>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between mt-3 pt-2 border-t">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="text-xs text-primary hover:underline"
+                        onClick={() => onEditCatalog(c.id)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="text-xs hover:underline"
+                        onClick={() => onToggleActive(c.id, c.active)}
+                      >
+                        {c.active ? "Deactivate" : "Activate"}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      className="text-xs text-destructive hover:underline flex items-center gap-1"
+                      onClick={() => setCatalogToDelete(c)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <AlertDialog open={Boolean(catalogToDelete)} onOpenChange={(open) => !open && setCatalogToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Delete {catalogToDelete?.kind ?? "Training"} Catalog Item?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">
+                Delete <strong>{catalogToDelete?.name}</strong> ({catalogToDelete?.kind ?? "Training"})?
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                This permanently deletes this {catalogToDelete?.kind ?? "training"} from the catalog, including any scheduled seminar occurrences and all linked attendance records. This action cannot be undone.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteCatalogMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteCatalogMutation.isPending}
+              onClick={() => catalogToDelete && deleteCatalogMutation.mutate({ id: catalogToDelete.id })}
+            >
+              {deleteCatalogMutation.isPending ? "Deleting..." : "Permanently Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
 

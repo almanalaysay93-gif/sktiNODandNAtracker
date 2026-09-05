@@ -17,7 +17,7 @@ import {
   TARGET_STAFF_TYPES,
 } from "../../shared/nursetrack";
 import { adminProcedure, router } from "../_core/trpc";
-import { deleteTrainingEvent, getDb, logActivity } from "../db";
+import { deleteNurseTraining, deleteTrainingEvent, getDb, getNurseTrainingById, logActivity } from "../db";
 import {
   getLocalSeminarsList,
   getLocalSeminarDetail,
@@ -266,6 +266,29 @@ export const seminarsRouter = router({
         });
         return { id };
       });
+    }),
+
+  removeAttendance: adminProcedure
+    .input(z.object({ attendanceId: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      // Only seminar attendance (a record attached to an occurrence) may be removed here;
+      // plain training-log entries are owned by the trainings router.
+      const existing = await getNurseTrainingById(input.attendanceId);
+      if (!existing) throw new TRPCError({ code: "NOT_FOUND", message: "Attendance record not found." });
+      if (existing.eventId == null) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "That record is not seminar attendance." });
+      }
+      const record = await deleteNurseTraining(input.attendanceId);
+      if (!record) throw new TRPCError({ code: "NOT_FOUND", message: "Attendance record not found." });
+      await logActivity({
+        supervisorId: ctx.user.id,
+        nurseId: record.nurseId,
+        actionType: "seminar.attendance.deleted",
+        entityType: "nurseTraining",
+        entityId: input.attendanceId,
+        summary: `Seminar attendance record #${input.attendanceId} removed`,
+      });
+      return { success: true } as const;
     }),
 
   matrix: adminProcedure

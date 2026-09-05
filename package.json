@@ -13,7 +13,8 @@
     "test": "vitest run",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "seed:excel": "tsx server/seedExcel.ts",
-    "generate:staff-qrs": "tsx server/scripts/generateStaffQrs.ts"
+    "generate:staff-qrs": "tsx server/scripts/generateStaffQrs.ts",
+    "db:import-csv": "tsx server/scripts/importCsv.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.693.0",

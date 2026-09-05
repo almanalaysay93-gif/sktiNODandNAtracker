@@ -895,7 +895,10 @@ __export(db_exports, {
   deleteCustomEvent: () => deleteCustomEvent,
   deleteNurse: () => deleteNurse,
   deleteNurseTraining: () => deleteNurseTraining,
+  deleteTrainingCatalogItem: () => deleteTrainingCatalogItem,
   deleteTrainingEvent: () => deleteTrainingEvent,
+  findNurseTrainingByKey: () => findNurseTrainingByKey,
+  findOrCreateTrainingEvent: () => findOrCreateTrainingEvent,
   getAllNurseLicenseInfos: () => getAllNurseLicenseInfos,
   getAllSettings: () => getAllSettings,
   getAreaById: () => getAreaById,
@@ -908,6 +911,7 @@ __export(db_exports, {
   getNurseByLinkedUserId: () => getNurseByLinkedUserId,
   getNurseLicenseInfo: () => getNurseLicenseInfo,
   getNurseLicenseStatus: () => getNurseLicenseStatus,
+  getNurseTrainingById: () => getNurseTrainingById,
   getSetting: () => getSetting,
   getUserByOpenId: () => getUserByOpenId,
   isEmailDuplicate: () => isEmailDuplicate,
@@ -1137,8 +1141,8 @@ async function createNurse(data) {
   }
   const sqlite = getSqliteDb();
   const res = sqlite.prepare(`
-    INSERT INTO nurses (employeeId, firstName, middleName, lastName, suffix, position, staffType, dateHired, employmentStatus, currentAreaId, profilePhotoKey)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO nurses (employeeId, firstName, middleName, lastName, suffix, position, staffType, dateHired, employmentStatus, currentAreaId, profilePhotoKey, contactNumber, accountEmail, linkedUserId)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     data.employeeId,
     data.firstName,
@@ -1147,10 +1151,13 @@ async function createNurse(data) {
     data.suffix ?? null,
     data.position ?? null,
     data.staffType ?? "Registered Nurse",
-    data.dateHired ? String(data.dateHired) : null,
+    data.dateHired ? dateKey(data.dateHired) : null,
     data.employmentStatus ?? "Active",
     data.currentAreaId ?? null,
-    data.profilePhotoKey ?? null
+    data.profilePhotoKey ?? null,
+    data.contactNumber ?? null,
+    data.accountEmail ?? null,
+    data.linkedUserId ?? null
   );
   return Number(res.lastInsertRowid);
 }
@@ -1163,7 +1170,7 @@ async function updateNurse(id, data) {
   const sqlite = getSqliteDb();
   const sets = [];
   const vals = [];
-  const fields = ["employeeId", "firstName", "middleName", "lastName", "suffix", "position", "staffType", "employmentStatus", "currentAreaId", "profilePhotoKey", "archivedAt"];
+  const fields = ["employeeId", "firstName", "middleName", "lastName", "suffix", "position", "staffType", "employmentStatus", "currentAreaId", "profilePhotoKey", "contactNumber", "accountEmail", "linkedUserId", "archivedAt"];
   for (const f of fields) {
     if (data[f] !== void 0) {
       sets.push(`${f} = ?`);
@@ -1172,7 +1179,7 @@ async function updateNurse(id, data) {
   }
   if (data.dateHired !== void 0) {
     sets.push("dateHired = ?");
-    vals.push(data.dateHired ? String(data.dateHired) : null);
+    vals.push(data.dateHired ? dateKey(data.dateHired) : null);
   }
   if (sets.length) {
     vals.push(id);
@@ -1182,18 +1189,25 @@ async function updateNurse(id, data) {
 async function deleteNurse(id) {
   const db = await getDb();
   if (db) {
-    await db.delete(emailLogs).where(eq(emailLogs.nurseId, id));
-    await db.delete(notifications).where(eq(notifications.nurseId, id));
-    await db.delete(customCalendarEvents).where(eq(customCalendarEvents.nurseId, id));
-    await db.delete(nurseTrainings).where(eq(nurseTrainings.nurseId, id));
-    await db.delete(nurseCredentials).where(eq(nurseCredentials.nurseId, id));
-    await db.delete(areaAssignments).where(eq(areaAssignments.nurseId, id));
-    await db.delete(activityLog).where(eq(activityLog.nurseId, id));
-    await db.delete(nurses).where(eq(nurses.id, id));
+    await db.transaction(async (tx) => {
+      const credentialIds = (await tx.select({ id: nurseCredentials.id }).from(nurseCredentials).where(eq(nurseCredentials.nurseId, id))).map((c) => c.id);
+      if (credentialIds.length) {
+        await tx.delete(licenseReminders).where(inArray(licenseReminders.credentialId, credentialIds));
+      }
+      await tx.delete(emailLogs).where(eq(emailLogs.nurseId, id));
+      await tx.delete(notifications).where(eq(notifications.nurseId, id));
+      await tx.delete(customCalendarEvents).where(eq(customCalendarEvents.nurseId, id));
+      await tx.delete(nurseTrainings).where(eq(nurseTrainings.nurseId, id));
+      await tx.delete(nurseCredentials).where(eq(nurseCredentials.nurseId, id));
+      await tx.delete(areaAssignments).where(eq(areaAssignments.nurseId, id));
+      await tx.delete(activityLog).where(eq(activityLog.nurseId, id));
+      await tx.delete(nurses).where(eq(nurses.id, id));
+    });
     return;
   }
   const sqlite = getSqliteDb();
   sqlite.transaction(() => {
+    sqlite.prepare("DELETE FROM licenseReminders WHERE credentialId IN (SELECT id FROM nurseCredentials WHERE nurseId = ?)").run(id);
     sqlite.prepare("DELETE FROM emailLogs WHERE nurseId = ?").run(id);
     sqlite.prepare("DELETE FROM notifications WHERE nurseId = ?").run(id);
     sqlite.prepare("DELETE FROM customCalendarEvents WHERE nurseId = ?").run(id);
@@ -1817,6 +1831,67 @@ async function deleteNurseTraining(id) {
     return record;
   })();
 }
+async function findOrCreateTrainingEvent(data) {
+  const startKey = dateKey(data.startDate);
+  const endKey = dateKey(data.endDate) || startKey;
+  if (!startKey) throw new Error("findOrCreateTrainingEvent requires a valid startDate");
+  const start = /* @__PURE__ */ new Date(`${startKey}T00:00:00Z`);
+  const end = /* @__PURE__ */ new Date(`${endKey}T00:00:00Z`);
+  const db = await getDb();
+  if (db) {
+    const [existing2] = await db.select({ id: trainingEvents.id }).from(trainingEvents).where(and(eq(trainingEvents.trainingId, data.trainingId), eq(trainingEvents.startDate, start), eq(trainingEvents.endDate, end))).limit(1);
+    if (existing2) return { id: existing2.id, created: false };
+    const [row] = await db.insert(trainingEvents).values({
+      trainingId: data.trainingId,
+      startDate: start,
+      endDate: end,
+      provider: data.provider ?? null,
+      venue: data.venue ?? null,
+      remarks: data.remarks ?? null
+    }).returning({ id: trainingEvents.id });
+    return { id: row.id, created: true };
+  }
+  const sqlite = getSqliteDb();
+  const existing = sqlite.prepare("SELECT id FROM trainingEvents WHERE trainingId = ? AND startDate = ? AND endDate = ? LIMIT 1").get(data.trainingId, startKey, endKey);
+  if (existing) return { id: existing.id, created: false };
+  const res = sqlite.prepare("INSERT INTO trainingEvents (trainingId, provider, venue, startDate, endDate, remarks) VALUES (?, ?, ?, ?, ?, ?)").run(data.trainingId, data.provider ?? null, data.venue ?? null, startKey, endKey, data.remarks ?? null);
+  return { id: Number(res.lastInsertRowid), created: true };
+}
+async function getNurseTrainingById(id) {
+  const db = await getDb();
+  if (db) {
+    const [row] = await db.select().from(nurseTrainings).where(eq(nurseTrainings.id, id)).limit(1);
+    return row ?? null;
+  }
+  const sqlite = getSqliteDb();
+  return sqlite.prepare("SELECT * FROM nurseTrainings WHERE id = ?").get(id) ?? null;
+}
+async function findNurseTrainingByKey(params) {
+  const compKey = dateKey(params.completionDate ?? null);
+  const db = await getDb();
+  if (db) {
+    const conditions = [eq(nurseTrainings.nurseId, params.nurseId), eq(nurseTrainings.trainingId, params.trainingId)];
+    if (params.eventId != null) conditions.push(eq(nurseTrainings.eventId, params.eventId));
+    conditions.push(compKey ? eq(nurseTrainings.completionDate, /* @__PURE__ */ new Date(`${compKey}T00:00:00Z`)) : isNull(nurseTrainings.completionDate));
+    const [row2] = await db.select({ id: nurseTrainings.id }).from(nurseTrainings).where(and(...conditions)).limit(1);
+    return row2 ?? null;
+  }
+  const sqlite = getSqliteDb();
+  const clauses = ["nurseId = ?", "trainingId = ?"];
+  const vals = [params.nurseId, params.trainingId];
+  if (params.eventId != null) {
+    clauses.push("eventId = ?");
+    vals.push(params.eventId);
+  }
+  if (compKey) {
+    clauses.push("completionDate = ?");
+    vals.push(compKey);
+  } else {
+    clauses.push("completionDate IS NULL");
+  }
+  const row = sqlite.prepare(`SELECT id FROM nurseTrainings WHERE ${clauses.join(" AND ")} LIMIT 1`).get(...vals);
+  return row ?? null;
+}
 async function deleteTrainingEvent(id) {
   const db = await getDb();
   if (db) {
@@ -1845,6 +1920,46 @@ async function deleteTrainingEvent(id) {
     return {
       event,
       training: { id: catalogId, name: trainingName, kind: trainingKind },
+      attendanceDeleted
+    };
+  })();
+}
+async function deleteTrainingCatalogItem(id) {
+  const db = await getDb();
+  if (db) {
+    return db.transaction(async (tx) => {
+      const [catalog] = await tx.select().from(trainingCatalog).where(eq(trainingCatalog.id, id)).limit(1);
+      if (!catalog) return null;
+      const attendance = await tx.select({ id: nurseTrainings.id }).from(nurseTrainings).where(eq(nurseTrainings.trainingId, id));
+      const events = await tx.select({ id: trainingEvents.id }).from(trainingEvents).where(eq(trainingEvents.trainingId, id));
+      await tx.delete(nurseTrainings).where(eq(nurseTrainings.trainingId, id));
+      await tx.delete(trainingEvents).where(eq(trainingEvents.trainingId, id));
+      await tx.delete(areaTrainingRequirements).where(eq(areaTrainingRequirements.trainingId, id));
+      await tx.delete(trainingCatalog).where(eq(trainingCatalog.id, id));
+      return {
+        catalog,
+        eventsDeleted: events.length,
+        attendanceDeleted: attendance.length
+      };
+    });
+  }
+  const sqlite = getSqliteDb();
+  return sqlite.transaction(() => {
+    const catalog = sqlite.prepare("SELECT * FROM trainingCatalog WHERE id = ?").get(id);
+    if (!catalog) return null;
+    const attendanceDeleted = Number(sqlite.prepare("SELECT COUNT(*) AS count FROM nurseTrainings WHERE trainingId = ?").get(id).count);
+    const eventsDeleted = Number(sqlite.prepare("SELECT COUNT(*) AS count FROM trainingEvents WHERE trainingId = ?").get(id).count);
+    sqlite.prepare("DELETE FROM nurseTrainings WHERE trainingId = ?").run(id);
+    sqlite.prepare("DELETE FROM trainingEvents WHERE trainingId = ?").run(id);
+    sqlite.prepare("DELETE FROM areaTrainingRequirements WHERE trainingId = ?").run(id);
+    sqlite.prepare("DELETE FROM trainingCatalog WHERE id = ?").run(id);
+    return {
+      catalog: {
+        ...catalog,
+        active: Boolean(catalog.active),
+        renewalRequired: Boolean(catalog.renewalRequired)
+      },
+      eventsDeleted,
       attendanceDeleted
     };
   })();
@@ -3729,6 +3844,22 @@ var trainingsRouter = router({
       defaultValidityMonths: rest.defaultValidityMonths ?? void 0
     });
     return { success: true };
+  }),
+  deleteCatalogItem: adminProcedure.input(z4.object({ id: z4.number().int().positive() })).mutation(async ({ ctx, input }) => {
+    const deleted = await deleteTrainingCatalogItem(input.id);
+    if (!deleted) throw new TRPCError4({ code: "NOT_FOUND", message: "Training catalog item not found." });
+    await logActivity({
+      supervisorId: ctx.user.id,
+      actionType: "training.catalog.deleted",
+      entityType: "trainingCatalog",
+      entityId: input.id,
+      summary: `${deleted.catalog.kind} "${deleted.catalog.name}" permanently deleted, including ${deleted.eventsDeleted} seminar event(s) and ${deleted.attendanceDeleted} attendance record(s)`
+    });
+    return {
+      success: true,
+      eventsDeleted: deleted.eventsDeleted,
+      attendanceDeleted: deleted.attendanceDeleted
+    };
   }),
   listRecords: adminProcedure.query(async () => {
     const rows = await listNurseTrainings();
@@ -6768,6 +6899,24 @@ var seminarsRouter = router({
       });
       return { id };
     });
+  }),
+  removeAttendance: adminProcedure.input(z11.object({ attendanceId: z11.number().int().positive() })).mutation(async ({ ctx, input }) => {
+    const existing = await getNurseTrainingById(input.attendanceId);
+    if (!existing) throw new TRPCError7({ code: "NOT_FOUND", message: "Attendance record not found." });
+    if (existing.eventId == null) {
+      throw new TRPCError7({ code: "BAD_REQUEST", message: "That record is not seminar attendance." });
+    }
+    const record = await deleteNurseTraining(input.attendanceId);
+    if (!record) throw new TRPCError7({ code: "NOT_FOUND", message: "Attendance record not found." });
+    await logActivity({
+      supervisorId: ctx.user.id,
+      nurseId: record.nurseId,
+      actionType: "seminar.attendance.deleted",
+      entityType: "nurseTraining",
+      entityId: input.attendanceId,
+      summary: `Seminar attendance record #${input.attendanceId} removed`
+    });
+    return { success: true };
   }),
   matrix: adminProcedure.input(z11.object({
     from: optionalDateInput,

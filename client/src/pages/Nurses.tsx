@@ -348,12 +348,12 @@ export default function Nurses() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">Delete Staff Record Permanently?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
-              <p>
+              <span className="block">
                 Are you sure you want to delete <strong>{nurseToDelete?.name}</strong> ({nurseToDelete?.idLabel})?
-              </p>
-              <p className="text-xs text-muted-foreground">
+              </span>
+              <span className="block text-xs text-muted-foreground">
                 This will permanently remove their profile, area assignments, license credentials, seminar records, email logs, and notifications. This action cannot be undone.
-              </p>
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

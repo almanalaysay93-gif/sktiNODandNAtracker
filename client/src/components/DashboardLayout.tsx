@@ -19,6 +19,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/useMobile";
@@ -183,7 +184,7 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
     <>
       <div className="relative" ref={sidebarRef}>
         <Sidebar
-          collapsible="icon"
+          collapsible="offcanvas"
           className="border-r-0 glass-sidebar"
           disableTransition={isResizing}
         >
@@ -280,6 +281,11 @@ function DashboardLayoutContent({ children, setSidebarWidth }: DashboardLayoutCo
       <SidebarInset className="nurse-track-inset">
         <div className="flex border-b h-20 items-center justify-between glass-panel px-3 md:px-6 sticky top-0 z-40">
           <div className="flex items-center gap-3 min-w-0">
+            <SidebarTrigger
+              className="hidden h-9 w-9 shrink-0 rounded-lg md:inline-flex"
+              aria-label={isCollapsed ? "Show side panel" : "Hide side panel"}
+              title={isCollapsed ? "Show side panel" : "Hide side panel"}
+            />
             <div className="flex flex-col gap-0.5 min-w-0">
               <span className="font-bold text-foreground text-lg md:text-2xl tracking-tight truncate">
                 {activeMenuItem?.label ?? "SKTI NurseTrack"}

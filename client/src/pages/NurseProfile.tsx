@@ -146,7 +146,22 @@ export default function NurseProfile() {
   });
 
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [trainingToDelete, setTrainingToDelete] = useState<{ id: number; name: string } | null>(null);
   const [credOpen, setCredOpen] = useState(false);
+
+  const deleteTrainingRecord = trpc.trainings.deleteRecord.useMutation({
+    onSuccess: async () => {
+      toast.success("Training record removed.");
+      await Promise.all([
+        utils.trainings.listForNurse.invalidate({ nurseId: id }),
+        utils.trainings.getCompliance.invalidate({ nurseId: id }),
+        utils.dashboard.invalidate(),
+        utils.seminars.matrix.invalidate(),
+      ]);
+      setTrainingToDelete(null);
+    },
+    onError: (e) => toast.error(e.message),
+  });
   const [editCredId, setEditCredId] = useState<number | null>(null);
   const [areaOpen, setAreaOpen] = useState(false);
   const [newAreaId, setNewAreaId] = useState("");
@@ -401,6 +416,7 @@ export default function NurseProfile() {
                         <th className="px-3 py-2.5 font-medium">Hours / CPD</th>
                         <th className="px-3 py-2.5 font-medium">Expires</th>
                         <th className="px-3 py-2.5 font-medium">Status</th>
+                        <th className="px-3 py-2.5 font-medium text-right">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -414,6 +430,17 @@ export default function NurseProfile() {
                           <td className="px-3 py-2.5 text-muted-foreground">{t.trainingHours ?? "-"} / {t.cpdUnits ?? "-"}</td>
                           <td className="px-3 py-2.5 text-muted-foreground">{formatDate(t.expiryDate)}</td>
                           <td className="px-3 py-2.5"><TrainingStatusBadge status={t.status} /></td>
+                          <td className="px-3 py-2.5 text-right">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              title="Remove training record"
+                              onClick={() => setTrainingToDelete({ id: t.id, name: t.trainingName })}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -602,12 +629,12 @@ export default function NurseProfile() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">Delete Staff Record Permanently?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
-              <p>
+              <span className="block">
                 Are you sure you want to permanently delete <strong>{nurseFullName(nurse)}</strong> ({nurseIdLabel(nurse)})?
-              </p>
-              <p className="text-xs text-muted-foreground">
+              </span>
+              <span className="block text-xs text-muted-foreground">
                 This action will delete all related credentials, training history, area assignments, email logs, and notifications. This cannot be undone.
-              </p>
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -618,6 +645,33 @@ export default function NurseProfile() {
               onClick={() => deleteMutation.mutate({ id })}
             >
               {deleteMutation.isPending ? "Deleting…" : "Permanently Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Training Record Delete Confirmation Alert Dialog */}
+      <AlertDialog open={Boolean(trainingToDelete)} onOpenChange={(open) => !open && setTrainingToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Remove Training Record?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">
+                Remove <strong>{trainingToDelete?.name}</strong> from {nurseFullName(nurse)}'s profile?
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                This removes this record from their training history. This action cannot be undone.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteTrainingRecord.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteTrainingRecord.isPending}
+              onClick={() => trainingToDelete && deleteTrainingRecord.mutate({ id: trainingToDelete.id })}
+            >
+              {deleteTrainingRecord.isPending ? "Removing..." : "Remove Record"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -37,6 +37,7 @@ export default function SeminarDetail() {
   const eventId = Number(params?.id);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [attendanceToDelete, setAttendanceToDelete] = useState<{ id: number; staffName: string } | null>(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const { data, isLoading, error } = trpc.seminars.detail.useQuery({ eventId }, { enabled: Number.isFinite(eventId) });
@@ -58,6 +59,24 @@ export default function SeminarDetail() {
       ]);
       setDeleteConfirmOpen(false);
       navigate("/seminars");
+    },
+    onError: (mutationError) => toast.error(mutationError.message),
+  });
+  const removeAttendance = trpc.seminars.removeAttendance.useMutation({
+    onSuccess: async () => {
+      toast.success(`Attendance removed for ${attendanceToDelete?.staffName ?? "staff member"}.`);
+      await Promise.all([
+        utils.seminars.detail.invalidate({ eventId }),
+        utils.seminars.list.invalidate(),
+        utils.seminars.matrix.invalidate(),
+        utils.seminars.monthlySummary.invalidate(),
+        utils.seminars.quarterlyLedger.invalidate(),
+        utils.trainings.initial.invalidate(),
+        utils.trainings.listRecords.invalidate(),
+        utils.trainings.listForNurse.invalidate(),
+        utils.trainings.getCompliance.invalidate(),
+      ]);
+      setAttendanceToDelete(null);
     },
     onError: (mutationError) => toast.error(mutationError.message),
   });
@@ -150,12 +169,12 @@ export default function SeminarDetail() {
         <TabsContent value="attendees">
           <Card className="glass-card"><CardContent className="space-y-3 pt-5">
             <div className="flex flex-wrap gap-2"><Input className="max-w-sm" placeholder="Search staff or area" value={search} onChange={(event) => setSearch(event.target.value)} /><Select value={status} onValueChange={setStatus}><SelectTrigger className="w-44"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All statuses</SelectItem>{TRAINING_STATUSES.map((item) => <SelectItem key={item} value={item}>{item}</SelectItem>)}</SelectContent></Select><Button variant="outline" onClick={() => exportRows(false)} disabled={!attendees.length}><Download className="mr-1 h-4 w-4" />CSV</Button></div>
-            <div className="overflow-auto rounded-md border"><table className="min-w-full text-sm"><thead><tr className="bg-muted/50 text-left"><th className="px-3 py-2">Staff</th><th className="px-3 py-2">Area</th><th className="px-3 py-2">Status</th><th className="px-3 py-2">Full Date</th><th className="px-3 py-2">Role</th><th className="px-3 py-2">Hours / CPD</th></tr></thead><tbody>{attendees.map((row) => <tr key={row.id} className="border-t"><td className="px-3 py-2"><Link href={`/nurses/${row.nurseId}`} className="font-medium text-primary hover:underline">{row.staffName}</Link><div className="text-xs text-muted-foreground">{row.staffType}</div></td><td className="px-3 py-2">{row.areaName}</td><td className="px-3 py-2">{row.status}</td><td className="px-3 py-2">{formatDate(row.completionDate)}</td><td className="px-3 py-2">{row.participationRole}</td><td className="px-3 py-2">{row.trainingHours ?? "-"} / {row.cpdUnits ?? "-"}</td></tr>)}</tbody></table></div>
+            <div className="overflow-auto rounded-md border"><table className="min-w-full text-sm"><thead><tr className="bg-muted/50 text-left"><th className="px-3 py-2">Staff</th><th className="px-3 py-2">Area</th><th className="px-3 py-2">Status</th><th className="px-3 py-2">Full Date</th><th className="px-3 py-2">Role</th><th className="px-3 py-2">Hours / CPD</th><th className="px-3 py-2 text-right">Action</th></tr></thead><tbody>{attendees.map((row) => <tr key={row.id} className="border-t"><td className="px-3 py-2"><Link href={`/nurses/${row.nurseId}`} className="font-medium text-primary hover:underline">{row.staffName}</Link><div className="text-xs text-muted-foreground">{row.staffType}</div></td><td className="px-3 py-2">{row.areaName}</td><td className="px-3 py-2">{row.status}</td><td className="px-3 py-2">{formatDate(row.completionDate)}</td><td className="px-3 py-2">{row.participationRole}</td><td className="px-3 py-2">{row.trainingHours ?? "-"} / {row.cpdUnits ?? "-"}</td><td className="px-3 py-2 text-right"><Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10" title="Remove attendance" onClick={() => setAttendanceToDelete({ id: row.id, staffName: row.staffName })}><Trash2 className="h-3.5 w-3.5" /></Button></td></tr>)}</tbody></table></div>
           </CardContent></Card>
         </TabsContent>
         <TabsContent value="all">
           <Card className="glass-card"><CardContent className="space-y-3 pt-5">
-            <div className="overflow-auto rounded-md border"><table className="min-w-full text-sm"><thead><tr className="bg-muted/50 text-left"><th className="px-3 py-2">Staff</th><th className="px-3 py-2">Area</th><th className="px-3 py-2">Status</th><th className="px-3 py-2">Full Date</th><th className="px-3 py-2">Occurrence</th><th className="px-3 py-2">Role</th></tr></thead><tbody>{allAttendees.map((row) => <tr key={row.id} className="border-t"><td className="px-3 py-2"><Link href={`/nurses/${row.nurseId}`} className="font-medium text-primary hover:underline">{row.staffName}</Link><div className="text-xs text-muted-foreground">{row.staffType}</div></td><td className="px-3 py-2">{row.areaName}</td><td className="px-3 py-2">{row.status}</td><td className="px-3 py-2">{formatDate(row.completionDate)}</td><td className="px-3 py-2">{formatDate(row.occurrenceStartDate)}{row.occurrenceEndDate && String(row.occurrenceEndDate) !== String(row.occurrenceStartDate) ? ` to ${formatDate(row.occurrenceEndDate)}` : ""}</td><td className="px-3 py-2">{row.participationRole}</td></tr>)}</tbody></table></div>
+            <div className="overflow-auto rounded-md border"><table className="min-w-full text-sm"><thead><tr className="bg-muted/50 text-left"><th className="px-3 py-2">Staff</th><th className="px-3 py-2">Area</th><th className="px-3 py-2">Status</th><th className="px-3 py-2">Full Date</th><th className="px-3 py-2">Occurrence</th><th className="px-3 py-2">Role</th><th className="px-3 py-2 text-right">Action</th></tr></thead><tbody>{allAttendees.map((row) => <tr key={row.id} className="border-t"><td className="px-3 py-2"><Link href={`/nurses/${row.nurseId}`} className="font-medium text-primary hover:underline">{row.staffName}</Link><div className="text-xs text-muted-foreground">{row.staffType}</div></td><td className="px-3 py-2">{row.areaName}</td><td className="px-3 py-2">{row.status}</td><td className="px-3 py-2">{formatDate(row.completionDate)}</td><td className="px-3 py-2">{formatDate(row.occurrenceStartDate)}{row.occurrenceEndDate && String(row.occurrenceEndDate) !== String(row.occurrenceStartDate) ? ` to ${formatDate(row.occurrenceEndDate)}` : ""}</td><td className="px-3 py-2">{row.participationRole}</td><td className="px-3 py-2 text-right"><Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10" title="Remove attendance" onClick={() => setAttendanceToDelete({ id: row.id, staffName: row.staffName })}><Trash2 className="h-3.5 w-3.5" /></Button></td></tr>)}</tbody></table></div>
           </CardContent></Card>
         </TabsContent>
         <TabsContent value="missing"><Card className="glass-card"><CardContent className="space-y-3 pt-5"><Button variant="outline" onClick={() => exportRows(true)} disabled={!data.missing.length}><Download className="mr-1 h-4 w-4" />CSV</Button><div className="overflow-auto rounded-md border"><table className="min-w-full text-sm"><thead><tr className="bg-muted/50 text-left"><th className="px-3 py-2">Staff</th><th className="px-3 py-2">Staff Type</th><th className="px-3 py-2">Area</th></tr></thead><tbody>{data.missing.map((row) => <tr key={row.id} className="border-t"><td className="px-3 py-2"><Link href={`/nurses/${row.id}`} className="font-medium text-primary hover:underline">{row.staffName}</Link></td><td className="px-3 py-2">{row.staffType}</td><td className="px-3 py-2">{row.areaName}</td></tr>)}</tbody></table></div></CardContent></Card></TabsContent>
@@ -165,12 +184,12 @@ export default function SeminarDetail() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-destructive">Delete Seminar Permanently?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
-              <p>
+              <span className="block">
                 Delete <strong>{data.training.name}</strong> on {formatDate(data.event.startDate)}?
-              </p>
-              <p className="text-xs text-muted-foreground">
+              </span>
+              <span className="block text-xs text-muted-foreground">
                 This removes the seminar and {data.attendees.length} linked attendance record(s). This action cannot be undone.
-              </p>
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -181,6 +200,31 @@ export default function SeminarDetail() {
               onClick={() => remove.mutate({ eventId })}
             >
               {remove.isPending ? "Deleting..." : "Permanently Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={Boolean(attendanceToDelete)} onOpenChange={(open) => !open && setAttendanceToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Remove Attendance Record?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">
+                Remove seminar attendance for <strong>{attendanceToDelete?.staffName}</strong>?
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                This removes their attendance record for this seminar. This action cannot be undone.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removeAttendance.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={removeAttendance.isPending}
+              onClick={() => attendanceToDelete && removeAttendance.mutate({ attendanceId: attendanceToDelete.id })}
+            >
+              {removeAttendance.isPending ? "Removing..." : "Remove Attendance"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

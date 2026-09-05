@@ -1,5 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { formatDate, TARGET_STAFF_TYPES } from "../../../shared/nursetrack";
-import { CalendarDays, MapPin, Plus, Users } from "lucide-react";
+import { CalendarDays, MapPin, Plus, Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -19,8 +29,31 @@ import ExcelImportPreview from "./ExcelImportPreview";
 
 export default function Seminars() {
   const [, navigate] = useLocation();
+  const utils = trpc.useUtils();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [seminarToDelete, setSeminarToDelete] = useState<{ id: number; name: string; kind: string; date: string; attendanceCount: number } | null>(null);
   const { data, isLoading } = trpc.seminars.list.useQuery(undefined);
+
+  const deleteSeminar = trpc.seminars.deleteEvent.useMutation({
+    onSuccess: async ({ attendanceDeleted }) => {
+      toast.success(`Seminar deleted. ${attendanceDeleted} attendance record(s) removed.`);
+      await Promise.all([
+        utils.seminars.list.invalidate(),
+        utils.seminars.detail.invalidate(),
+        utils.seminars.matrix.invalidate(),
+        utils.seminars.monthlySummary.invalidate(),
+        utils.seminars.quarterlyLedger.invalidate(),
+        utils.trainings.initial.invalidate(),
+        utils.trainings.listRecords.invalidate(),
+        utils.trainings.listForNurse.invalidate(),
+        utils.trainings.getCompliance.invalidate(),
+        utils.calendar.listEvents.invalidate(),
+        utils.dashboard.initial.invalidate(),
+      ]);
+      setSeminarToDelete(null);
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   return (
     <div className="space-y-4">
@@ -45,10 +78,32 @@ export default function Seminars() {
           ) : (
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {data.map(({ event, training, attendance }) => (
-                <Card key={event.id} className="glass-card cursor-pointer hover:border-primary" onClick={() => navigate(`/seminars/${event.id}`)}>
+                <Card key={event.id} className="glass-card cursor-pointer hover:border-primary group relative" onClick={() => navigate(`/seminars/${event.id}`)}>
                   <CardHeader className="pb-2">
-                    <div className="text-xs font-medium uppercase tracking-wide text-primary">{training.kind}</div>
-                    <CardTitle className="text-base leading-snug">{training.name}</CardTitle>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium uppercase tracking-wide text-primary">{training.kind}</div>
+                        <CardTitle className="text-base leading-snug">{training.name}</CardTitle>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                        title={`Delete ${training.kind}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSeminarToDelete({
+                            id: event.id,
+                            name: training.name,
+                            kind: training.kind,
+                            date: formatDate(event.startDate),
+                            attendanceCount: attendance.total,
+                          });
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
                     <div className="flex items-center gap-2"><CalendarDays className="h-4 w-4 text-muted-foreground" /><span>{formatDate(event.startDate)}{String(event.endDate) !== String(event.startDate) ? ` to ${formatDate(event.endDate)}` : ""}</span></div>
@@ -65,6 +120,32 @@ export default function Seminars() {
         <TabsContent value="reports"><LdiReports /></TabsContent>
         <TabsContent value="import"><ExcelImportPreview /></TabsContent>
       </Tabs>
+
+      <AlertDialog open={Boolean(seminarToDelete)} onOpenChange={(open) => !open && setSeminarToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">Delete {seminarToDelete?.kind ?? "Seminar"} Permanently?</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <span className="block">
+                Delete <strong>{seminarToDelete?.name}</strong> on {seminarToDelete?.date}?
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                This removes the seminar occurrence and {seminarToDelete?.attendanceCount ?? 0} linked attendance record(s). This action cannot be undone.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteSeminar.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteSeminar.isPending}
+              onClick={() => seminarToDelete && deleteSeminar.mutate({ eventId: seminarToDelete.id })}
+            >
+              {deleteSeminar.isPending ? "Deleting..." : "Permanently Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <SeminarDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
